@@ -15,7 +15,6 @@ export function SidebarSkeleton({ collapsed }: SidebarSkeletonProps) {
         'hidden md:flex'
       )}
     >
-      {/* Logo skeleton */}
       <div className="p-4">
         <div
           className={cn(
@@ -25,10 +24,8 @@ export function SidebarSkeleton({ collapsed }: SidebarSkeletonProps) {
         />
       </div>
 
-      {/* Divider */}
       <div className="mx-4 border-b border-border" />
 
-      {/* Nav skeleton */}
       <div className="flex flex-col gap-2 p-4">
         {[...Array(4)].map((_, i) => (
           <div

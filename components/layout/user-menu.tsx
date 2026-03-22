@@ -16,6 +16,16 @@ import { LogOut, Settings, Moon, Sun, ChevronDown, Users } from 'lucide-react';
 import { SettingsDialog } from '@/components/features/account/settings-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useAuth } from '@/lib/auth/auth-context';
+import { cn } from '@/lib/utils';
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 export function UserMenu() {
   const router = useRouter();
@@ -27,19 +37,9 @@ export function UserMenu() {
   const handleLogout = async () => {
     setLogoutDialogOpen(false);
     await logout();
-    // Pequeño delay para que el overlay sea visible
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     router.push('/login');
     router.refresh();
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   const toggleTheme = () => {
@@ -49,14 +49,12 @@ export function UserMenu() {
   const authLoading = status === 'INITIALIZING';
 
   if (authLoading) {
-    return (
-      <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
-    );
+    return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
   }
 
   if (!user) {
     return (
-      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground text-sm">
         ?
       </div>
     );
@@ -64,32 +62,28 @@ export function UserMenu() {
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
   const displayRole = profile?.role === 'ADMIN' ? 'Manager' : 'Diseñador';
-  // Subtle role color: Manager = primary (orange), Designer = muted blue
-  const roleColor = profile?.role === 'ADMIN' 
-    ? 'text-primary' 
-    : 'text-blue-400';
+  const roleColor = profile?.role === 'ADMIN' ? 'text-primary' : 'text-blue-400';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-3 rounded-lg hover:bg-accent px-3 py-2 transition-colors">
+        <button
+          type="button"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent"
+        >
           <Avatar className="h-10 w-10 border-2 border-primary/30">
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+            <AvatarFallback className="bg-primary/10 font-medium text-primary">
               {getInitials(displayName)}
             </AvatarFallback>
           </Avatar>
-          <div className="hidden md:block text-left">
-            <p className="text-sm font-medium text-foreground">
-              {displayName}
-            </p>
-            <p className={`text-xs ${roleColor}`}>
-              {displayRole}
-            </p>
+          <div className="hidden text-left md:block">
+            <p className="text-sm font-medium text-foreground">{displayName}</p>
+            <p className={cn('text-xs', roleColor)}>{displayRole}</p>
           </div>
-          <ChevronDown className="hidden md:block h-4 w-4 text-muted-foreground" />
+          <ChevronDown className="hidden h-4 w-4 text-muted-foreground md:block" aria-hidden />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-popover border border-border text-popover-foreground shadow-xl">
+      <DropdownMenuContent align="end" className="w-56 border border-border bg-popover text-popover-foreground shadow-xl">
         <DropdownMenuLabel className="text-foreground">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{displayName}</p>
@@ -142,8 +136,7 @@ export function UserMenu() {
           <span>Cerrar Sesión</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-      
-      {/* Diálogos */}
+
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <ConfirmDialog
         open={logoutDialogOpen}
@@ -154,7 +147,7 @@ export function UserMenu() {
         cancelLabel="Cancelar"
         variant="warning"
         onConfirm={handleLogout}
-        customIcon="/images/logo-icon-orange.webp"
+        customIcon="/images/logo-ph-sport-gold.svg"
       />
     </DropdownMenu>
   );

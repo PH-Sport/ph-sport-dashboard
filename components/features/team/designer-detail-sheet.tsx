@@ -158,10 +158,10 @@ export function DesignerDetailSheet({
               </div>
               <button
                 onClick={() => onOpenChange(false)}
-                className="p-2 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors group"
+                className="p-2 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-500/10 transition-colors group"
                 title="Cerrar"
               >
-                <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-orange-400" />
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gold-400" />
               </button>
             </div>
           </SheetHeader>

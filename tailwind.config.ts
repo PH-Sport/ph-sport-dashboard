@@ -10,6 +10,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'Helvetica', 'Arial', 'sans-serif'],
+        heading: [
+          'var(--font-heading)',
+          'var(--font-sans)',
+          'Helvetica',
+          'Arial',
+          'sans-serif',
+        ],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -48,18 +58,18 @@ const config: Config = {
           DEFAULT: 'hsl(var(--sidebar))',
           foreground: 'hsl(var(--sidebar-foreground))',
         },
-        orange: {
-          50: '#fff5ed',
-          100: '#ffe8d5',
-          200: '#ffd0aa',
-          300: '#ffab74',
-          400: '#fd7a3c',
-          500: '#FC4F00',
-          600: '#d94300',
-          700: '#b53800',
-          800: '#922d00',
-          900: '#752400',
-          950: '#401300',
+        gold: {
+          50: '#faf7f0',
+          100: '#f3edd8',
+          200: '#e8dcb8',
+          300: '#dfc06f',
+          400: '#d6b25e',
+          500: '#c4a050',
+          600: '#a8883d',
+          700: '#8a6f32',
+          800: '#6b5628',
+          900: '#4a3b1c',
+          950: '#2d2412',
         },
       },
       borderRadius: {

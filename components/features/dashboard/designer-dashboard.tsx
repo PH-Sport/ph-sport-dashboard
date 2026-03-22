@@ -114,10 +114,10 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
 
       {/* Alerta si hay diseños urgentes */}
       {hoursUntilNext !== null && hoursUntilNext < 24 && hoursUntilNext > 0 && (
-        <Card className="border-orange-500/50 bg-orange-500/5">
+        <Card className="border-gold-500/50 bg-gold-500/5">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <AlertTriangle className="h-6 w-6 text-orange-500 shrink-0 mt-1" />
+              <AlertTriangle className="h-6 w-6 text-gold-500 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">Entrega urgente</h3>
                 <p className="text-sm text-muted-foreground mt-1">

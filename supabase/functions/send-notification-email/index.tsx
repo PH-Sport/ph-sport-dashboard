@@ -13,7 +13,6 @@ import {
   Button,
   Hr,
   Img,
-  Font,
   Tailwind,
 } from "@react-email/components";
 import { render } from "@react-email/render";
@@ -193,25 +192,17 @@ const EmailLayout = ({
   children: React.ReactNode;
 }) => (
   <Html>
-    <Head>
-      <Font
-        fontFamily="Outfit"
-        fallbackFontFamily="Arial"
-        webFont={{
-          url: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap",
-          format: "woff2",
-        }}
-        fontWeight={400}
-        fontStyle="normal"
-      />
-    </Head>
+    <Head />
     <Preview>{preview}</Preview>
     <Tailwind
       config={{
         theme: {
           extend: {
             colors: {
-              primary: "#FC4F00", // PH Sport Orange
+              primary: "#d6b25e",
+              brand: {
+                fg: "#0d0f12",
+              },
               gray: {
                 50: "#FAFAFA",
                 100: "#F5F5F5",
@@ -222,7 +213,7 @@ const EmailLayout = ({
               },
             },
             fontFamily: {
-              sans: ["Outfit", "Arial", "sans-serif"],
+              sans: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
             },
           },
         },
@@ -235,11 +226,12 @@ const EmailLayout = ({
           </Section>
           <Section className="mt-[6px] mb-[20px] text-center">
             <Img
-              src="https://phsport.app/images/logo-full-orange.png"
-              width="204"
+              src="https://phsport.app/images/logo-ph-sport-gold.svg"
+              width="120"
+              height="96"
               alt="PH Sport"
               className="mx-auto"
-              style={{ height: "auto" }}
+              style={{ height: 'auto' }}
             />
           </Section>
 
@@ -270,7 +262,7 @@ const AssignmentTemplate = ({ greetingName, copy }: TemplateProps) => (
       </Text>
       <Section className="text-center mt-[24px] mb-[30px]">
         <Button
-          className="bg-primary rounded-[8px] text-white text-[14px] font-semibold no-underline text-center px-7 py-3"
+          className="bg-primary rounded-[8px] text-brand-fg text-[14px] font-semibold no-underline text-center px-7 py-3"
           href={copy.ctaUrl}
         >
           {copy.ctaText}
@@ -298,7 +290,7 @@ const CommentTemplate = ({ greetingName, copy }: TemplateProps) => (
 
       <Section className="text-center mt-[24px] mb-[30px]">
         <Button
-          className="bg-primary rounded-[8px] text-white text-[14px] font-semibold no-underline text-center px-7 py-3"
+          className="bg-primary rounded-[8px] text-brand-fg text-[14px] font-semibold no-underline text-center px-7 py-3"
           href={copy.ctaUrl}
         >
           {copy.ctaText}
@@ -314,11 +306,11 @@ const DeadlineTemplate = ({ greetingName, copy }: TemplateProps) => (
       <Text className="text-[14px] leading-[22px] text-gray-500 mt-0 mb-[10px]">
         {greetingName ? `Hola, ${greetingName}` : "Hola"}
       </Text>
-      <Heading className="text-[28px] font-semibold text-center p-0 my-0 mx-0 text-[#b45309]">
+      <Heading className="text-[28px] font-semibold text-center p-0 my-0 mx-0 text-primary">
         {copy.headline}
       </Heading>
 
-      <Section className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4 my-6">
+      <Section className="bg-amber-50 border border-amber-200 rounded-[10px] p-4 my-6">
         <Text className="text-[16px] leading-[26px] text-gray-700 m-0">
           {copy.bodyMessage}
         </Text>
@@ -326,7 +318,7 @@ const DeadlineTemplate = ({ greetingName, copy }: TemplateProps) => (
 
       <Section className="text-center mt-[24px] mb-[30px]">
         <Button
-          className="bg-[#b45309] rounded-[8px] text-white text-[14px] font-semibold no-underline text-center px-7 py-3"
+          className="bg-primary rounded-[8px] text-brand-fg text-[14px] font-semibold no-underline text-center px-7 py-3"
           href={copy.ctaUrl}
         >
           {copy.ctaText}
@@ -350,7 +342,7 @@ const DefaultTemplate = ({ greetingName, copy }: TemplateProps) => (
       </Text>
       <Section className="text-center mt-[24px] mb-[30px]">
         <Button
-          className="bg-primary rounded-[8px] text-white text-[14px] font-semibold no-underline text-center px-7 py-3"
+          className="bg-primary rounded-[8px] text-brand-fg text-[14px] font-semibold no-underline text-center px-7 py-3"
           href={copy.ctaUrl}
         >
           {copy.ctaText}

@@ -403,7 +403,7 @@ function DesignsPageContent() {
               <TableHeader>
                 <TableRow>
                   <TableHead 
-                    className="cursor-pointer hover:text-orange-400 transition-colors select-none"
+                    className="cursor-pointer hover:text-gold-400 transition-colors select-none"
                     onClick={() => handleSort('title')}
                   >
                     <div className="flex items-center gap-1">
@@ -416,7 +416,7 @@ function DesignsPageContent() {
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:text-orange-400 transition-colors select-none"
+                    className="cursor-pointer hover:text-gold-400 transition-colors select-none"
                     onClick={() => handleSort('player')}
                   >
                     <div className="flex items-center gap-1">
@@ -430,7 +430,7 @@ function DesignsPageContent() {
                   </TableHead>
                   <TableHead>Diseñador</TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:text-orange-400 transition-colors select-none"
+                    className="cursor-pointer hover:text-gold-400 transition-colors select-none"
                     onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center gap-1">
@@ -443,7 +443,7 @@ function DesignsPageContent() {
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:text-orange-400 transition-colors select-none"
+                    className="cursor-pointer hover:text-gold-400 transition-colors select-none"
                     onClick={() => handleSort('deadline')}
                   >
                     <div className="flex items-center gap-1">

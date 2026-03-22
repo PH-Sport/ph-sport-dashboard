@@ -112,9 +112,9 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
 
       {/* Alertas Críticas */}
       {(atRisk > 5 || overloadedDesigners.length > 0 || criticalDesigns.length > 0) && (
-        <Card className="border-orange-500/50 bg-orange-500/5">
+        <Card className="border-gold-500/50 bg-gold-500/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+            <CardTitle className="flex items-center gap-2 text-gold-600 dark:text-gold-400">
               <AlertTriangle className="h-5 w-5" />
               Alertas que requieren atención
             </CardTitle>

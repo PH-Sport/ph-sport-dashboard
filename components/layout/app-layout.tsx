@@ -15,39 +15,33 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  // Consumimos el nuevo estado robusto
+
   const { status } = useAuth();
   const router = useRouter();
 
-  // Derived state: Are we fully ready?
-  // Only show UI when strictly AUTHENTICATED
   const authReady = status === 'AUTHENTICATED';
 
-  // Guard Effect: Enforce Login if we are definitely NOT authenticated
   useEffect(() => {
-    // Si la inicialización terminó y el resultado fue "UNAUTHENTICATED",
-    // nos vamos al login. Sin dudas.
     if (status === 'UNAUTHENTICATED') {
       router.push('/login');
     }
   }, [status, router]);
 
-  // Load sidebar state from localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebar-collapsed');
-      if (saved) {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem('sidebar-collapsed');
+    if (saved) {
+      try {
         setSidebarCollapsed(JSON.parse(saved));
+      } catch {
+        setSidebarCollapsed(false);
       }
     }
   }, []);
 
-  // Save sidebar state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
-    }
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
   const toggleSidebar = () => {
@@ -60,27 +54,29 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Desktop Sidebar - show skeleton while Initializing */}
       {authReady ? (
         <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
       ) : (
         <SidebarSkeleton collapsed={sidebarCollapsed} />
       )}
 
-      {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && authReady && (
         <>
           <div
-            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden animate-in fade-in"
+            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm animate-in fade-in md:hidden"
             onClick={toggleMobileMenu}
           />
           <div className="fixed left-0 top-0 z-40 md:hidden">
-            <Sidebar collapsed={false} onToggle={toggleMobileMenu} onClose={toggleMobileMenu} />
+            <Sidebar
+              collapsed={false}
+              onToggle={toggleMobileMenu}
+              onClose={toggleMobileMenu}
+              overlay
+            />
           </div>
         </>
       )}
 
-      {/* Main content area */}
       <div
         className={cn(
           'flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out',
@@ -88,8 +84,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         )}
       >
         <Header onMenuClick={toggleMobileMenu} />
-        {/* Renderizamos el contenido, pero podríamos bloquearlo también si authReady es false */}
-        {/* Por ahora lo dejamos visible para mejorar la percepción de carga (Skeleton UI) */}
         <main className="flex-1 overflow-y-auto animate-page-enter">{children}</main>
       </div>
     </div>

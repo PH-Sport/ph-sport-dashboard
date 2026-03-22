@@ -18,7 +18,7 @@ export const PLAYER_STATUS_CONFIG = {
   suspended: { 
     label: 'Sancionado', 
     icon: Ban, 
-    color: 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800' 
+    color: 'text-gold-700 bg-gold-100 dark:text-gold-400 dark:bg-gold-950/40 border-gold-200 dark:border-gold-800' 
   },
   doubt: { 
     label: 'Duda', 

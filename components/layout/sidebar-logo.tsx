@@ -1,20 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { PhSportMark } from '@/components/layout/ph-sport-mark';
 
-// Animation timing constant
 const CLICK_EFFECT_DURATION_MS = 150;
-
-// Logo paths
-const LOGO_PATHS = {
-  fullOrange: '/images/logo-full-orange.png',
-  fullBlack: '/images/logo-full-black.png',
-  iconOrange: '/images/logo-icon-orange.webp',
-  iconBlack: '/images/logo-icon-black.webp',
-} as const;
+/** Mismo ritmo que `transition-all duration-300` del `<aside>` en `sidebar.tsx`. */
+const SIDEBAR_WIDTH_TRANSITION_MS = 300;
 
 interface SidebarLogoProps {
   collapsed: boolean;
@@ -22,92 +14,64 @@ interface SidebarLogoProps {
 }
 
 export function SidebarLogo({ collapsed, onToggle }: SidebarLogoProps) {
-  const { resolvedTheme } = useTheme();
   const [isClicking, setIsClicking] = useState(false);
+  /** Evita aplicar centrado hasta que el carril haya terminado de estrecharse. */
+  const [collapseLayoutSettled, setCollapseLayoutSettled] = useState(false);
 
-  const isDark = resolvedTheme === 'dark';
+  useEffect(() => {
+    if (!collapsed) {
+      setCollapseLayoutSettled(false);
+      return;
+    }
+    const id = window.setTimeout(() => {
+      setCollapseLayoutSettled(true);
+    }, SIDEBAR_WIDTH_TRANSITION_MS);
+    return () => window.clearTimeout(id);
+  }, [collapsed]);
 
   const handleMouseDown = () => {
     setIsClicking(true);
   };
 
   const handleMouseUp = () => {
-    // Minimum visible duration for click effect feedback
     setTimeout(() => {
       setIsClicking(false);
       onToggle();
     }, CLICK_EFFECT_DURATION_MS);
   };
 
+  const narrowLogo = collapsed && collapseLayoutSettled;
+
   return (
-    <div className="flex items-center h-16 px-4 transition-all duration-300 ease-in-out">
+    <div className="flex h-16 items-center px-4 transition-all duration-300 ease-in-out">
       <button
+        type="button"
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseLeave={() => setIsClicking(false)}
-        className="relative flex items-center justify-center h-10 w-full cursor-pointer"
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        className={cn(
+          'relative flex h-10 w-full min-w-0 cursor-pointer items-center justify-start overflow-hidden',
+          narrowLogo &&
+            'pl-[calc((100%-2.25rem)/2)] transition-[padding-left] duration-500 ease-out motion-reduce:transition-none',
+          collapsed && !collapseLayoutSettled && 'pl-0'
+        )}
+        aria-label={collapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'}
       >
-        {/* Full logo - visible when expanded */}
-        <Image
-          src={LOGO_PATHS.fullOrange}
-          alt="PH Sport"
-          width={180}
-          height={50}
+        <PhSportMark
           className={cn(
-            'h-10 w-auto object-contain absolute left-0',
-            'transition-all duration-200 ease-in-out',
-            collapsed ? 'opacity-0 scale-90' : isClicking ? 'opacity-0' : 'opacity-100 scale-100'
-          )}
-          priority
-        />
-        <Image
-          src={LOGO_PATHS.fullBlack}
-          alt="PH Sport"
-          width={180}
-          height={50}
-          className={cn(
-            'h-10 w-auto object-contain absolute left-0',
-            'transition-all duration-200 ease-in-out',
-            isDark && 'invert',
-            collapsed
-              ? 'opacity-0 scale-90'
-              : isClicking
-              ? 'opacity-100 scale-95'
-              : 'opacity-0 scale-100'
-          )}
-          priority
-        />
-
-        {/* Icon logo - visible when collapsed */}
-        <Image
-          src={LOGO_PATHS.iconOrange}
-          alt="PH Sport"
-          width={40}
-          height={40}
-          className={cn(
-            'h-9 w-9 object-contain absolute left-1/2 -translate-x-1/2',
-            'transition-all duration-200 ease-in-out',
-            collapsed
+            'inline-block shrink-0 text-primary will-change-transform',
+            /* El resize “suave”: solo `scale` (GPU); tamaño layout fijo h-10 + w-auto */
+            'h-10 w-auto max-w-[min(100%,11rem)] transition-[transform,opacity] duration-700 ease-out motion-reduce:transition-none motion-reduce:duration-0',
+            narrowLogo ? 'origin-center' : 'origin-left',
+            narrowLogo
               ? isClicking
-                ? 'opacity-0'
-                : 'opacity-100 scale-100'
-              : 'opacity-0 scale-90'
+                ? 'scale-[0.81] opacity-90'
+                : 'scale-90 opacity-100'
+              : isClicking
+                ? 'scale-[0.98] opacity-90'
+                : 'scale-100 opacity-100'
           )}
-          priority
-        />
-        <Image
-          src={LOGO_PATHS.iconBlack}
-          alt="PH Sport"
-          width={40}
-          height={40}
-          className={cn(
-            'h-9 w-9 object-contain absolute left-1/2 -translate-x-1/2',
-            'transition-all duration-200 ease-in-out',
-            isDark && 'invert',
-            collapsed ? (isClicking ? 'opacity-100 scale-95' : 'opacity-0') : 'opacity-0 scale-90'
-          )}
-          priority
+          decorative
         />
       </button>
     </div>

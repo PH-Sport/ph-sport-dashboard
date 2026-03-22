@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { PhSportMark } from '@/components/layout/ph-sport-mark';
 
 export default function AuthLayout({
   children,
@@ -16,7 +16,7 @@ export default function AuthLayout({
       </div>
 
       {/* Right side - Branding (hidden on mobile) */}
-      <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-primary via-primary to-orange-600 relative overflow-hidden">
+      <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-primary via-gold-500 to-gold-700 relative overflow-hidden">
         {/* Abstract shapes */}
         <div className="absolute inset-0">
           {/* Large shape top right */}
@@ -31,7 +31,7 @@ export default function AuthLayout({
             <rect width="100%" height="100%" fill="url(#grid)" />
           </svg>
           {/* Diagonal accent */}
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-orange-700/50 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-gold-900/50 to-transparent" />
           {/* Arrow shapes */}
           <div className="absolute top-1/4 right-10 w-32 h-32 border-2 border-white/20 rotate-45" />
           <div className="absolute bottom-1/4 left-10 w-24 h-24 border-2 border-white/20 rotate-12" />
@@ -39,15 +39,7 @@ export default function AuthLayout({
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center w-full px-12">
-          {/* Logo with CSS filter to make it white */}
-          <Image
-            src="/images/logo-full-orange.png"
-            alt="PH Sport"
-            width={280}
-            height={80}
-            className="h-16 w-auto mb-6 brightness-0 invert"
-            priority
-          />
+          <PhSportMark className="h-16 w-auto max-w-[280px] mb-6 text-white" />
           <p className="text-white/80 text-lg text-center max-w-sm">
             Gestión de diseños deportivos
           </p>

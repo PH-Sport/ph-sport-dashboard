@@ -42,7 +42,7 @@ export function NotificationsDropdown() {
     switch (type) {
       case 'comment': return <MessageSquare className="h-4 w-4 text-blue-500" />;
       case 'assignment': return <Calendar className="h-4 w-4 text-purple-500" />;
-      case 'deadline': return <AlertCircle className="h-4 w-4 text-orange-500" />;
+      case 'deadline': return <AlertCircle className="h-4 w-4 text-gold-500" />;
       default: return <Info className="h-4 w-4 text-gray-500" />;
     }
   };
@@ -54,8 +54,8 @@ export function NotificationsDropdown() {
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold-500"></span>
             </span>
           )}
         </Button>
@@ -68,7 +68,7 @@ export function NotificationsDropdown() {
             {unreadCount > 0 && (
               <button 
                 onClick={() => markAllAsRead()}
-                className="text-xs text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                className="text-xs text-gold-600 hover:text-gold-700 font-medium flex items-center gap-1"
               >
                 <Check className="h-3 w-3" /> Leído
               </button>
@@ -102,7 +102,7 @@ export function NotificationsDropdown() {
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
                     "flex items-start gap-3 px-4 py-3 cursor-pointer group",
-                    !notification.read ? "bg-orange-50/50 dark:bg-orange-500/5" : ""
+                    !notification.read ? "bg-gold-50/50 dark:bg-gold-500/5" : ""
                   )}
                 >
                   <div className="mt-1 shrink-0 bg-white dark:bg-zinc-800 p-1.5 rounded-full shadow-sm border border-gray-100 dark:border-white/10">

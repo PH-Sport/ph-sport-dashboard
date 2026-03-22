@@ -11,6 +11,8 @@ interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   onClose?: () => void;
+  /** Drawer móvil: fuerza visibilidad (el sidebar desktop va con `hidden md:flex`). */
+  overlay?: boolean;
 }
 
 interface NavItem {
@@ -24,14 +26,12 @@ interface NavGroup {
   items: NavItem[];
 }
 
-// Navigation configuration based on role
 function getNavGroups(role: 'ADMIN' | 'DESIGNER' | undefined): NavGroup[] {
   return [
     {
       label: 'Navegación',
       items: [
         { href: '/dashboard', label: 'Inicio', icon: Home },
-        // ADMIN sees "Equipo", DESIGNER sees "Mi Semana"
         role === 'ADMIN'
           ? { href: '/team', label: 'Equipo', icon: Users }
           : { href: '/my-week', label: 'Mi Semana', icon: Calendar },
@@ -42,16 +42,12 @@ function getNavGroups(role: 'ADMIN' | 'DESIGNER' | undefined): NavGroup[] {
   ];
 }
 
-
-export function Sidebar({ collapsed, onToggle, onClose }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, onClose, overlay }: SidebarProps) {
   const pathname = usePathname();
   const { profile } = useAuth();
-  
-  // Get navigation based on user role
   const navGroups = getNavGroups(profile?.role);
 
   const handleLinkClick = () => {
-    // Close mobile menu on link click (mobile only)
     if (typeof window !== 'undefined' && window.innerWidth < 768 && onClose) {
       onClose();
     }
@@ -64,37 +60,31 @@ export function Sidebar({ collapsed, onToggle, onClose }: SidebarProps) {
         'bg-sidebar text-sidebar-foreground',
         'flex flex-col',
         collapsed ? 'w-20' : 'w-64',
-        'hidden md:flex'
+        overlay ? 'w-[min(100%,16rem)]' : 'hidden md:flex'
       )}
     >
-      {/* Logo with toggle functionality */}
       <SidebarLogo collapsed={collapsed} onToggle={onToggle} />
 
-      {/* Divider */}
       <div className="mx-4 border-b border-border" />
 
-      {/* Navigation */}
-      <nav className="flex flex-col gap-6 p-4 flex-1 overflow-y-auto">
+      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-4">
         {navGroups.map((group) => (
           <div key={group.label} className="flex flex-col gap-2">
-            {/* Group label - animated hide/show */}
             <div
               className={cn(
                 'overflow-hidden transition-all duration-300 ease-in-out',
                 collapsed ? 'max-h-0 opacity-0' : 'max-h-8 opacity-100'
               )}
             >
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-1 whitespace-nowrap">
+              <h3 className="mb-1 whitespace-nowrap px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {group.label}
               </h3>
             </div>
 
-            {/* Nav items */}
             {group.items.map((item) => {
               const Icon = item.icon;
               const isActive =
-                pathname === item.href ||
-                (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
 
               return (
                 <Link
@@ -103,18 +93,15 @@ export function Sidebar({ collapsed, onToggle, onClose }: SidebarProps) {
                   onClick={handleLinkClick}
                   title={collapsed ? item.label : undefined}
                   className={cn(
-                    'flex items-center rounded-lg transition-all duration-300 ease-in-out group relative',
-                    'px-3 py-2.5',
+                    'group relative flex items-center rounded-lg px-3 py-2.5 transition-all duration-300 ease-in-out',
                     isActive
-                      ? 'bg-card text-foreground font-medium shadow-md border-l-[3px] border-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'border-l-[3px] border-primary bg-card font-medium text-foreground shadow-md'
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   )}
                 >
                   <Icon
                     className={cn(
                       'h-5 w-5 shrink-0 transition-all duration-300',
-                      // 0.0625rem (1px) offset to visually center icon when collapsed
-                      // (compensates for the 3px border-l on active items)
                       collapsed && 'translate-x-[0.0625rem]',
                       isActive
                         ? 'text-primary'
@@ -123,9 +110,8 @@ export function Sidebar({ collapsed, onToggle, onClose }: SidebarProps) {
                   />
                   <span
                     className={cn(
-                      'text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out',
-                      // max-w-[150px] prevents text overflow when animating
-                      collapsed ? 'max-w-0 opacity-0 ml-0' : 'max-w-[150px] opacity-100 ml-3'
+                      'overflow-hidden whitespace-nowrap text-sm transition-all duration-300 ease-in-out',
+                      collapsed ? 'ml-0 max-w-0 opacity-0' : 'ml-3 max-w-[150px] opacity-100'
                     )}
                   >
                     {item.label}

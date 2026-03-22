@@ -110,7 +110,7 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
               <div key={comment.id} className={cn("flex gap-3", isOwn ? "flex-row-reverse" : "")}>
                 <Avatar className="h-8 w-8 shrink-0">
                   <AvatarImage src={comment.user?.avatar_url} />
-                  <AvatarFallback className="bg-orange-100 text-orange-700 text-xs">
+                  <AvatarFallback className="bg-gold-100 text-gold-800 text-xs">
                     {comment.user?.full_name?.substring(0, 2).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -118,11 +118,11 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
                 <div className={cn(
                   "group relative max-w-[80%] rounded-2xl px-4 py-2 text-sm",
                   isOwn 
-                    ? "bg-orange-500 text-white rounded-tr-none" 
+                    ? "bg-primary text-primary-foreground rounded-tr-none" 
                     : "bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-tl-none"
                 )}>
                   <div className="flex justify-between items-start gap-2">
-                    <span className={cn("font-semibold text-xs mb-1 block opacity-90", isOwn ? "text-orange-100" : "text-gray-500 dark:text-gray-400")}>
+                    <span className={cn("font-semibold text-xs mb-1 block opacity-90", isOwn ? "text-primary-foreground/90" : "text-gray-500 dark:text-gray-400")}>
                       {comment.user?.full_name}
                     </span>
                     {!isEditing && (
@@ -183,7 +183,7 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
                   
                   <span className={cn(
                     "text-[10px] mt-1 block text-right opacity-70",
-                    isOwn ? "text-orange-100" : "text-gray-400"
+                    isOwn ? "text-primary-foreground/90" : "text-gray-400"
                   )}>
                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
                     {wasEdited && <span className="ml-1">(editado)</span>}
@@ -214,7 +214,7 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
             type="submit" 
             size="icon" 
             disabled={!newComment.trim() || sending}
-            className="bg-orange-500 hover:bg-orange-600 text-white shrink-0 h-10 w-10"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 h-10 w-10"
           >
             {sending ? <Loader className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           </Button>

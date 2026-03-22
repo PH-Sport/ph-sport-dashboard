@@ -4,56 +4,42 @@
 
 @layer base {
   :root {
-    /* ========================================
-       LIGHT MODE - Clean Grayscale
-       Professional, minimal, no color tints
-       ======================================== */
-    
-    /* Background - Off-white */
-    --background: 0 0% 98%; /* #FAFAFA */
-    --foreground: 0 0% 9%; /* #171717 */
+    /* PH Sport — light: negro de marca sobre blanco, acento dorado */
+    --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-    /* Card - White with shadow */
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 0 0% 9%;
+    --background: 0 0% 100%;
+    --foreground: 216 16% 6%;
 
-    /* Sidebar - Light gray */
-    --sidebar: 0 0% 96%; /* #F5F5F5 */
-    --sidebar-foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 216 16% 6%;
 
-    /* Popover */
+    --sidebar: 40 10% 97%;
+    --sidebar-foreground: 216 16% 6%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 216 16% 6%;
 
-    /* Primary - Orange (ONLY accent color) */
-    --primary: 19 100% 49%; /* #FC4F00 */
-    --primary-foreground: 0 0% 100%;
+    --primary: 43 60% 60%;
+    --primary-foreground: 216 16% 6%;
 
-    /* Secondary - Neutral gray */
-    --secondary: 0 0% 96%; /* #F5F5F5 */
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 40 8% 96%;
+    --secondary-foreground: 216 16% 6%;
 
-    /* Muted */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%; /* #737373 */
+    --muted: 40 6% 94%;
+    --muted-foreground: 216 10% 40%;
 
-    /* Accent - Hover state */
-    --accent: 0 0% 94%; /* #F0F0F0 */
-    --accent-foreground: 0 0% 9%;
+    --accent: 40 10% 92%;
+    --accent-foreground: 216 16% 6%;
 
-    /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border - Light gray */
-    --border: 0 0% 90%; /* #E5E5E5 */
-    --input: 0 0% 90%;
-    --ring: 19 100% 49%;
+    --border: 40 8% 88%;
+    --input: 40 8% 88%;
+    --ring: 43 60% 60%;
 
-    /* Radius */
     --radius: 0.5rem;
 
-    /* Status Colors (semantic only) */
     --status-success: 142 71% 45%;
     --status-warning: 45 93% 47%;
     --status-error: 0 84% 60%;
@@ -61,52 +47,37 @@
   }
 
   .dark {
-    /* ========================================
-       DARK MODE - Blue-Tinted Dark Theme
-       Subtle blue undertone for modern look
-       Orange accent creates complementary contrast
-       ======================================== */
-    
-    /* Background - Dark with subtle blue tint */
-    --background: 230 15% 8%; /* #11131A */
-    --foreground: 220 10% 98%; /* #F9FAFB */
+    /* Oscuro: base #0d0f12, superficies escalonadas, acento dorado */
+    --background: 216 16% 6%;
+    --foreground: 0 0% 98%;
 
-    /* Card - Elevated with blue undertone */
-    --card: 230 12% 14%; /* #1E2028 */
-    --card-foreground: 220 10% 98%;
+    --card: 216 14% 11%;
+    --card-foreground: 0 0% 98%;
 
-    /* Sidebar - Slightly lighter than bg (like reference) */
-    --sidebar: 230 12% 12%; /* #1A1C24 */
-    --sidebar-foreground: 220 10% 98%;
+    --sidebar: 216 15% 8%;
+    --sidebar-foreground: 0 0% 98%;
 
-    /* Popover */
-    --popover: 230 12% 14%;
-    --popover-foreground: 220 10% 98%;
+    --popover: 216 14% 11%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary - Vibrant Orange (complementary to blue) */
-    --primary: 19 100% 49%; /* #FC4F00 */
-    --primary-foreground: 0 0% 100%;
+    --primary: 43 60% 60%;
+    --primary-foreground: 216 16% 6%;
 
-    /* Secondary */
-    --secondary: 230 10% 18%; /* #282A32 */
-    --secondary-foreground: 220 10% 98%;
+    --secondary: 216 12% 14%;
+    --secondary-foreground: 0 0% 98%;
 
-    /* Muted */
-    --muted: 230 10% 16%; /* #242630 */
-    --muted-foreground: 230 8% 55%; /* #858899 */
+    --muted: 216 12% 16%;
+    --muted-foreground: 216 8% 58%;
 
-    /* Accent - Hover states */
-    --accent: 230 10% 20%; /* #2E3038 */
-    --accent-foreground: 220 10% 98%;
+    --accent: 216 12% 16%;
+    --accent-foreground: 0 0% 98%;
 
-    /* Destructive */
     --destructive: 0 62% 50%;
-    --destructive-foreground: 220 10% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    /* Border - Subtle blue-gray */
-    --border: 230 10% 20%; /* #2E3038 */
-    --input: 230 10% 20%;
-    --ring: 19 100% 49%;
+    --border: 216 10% 18%;
+    --input: 216 10% 18%;
+    --ring: 43 60% 60%;
   }
 }
 
@@ -116,6 +87,14 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
   }
 }
 
@@ -167,4 +146,3 @@
 .fc-event {
   cursor: pointer;
 }
-
