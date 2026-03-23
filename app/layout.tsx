@@ -20,8 +20,18 @@ export const metadata: Metadata = {
   title: 'PH Sport Dashboard',
   description: 'Plataforma de gestión para el equipo de diseño de PH Sport',
   icons: {
-    icon: '/images/logo-ph-sport-gold.svg',
-    apple: '/images/logo-ph-sport-gold.svg',
+    icon: [
+      {
+        url: '/images/logo-ph-sport-gold.svg?v=3',
+        type: 'image/svg+xml',
+      },
+      {
+        url: '/images/logo-ph-sport-gold-32.png?v=3',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+    ],
+    apple: '/images/apple-touch-icon.png?v=3',
   },
 };
 
