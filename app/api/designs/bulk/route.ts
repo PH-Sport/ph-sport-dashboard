@@ -18,6 +18,7 @@ interface BulkCreateRequest {
 }
 
 export async function POST(request: Request) {
+  const reqId = crypto.randomUUID();
   try {
     const body: BulkCreateRequest = await request.json();
 
@@ -78,13 +79,22 @@ export async function POST(request: Request) {
       .single();
 
     if (profileError) {
-      logger.error('[API Bulk] Role check error:', profileError);
+      logger.serverError('[API Bulk] Role check error', { reqId, userId: data.user.id, error: profileError });
       return NextResponse.json({ error: 'Error al verificar permisos' }, { status: 500 });
     }
 
     if (profile?.role !== 'ADMIN') {
+      logger.serverError('[API Bulk] Forbidden attempt', { reqId, userId: data.user.id, role: profile?.role });
       return NextResponse.json({ error: 'Prohibido' }, { status: 403 });
     }
+
+    logger.serverInfo('[API Bulk] Attempt', {
+      reqId,
+      userId: data.user.id,
+      count: designs.length,
+      firstTitle: designs[0]?.title || designs[0]?.player || null,
+      firstDeadline: designs[0]?.deadline_at || null,
+    });
 
     // Obtener diseñadores y carga actual para asignación equitativa en lote
     const { data: designers, error: designersError } = await supabase
@@ -93,7 +103,7 @@ export async function POST(request: Request) {
       .eq('role', 'DESIGNER');
 
     if (designersError) {
-      logger.error('[API Bulk] Error fetching designers:', designersError);
+      logger.serverError('[API Bulk] Error fetching designers', { reqId, error: designersError });
       return NextResponse.json({ error: 'Error al obtener diseñadores' }, { status: 500 });
     }
 
@@ -106,7 +116,7 @@ export async function POST(request: Request) {
       .not('designer_id', 'is', null);
 
     if (designsError) {
-      logger.error('[API Bulk] Error fetching active designs:', designsError);
+      logger.serverError('[API Bulk] Error fetching active designs', { reqId, error: designsError });
       return NextResponse.json({ error: 'Error al obtener carga de diseñadores' }, { status: 500 });
     }
 
@@ -185,8 +195,26 @@ export async function POST(request: Request) {
       .select();
 
     if (error) {
-      logger.error('[API Bulk] Supabase error:', error);
+      logger.serverError('[API Bulk] Insert failed', {
+        reqId,
+        userId: data.user.id,
+        attemptedCount: designsToInsert.length,
+        attemptedTitles: designsToInsert.map((d) => d.title),
+        attemptedDeadlines: designsToInsert.map((d) => d.deadline_at),
+        error,
+      });
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const createdCount = createdDesigns?.length || 0;
+    if (createdCount < designsToInsert.length) {
+      logger.serverError('[API Bulk] Partial insert', {
+        reqId,
+        userId: data.user.id,
+        attempted: designsToInsert.length,
+        created: createdCount,
+        missing: designsToInsert.length - createdCount,
+      });
     }
 
     // Si hay múltiples diseños, crear notificación agregada por diseñador
@@ -216,22 +244,28 @@ export async function POST(request: Request) {
       }
 
       if (notifications.length > 0) {
-        try {
-          await supabase.from('notifications').insert(notifications);
-        } catch (notifError) {
-          logger.error('[API Bulk] Error sending notifications:', notifError);
+        const { error: notifError } = await supabase.from('notifications').insert(notifications);
+        if (notifError) {
+          logger.serverError('[API Bulk] Error sending notifications', { reqId, error: notifError });
         }
       }
     }
 
+    logger.serverInfo('[API Bulk] Success', {
+      reqId,
+      userId: data.user.id,
+      created: createdCount,
+      requested: designs.length,
+    });
+
     return NextResponse.json({
-      created: createdDesigns?.length || 0,
-      failed: designs.length - (createdDesigns?.length || 0),
+      created: createdCount,
+      failed: designs.length - createdCount,
       designs: createdDesigns || [],
     }, { status: 201 });
 
   } catch (error) {
-    logger.error('[API Bulk] Error:', error);
+    logger.serverError('[API Bulk] Unhandled error', { reqId, error });
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

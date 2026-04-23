@@ -1,7 +1,8 @@
 /**
- * Logger utility that only logs in development mode
- * Prevents exposing sensitive information in production
- * Works in both client and server contexts
+ * Logger utility.
+ * - log/error/warn/info: dev-only (safe for client; avoids leaking info in prod)
+ * - serverError/serverInfo: always log when running on the server (no window),
+ *   so production errors reach Vercel/hosting logs. Never use from client code.
  */
 const isDevelopment = () => {
   if (typeof process !== 'undefined' && process.env) {
@@ -10,6 +11,8 @@ const isDevelopment = () => {
   // Fallback for client-side: assume development if not explicitly production
   return typeof window !== 'undefined';
 };
+
+const isServer = () => typeof window === 'undefined';
 
 export const logger = {
   log: (...args: unknown[]) => {
@@ -29,6 +32,16 @@ export const logger = {
   },
   info: (...args: unknown[]) => {
     if (isDevelopment()) {
+      console.info(...args);
+    }
+  },
+  serverError: (...args: unknown[]) => {
+    if (isServer()) {
+      console.error(...args);
+    }
+  },
+  serverInfo: (...args: unknown[]) => {
+    if (isServer()) {
       console.info(...args);
     }
   },
