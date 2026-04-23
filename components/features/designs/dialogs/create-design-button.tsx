@@ -21,6 +21,9 @@ interface CreateDesignButtonProps {
   disabled?: boolean;
   /** Texto de ayuda cuando está deshabilitado */
   disabledReason?: string;
+  /** Semana actualmente visible en la página (para avisar si un diseño cae fuera) */
+  activeWeekStart?: Date;
+  activeWeekEnd?: Date;
 }
 
 export function CreateDesignButton({
@@ -31,6 +34,8 @@ export function CreateDesignButton({
   className,
   disabled = false,
   disabledReason,
+  activeWeekStart,
+  activeWeekEnd,
 }: CreateDesignButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -53,6 +58,8 @@ export function CreateDesignButton({
         onOpenChange={setDialogOpen}
         onDesignCreated={onDesignCreated}
         design={editDesign}
+        activeWeekStart={activeWeekStart}
+        activeWeekEnd={activeWeekEnd}
       />
     </>
   );

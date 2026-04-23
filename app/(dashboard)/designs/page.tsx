@@ -263,6 +263,8 @@ function DesignsPageContent() {
             onDesignCreated={() => mutate()}
             disabled={!isAdmin}
             disabledReason="Solo administradores pueden crear diseños"
+            activeWeekStart={weekStartFilter}
+            activeWeekEnd={weekEndFilter}
           />
         </div>
       </div>
@@ -617,6 +619,8 @@ function DesignsPageContent() {
         onOpenChange={handleEditDialogClose}
         onDesignCreated={() => mutate()}
         design={editingDesign}
+        activeWeekStart={weekStartFilter}
+        activeWeekEnd={weekEndFilter}
       />
 
       <DesignDetailSheet

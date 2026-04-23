@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Edit, Save, Layers, Trash2, Loader2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Edit, Save, Layers, Trash2, Loader2, ChevronRight, ChevronDown, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDesigners } from '@/lib/hooks/use-designers';
 import { PLAYER_STATUS_CONFIG } from '@/components/features/designs/tags/player-status-tag';
@@ -94,6 +94,17 @@ interface CreateDesignDialogProps {
   onOpenChange: (open: boolean) => void;
   onDesignCreated: () => void;
   design?: Design | null;
+  /** Start of the week currently visible in the designs page. When provided, the dialog
+   * warns if a deadline falls outside this range (design would be created but not appear
+   * in the active view). */
+  activeWeekStart?: Date;
+  /** End of the week currently visible in the designs page. */
+  activeWeekEnd?: Date;
+}
+
+function isOutsideWeek(date: Date | undefined, start?: Date, end?: Date): boolean {
+  if (!date || !start || !end) return false;
+  return date.getTime() < start.getTime() || date.getTime() > end.getTime();
 }
 
 export function CreateDesignDialog({
@@ -101,6 +112,8 @@ export function CreateDesignDialog({
   onOpenChange,
   onDesignCreated,
   design,
+  activeWeekStart,
+  activeWeekEnd,
 }: CreateDesignDialogProps) {
   const [loading, setLoading] = useState(false);
   const { designers, loading: loadingDesigners } = useDesigners();
@@ -294,6 +307,14 @@ export function CreateDesignDialog({
 
   const validBulkCount = bulkRows.filter(isRowValid).length;
   const hasIncompleteRows = bulkRows.some((r) => !isRowValid(r) && !isRowEmpty(r));
+  const outsideWeekCount = (activeWeekStart && activeWeekEnd)
+    ? bulkRows.filter((r) => isRowValid(r) && isOutsideWeek(r.deadline_at, activeWeekStart, activeWeekEnd)).length
+    : 0;
+  const editDeadlineOutsideWeek = isEditMode && isOutsideWeek(formData.deadline_at, activeWeekStart, activeWeekEnd);
+
+  const weekRangeLabel = (activeWeekStart && activeWeekEnd)
+    ? `${activeWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${activeWeekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`
+    : null;
 
   return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -375,6 +396,12 @@ export function CreateDesignDialog({
                           onChange={(date) => setFormData({ ...formData, deadline_at: date })}
                           placeholder="Selecciona fecha y hora"
                         />
+                        {editDeadlineOutsideWeek && weekRangeLabel && (
+                          <p className="text-xs text-amber-600 flex items-start gap-1.5 mt-1">
+                            <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                            <span>Esta fecha cae fuera de la semana visible ({weekRangeLabel}). El diseño existirá pero no aparecerá en la vista actual hasta que cambies el filtro de semana.</span>
+                          </p>
+                        )}
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="designer_id">Diseñador</Label>
@@ -494,6 +521,15 @@ export function CreateDesignDialog({
                         {allExpanded ? 'Colapsar todas' : 'Expandir todas'}
                       </Button>
                     </div>
+                    {outsideWeekCount > 0 && weekRangeLabel && (
+                      <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-600">
+                        <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium">{outsideWeekCount} diseño{outsideWeekCount !== 1 ? 's' : ''}</span> con fecha fuera de la semana visible ({weekRangeLabel}).{' '}
+                          <span className="text-amber-600/90">Se crearán correctamente, pero no aparecerán en la vista actual hasta que cambies el filtro de semana.</span>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges]">
                       <table className="w-full caption-bottom text-sm">
                         <TableHeader>
