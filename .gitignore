@@ -24,6 +24,7 @@ npm-debug.log*
 # IDE/Editor
 .vscode/*
 .cursor/*
+.claude/
 !.vscode/settings.json
 *.swp
 *.swo
