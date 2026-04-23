@@ -94,13 +94,14 @@ export default function InvitePage() {
         return;
       }
 
+      // The invitation's role is applied server-side inside use_invitation(),
+      // reading from the invitations table. We never pass role from the client.
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
-            role: invitation.role,
           },
         },
       });
