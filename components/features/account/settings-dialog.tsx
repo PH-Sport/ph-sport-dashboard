@@ -1,56 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TRANSITIONS, animations } from '@/components/ui/animations';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Settings, Bell, Eye, Save, Camera, Loader2, Mail, Smartphone } from 'lucide-react';
+import { Settings, Bell, Eye, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
-import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
-
-interface NotificationPreferences {
-  email: {
-    assignment: boolean;
-    statusChanges: boolean;
-    upcomingDeadlines: boolean;
-    comments: boolean;
-  };
-  in_app: {
-    assignment: boolean;
-    statusChanges: boolean;
-    upcomingDeadlines: boolean;
-    comments: boolean;
-  };
-}
-
-interface NotificationPreferencesDb {
-  email?: {
-    assignment?: boolean;
-    status_change?: boolean;
-    deadline?: boolean;
-    comment?: boolean;
-  };
-  in_app?: {
-    assignment?: boolean;
-    status_change?: boolean;
-    deadline?: boolean;
-    comment?: boolean;
-  };
-}
+import { useUserPreferences } from '@/lib/hooks/use-user-preferences';
+import { AccountTab } from './account-tab';
+import { NotificationsTab } from './notifications-tab';
+import { AppearanceTab } from './appearance-tab';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -59,180 +19,27 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { user, profile } = useAuth();
-  const supabase = createClient();
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  
-  // Account State
-  const [name, setName] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Preferences State
-  const [defaultView, setDefaultView] = useState<'list' | 'calendar'>('list');
-  const [preferences, setPreferences] = useState<NotificationPreferences>({
-    email: {
-      assignment: true,
-      statusChanges: true,
-      upcomingDeadlines: true,
-      comments: true,
-    },
-    in_app: {
-      assignment: true,
-      statusChanges: true,
-      upcomingDeadlines: true,
-      comments: true,
-    },
+  const {
+    name,
+    setName,
+    defaultView,
+    setDefaultView,
+    preferences,
+    togglePreference,
+    saving,
+    uploading,
+    save,
+    uploadAvatar,
+  } = useUserPreferences({
+    open,
+    onSaved: () => onOpenChange(false),
   });
-
-  useEffect(() => {
-    if (open) {
-      // Init Name
-      if (profile?.full_name) {
-        setName(profile.full_name);
-      } else if (user?.email) {
-        setName(user.email.split('@')[0]);
-      }
-
-      // Init Preferences
-      const loadPreferences = async () => {
-        if (!user) return;
-        
-        const { data } = await supabase
-          .from('profiles')
-          .select('notification_preferences')
-          .eq('id', user.id)
-          .single();
-
-        if (data?.notification_preferences) {
-          // Merge with default to ensure all keys exist
-          const dbPrefs = data.notification_preferences as NotificationPreferencesDb;
-          setPreferences({
-            email: {
-              assignment: dbPrefs.email?.assignment ?? true,
-              statusChanges: dbPrefs.email?.status_change ?? true,
-              upcomingDeadlines: dbPrefs.email?.deadline ?? true,
-              comments: dbPrefs.email?.comment ?? true,
-            },
-            in_app: {
-              assignment: dbPrefs.in_app?.assignment ?? true,
-              statusChanges: dbPrefs.in_app?.status_change ?? true,
-              upcomingDeadlines: dbPrefs.in_app?.deadline ?? true,
-              comments: dbPrefs.in_app?.comment ?? true,
-            },
-          });
-        }
-      };
-      
-      loadPreferences();
-      
-      // Load view preference from local storage as it is device specific
-      const storedView = localStorage.getItem('defaultView');
-      if (storedView) setDefaultView(storedView as 'list' | 'calendar');
-    }
-  }, [open, profile, user, supabase]);
-
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    setUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}-${Math.random()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
-
-      toast.success('Avatar actualizado correctamente');
-      window.location.reload(); // Recargar para actualizar el contexto de auth
-    } catch (error) {
-      console.error('Error updating avatar:', error);
-      toast.error('Error al actualizar el avatar');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!user) return;
-    setSaving(true);
-    
-    try {
-      // Save view preference to localStorage
-      localStorage.setItem('defaultView', defaultView);
-
-      // Map preferences to DB structure (snake_case)
-      const dbPreferences = {
-        email: {
-          assignment: preferences.email.assignment,
-          status_change: preferences.email.statusChanges,
-          deadline: preferences.email.upcomingDeadlines,
-          comment: preferences.email.comments,
-        },
-        in_app: {
-          assignment: preferences.in_app.assignment,
-          status_change: preferences.in_app.statusChanges,
-          deadline: preferences.in_app.upcomingDeadlines,
-          comment: preferences.in_app.comments,
-        },
-      };
-
-      // Save profile and notifications to DB
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: name,
-          notification_preferences: dbPreferences,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast.success('Configuración guardada correctamente');
-      onOpenChange(false);
-      window.location.reload(); // Recargar para ver los cambios reflejados
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.error('Error al guardar la configuración');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const togglePreference = (channel: 'email' | 'in_app', type: keyof NotificationPreferences['email']) => {
-    setPreferences(prev => ({
-      ...prev,
-      [channel]: {
-        ...prev[channel],
-        [type]: !prev[channel][type]
-      }
-    }));
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] bg-background border-border shadow-xl p-0 overflow-hidden">
-        <motion.div 
-          layout 
+        <motion.div
+          layout
           transition={TRANSITIONS.layoutSpring}
           className="flex flex-col h-full"
         >
@@ -243,10 +50,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </div>
 
           <div className="p-6 pt-0">
-            <Tabs 
-              defaultValue="account" 
-              className="w-full flex flex-col min-h-[400px]"
-            >
+            <Tabs defaultValue="account" className="w-full flex flex-col min-h-[400px]">
               <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50">
                 <TabsTrigger value="account" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-primary">
                   <Settings className="h-4 w-4" />
@@ -262,10 +66,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Contenido con animaciones */}
               <div className="flex-1 overflow-y-auto overflow-x-hidden -mx-1 px-1">
                 <AnimatePresence mode="wait">
-                  {/* Account Settings */}
                   <TabsContent value="account" className="mt-0 focus-visible:outline-none">
                     <motion.div
                       key="account"
@@ -273,73 +75,19 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       animate={animations.slideHorizontal.animate}
                       exit={animations.slideHorizontal.exit}
                       transition={TRANSITIONS.fade}
-                      className="space-y-6 py-2"
                     >
-                      <div className="flex flex-col items-center gap-4 py-4">
-                        <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
-                          <Avatar className="h-24 w-24 border-2 border-border group-hover:border-primary transition-colors">
-                            <AvatarImage src={profile?.avatar_url || ''} />
-                            <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
-                              {name 
-                                ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-                                : user?.email?.split('@')[0].substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            {uploading ? (
-                              <Loader2 className="h-6 w-6 text-white animate-spin" />
-                            ) : (
-                              <Camera className="h-6 w-6 text-white" />
-                            )}
-                          </div>
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            disabled={uploading}
-                          />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-muted-foreground">Haz clic para cambiar tu foto</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Nombre Completo</Label>
-                          <Input
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Tu nombre"
-                            className="bg-background border-input"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            value={user?.email || ''}
-                            disabled
-                            className="bg-muted text-muted-foreground border-input"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="role">Rol</Label>
-                          <Input
-                            id="role"
-                            value={profile?.role || 'User'}
-                            disabled
-                            className="bg-muted text-muted-foreground border-input capitalize"
-                          />
-                        </div>
-                      </div>
+                      <AccountTab
+                        name={name}
+                        onNameChange={setName}
+                        email={user?.email}
+                        role={profile?.role}
+                        avatarUrl={profile?.avatar_url}
+                        uploading={uploading}
+                        onAvatarFile={uploadAvatar}
+                      />
                     </motion.div>
                   </TabsContent>
 
-                  {/* Notification Settings */}
                   <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
                     <motion.div
                       key="notifications"
@@ -347,113 +95,14 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       animate={animations.slideHorizontal.animate}
                       exit={animations.slideHorizontal.exit}
                       transition={TRANSITIONS.fade}
-                      className="space-y-6 py-2"
                     >
-                      <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
-                        <h3 className="text-sm font-medium text-foreground mb-1">Preferencias de canales</h3>
-                        <p className="text-xs text-muted-foreground">
-                          Elige cómo quieres recibir las notificaciones para cada tipo de evento.
-                        </p>
-                      </div>
-
-                      <div className="space-y-6">
-                        {/* Headers */}
-                        <div className="grid grid-cols-3 gap-4 pb-2 border-b border-border/50">
-                          <span className="text-sm font-medium text-muted-foreground">Evento</span>
-                          <div className="flex flex-col items-center justify-center">
-                            <Mail className="h-4 w-4 mb-1 text-primary" />
-                            <span className="text-xs font-medium text-muted-foreground">Email</span>
-                          </div>
-                          <div className="flex flex-col items-center justify-center">
-                            <Smartphone className="h-4 w-4 mb-1 text-primary" />
-                            <span className="text-xs font-medium text-muted-foreground">In-App</span>
-                          </div>
-                        </div>
-
-                        {/* Assignments */}
-                        <div className="grid grid-cols-3 gap-4 items-center">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">Nuevas Asignaciones</span>
-                            <span className="text-xs text-muted-foreground">Cuando se te asigna un diseño</span>
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.email.assignment}
-                              onCheckedChange={() => togglePreference('email', 'assignment')} 
-                            />
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.in_app.assignment}
-                              onCheckedChange={() => togglePreference('in_app', 'assignment')} 
-                            />
-                          </div>
-                        </div>
-
-                        {/* Status Changes */}
-                        <div className="grid grid-cols-3 gap-4 items-center">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">Cambios de Estado</span>
-                            <span className="text-xs text-muted-foreground">Cuando cambia el estado de tus diseños</span>
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.email.statusChanges}
-                              onCheckedChange={() => togglePreference('email', 'statusChanges')} 
-                            />
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.in_app.statusChanges}
-                              onCheckedChange={() => togglePreference('in_app', 'statusChanges')} 
-                            />
-                          </div>
-                        </div>
-
-                        {/* Deadlines */}
-                        <div className="grid grid-cols-3 gap-4 items-center">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">Deadlines Próximos</span>
-                            <span className="text-xs text-muted-foreground">Recordatorios de fechas límite</span>
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.email.upcomingDeadlines}
-                              onCheckedChange={() => togglePreference('email', 'upcomingDeadlines')} 
-                            />
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.in_app.upcomingDeadlines}
-                              onCheckedChange={() => togglePreference('in_app', 'upcomingDeadlines')} 
-                            />
-                          </div>
-                        </div>
-
-                        {/* Comments */}
-                        <div className="grid grid-cols-3 gap-4 items-center">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">Nuevos Comentarios</span>
-                            <span className="text-xs text-muted-foreground">Cuando alguien comenta en tu diseño</span>
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.email.comments}
-                              onCheckedChange={() => togglePreference('email', 'comments')} 
-                            />
-                          </div>
-                          <div className="flex justify-center">
-                            <Switch 
-                              checked={preferences.in_app.comments}
-                              onCheckedChange={() => togglePreference('in_app', 'comments')} 
-                            />
-                          </div>
-                        </div>
-                      </div>
+                      <NotificationsTab
+                        preferences={preferences}
+                        onToggle={togglePreference}
+                      />
                     </motion.div>
                   </TabsContent>
 
-                  {/* Appearance Settings */}
                   <TabsContent value="appearance" className="mt-0 focus-visible:outline-none">
                     <motion.div
                       key="appearance"
@@ -461,28 +110,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       animate={animations.slideHorizontal.animate}
                       exit={animations.slideHorizontal.exit}
                       transition={TRANSITIONS.fade}
-                      className="space-y-4 py-2"
                     >
-                      <div className="space-y-4">
-                        <div className="space-y-3">
-                          <Label>Vista predeterminada del Dashboard</Label>
-                          <Select 
-                            value={defaultView} 
-                            onValueChange={(value) => setDefaultView(value as 'list' | 'calendar')}
-                          >
-                            <SelectTrigger className="w-full bg-background border-input">
-                              <SelectValue placeholder="Selecciona una vista" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="list">Vista de Lista</SelectItem>
-                              <SelectItem value="calendar">Vista de Calendario</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <p className="text-sm text-muted-foreground">
-                            Elige cómo quieres ver tus tareas al iniciar sesión.
-                          </p>
-                        </div>
-                      </div>
+                      <AppearanceTab
+                        defaultView={defaultView}
+                        onDefaultViewChange={setDefaultView}
+                      />
                     </motion.div>
                   </TabsContent>
                 </AnimatePresence>
@@ -499,7 +131,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 Cancelar
               </Button>
               <Button
-                onClick={handleSave}
+                onClick={save}
                 disabled={saving}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]"
               >
