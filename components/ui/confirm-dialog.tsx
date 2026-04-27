@@ -33,20 +33,20 @@ interface ConfirmDialogProps {
 const variantConfig = {
   danger: {
     icon: Trash2,
-    iconClassName: 'text-red-500',
-    bgClassName: 'bg-red-500/10',
+    iconClassName: 'text-destructive',
+    bgClassName: 'bg-destructive/10',
     buttonVariant: 'destructive' as const,
   },
   warning: {
     icon: AlertTriangle,
-    iconClassName: 'text-yellow-500',
-    bgClassName: 'bg-yellow-500/10',
+    iconClassName: 'text-[hsl(var(--status-warning))]',
+    bgClassName: 'bg-[hsl(var(--status-warning)/0.1)]',
     buttonVariant: 'default' as const,
   },
   info: {
     icon: Info,
-    iconClassName: 'text-blue-500',
-    bgClassName: 'bg-blue-500/10',
+    iconClassName: 'text-[hsl(var(--status-info))]',
+    bgClassName: 'bg-[hsl(var(--status-info)/0.1)]',
     buttonVariant: 'default' as const,
   },
 };
@@ -120,7 +120,7 @@ export function ConfirmDialog({
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Eliminando...
+                Procesando...
               </span>
             ) : (
               confirmLabel

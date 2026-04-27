@@ -143,7 +143,7 @@ export function DesignerDetailSheet({
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto" hideCloseButton>
-          <SheetHeader className="pb-4 border-b border-gray-100 dark:border-white/10">
+          <SheetHeader className="pb-4 border-b border-border">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <SheetTitle className="flex items-center gap-3 text-xl">
@@ -158,10 +158,10 @@ export function DesignerDetailSheet({
               </div>
               <button
                 onClick={() => onOpenChange(false)}
-                className="p-2 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-500/10 transition-colors group"
+                className="p-2 rounded-lg hover:bg-accent transition-colors group"
                 title="Cerrar"
               >
-                <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gold-400" />
+                <X className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
               </button>
             </div>
           </SheetHeader>
@@ -173,8 +173,8 @@ export function DesignerDetailSheet({
               </p>
             ) : (
               <>
-                {renderSection('Pendientes', backlog, 'text-gray-600 dark:text-gray-400')}
-                {renderSection('Entregados', delivered, 'text-green-600 dark:text-green-400')}
+                {renderSection('Pendientes', backlog, 'text-muted-foreground')}
+                {renderSection('Entregados', delivered, 'text-[hsl(var(--status-success))]')}
               </>
             )}
           </div>

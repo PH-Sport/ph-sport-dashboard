@@ -37,9 +37,10 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
   }).length;
 
   const stuckDesigns = items.filter(d => {
+    if (d.status !== 'BACKLOG') return false;
     const updated = new Date(d.updated_at || d.created_at || new Date());
     const hoursSinceUpdate = (now.getTime() - updated.getTime()) / (1000 * 60 * 60);
-    return hoursSinceUpdate > 48 && d.status !== 'DELIVERED' && d.status !== 'BACKLOG';
+    return hoursSinceUpdate > 48;
   }).length;
 
   const unassignedCount = items.filter(d => !d.designer_id).length;
@@ -112,9 +113,9 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
 
       {/* Alertas Críticas */}
       {(atRisk > 5 || overloadedDesigners.length > 0 || criticalDesigns.length > 0) && (
-        <Card className="border-gold-500/50 bg-gold-500/5">
+        <Card className="border-primary/50 bg-primary/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gold-600 dark:text-gold-400">
+            <CardTitle className="flex items-center gap-2 text-primary">
               <AlertTriangle className="h-5 w-5" />
               Alertas que requieren atención
             </CardTitle>
@@ -188,7 +189,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-yellow-500" />
+              <TrendingDown className="h-5 w-5 text-[hsl(var(--status-warning))]" />
               Diseñadores Inactivos
             </CardTitle>
             <CardDescription>Sin entregas ni trabajo asignado esta semana</CardDescription>

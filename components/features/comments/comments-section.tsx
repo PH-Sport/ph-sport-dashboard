@@ -85,16 +85,16 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
   if (loading) return <div className="p-4 flex justify-center"><Loader /></div>;
 
   return (
-    <div className="flex flex-col h-full border-t border-gray-100 dark:border-white/10 mt-6 pt-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 px-6">Comentarios</h3>
-      
+    <div className="flex flex-col h-full border-t border-border mt-6 pt-4">
+      <h3 className="text-lg font-semibold text-foreground mb-4 px-6">Comentarios</h3>
+
       {/* Messages List */}
-      <div 
+      <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto space-y-6 px-6 mb-4 min-h-[200px]"
       >
         {comments.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+          <div className="text-center text-muted-foreground py-8 text-sm">
             No hay comentarios aún. ¡Sé el primero!
           </div>
         ) : (
@@ -110,36 +110,36 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
               <div key={comment.id} className={cn("flex gap-3", isOwn ? "flex-row-reverse" : "")}>
                 <Avatar className="h-8 w-8 shrink-0">
                   <AvatarImage src={comment.user?.avatar_url} />
-                  <AvatarFallback className="bg-gold-100 text-gold-800 text-xs">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
                     {comment.user?.full_name?.substring(0, 2).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div className={cn(
                   "group relative max-w-[80%] rounded-2xl px-4 py-2 text-sm",
-                  isOwn 
-                    ? "bg-primary text-primary-foreground rounded-tr-none" 
-                    : "bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-tl-none"
+                  isOwn
+                    ? "bg-primary text-primary-foreground rounded-tr-none"
+                    : "bg-muted text-foreground rounded-tl-none"
                 )}>
                   <div className="flex justify-between items-start gap-2">
-                    <span className={cn("font-semibold text-xs mb-1 block opacity-90", isOwn ? "text-primary-foreground/90" : "text-gray-500 dark:text-gray-400")}>
+                    <span className={cn("font-semibold text-xs mb-1 block opacity-90", isOwn ? "text-primary-foreground/90" : "text-muted-foreground")}>
                       {comment.user?.full_name}
                     </span>
                     {!isEditing && (
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {canEditThis && (
-                          <button 
+                          <button
                             onClick={() => handleStartEdit(comment)}
-                            className="text-xs hover:text-blue-500"
+                            className="text-xs hover:text-primary"
                             title="Editar"
                           >
                             <Pencil className="h-3 w-3" />
                           </button>
                         )}
                         {canDelete && (
-                          <button 
+                          <button
                             onClick={() => handleDelete(comment.id)}
-                            className="text-xs hover:text-red-500"
+                            className="text-xs hover:text-destructive"
                             title="Eliminar"
                           >
                             <Trash2 className="h-3 w-3" />
@@ -148,13 +148,13 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
                       </div>
                     )}
                   </div>
-                  
+
                   {isEditing ? (
                     <div className="space-y-2">
                       <Textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="min-h-[60px] text-gray-900 dark:text-white bg-white dark:bg-zinc-700 resize-none text-sm"
+                        className="min-h-[60px] resize-none text-sm"
                         autoFocus
                       />
                       <div className="flex justify-end gap-1">
@@ -171,7 +171,7 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
                           size="sm"
                           onClick={handleSaveEdit}
                           disabled={saving || !editContent.trim()}
-                          className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white"
+                          className="h-7 px-2"
                         >
                           {saving ? <Loader className="h-3 w-3" /> : <Check className="h-3 w-3 mr-1" />} Guardar
                         </Button>
@@ -180,10 +180,10 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
                   ) : (
                     <p className="whitespace-pre-wrap break-words">{comment.content}</p>
                   )}
-                  
+
                   <span className={cn(
                     "text-[10px] mt-1 block text-right opacity-70",
-                    isOwn ? "text-primary-foreground/90" : "text-gray-400"
+                    isOwn ? "text-primary-foreground/90" : "text-muted-foreground"
                   )}>
                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
                     {wasEdited && <span className="ml-1">(editado)</span>}
@@ -196,7 +196,7 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-100 dark:border-white/10 p-4">
+      <div className="border-t border-border p-4">
         <form onSubmit={handleSubmit} className="flex gap-2 items-end">
           <Textarea
             value={newComment}
@@ -210,11 +210,11 @@ export function CommentsSection({ designId }: CommentsSectionProps) {
               }
             }}
           />
-          <Button 
-            type="submit" 
-            size="icon" 
+          <Button
+            type="submit"
+            size="icon"
             disabled={!newComment.trim() || sending}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 h-10 w-10"
+            className="shrink-0 h-10 w-10"
           >
             {sending ? <Loader className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           </Button>

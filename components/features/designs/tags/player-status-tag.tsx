@@ -10,25 +10,27 @@ interface PlayerStatusTagProps {
 }
 
 export const PLAYER_STATUS_CONFIG = {
-  injured: { 
-    label: 'Lesionado', 
-    icon: AlertCircle, 
-    color: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30 border-red-200 dark:border-red-800' 
+  injured: {
+    label: 'Lesionado',
+    icon: AlertCircle,
+    color: 'text-destructive bg-destructive/10 border-destructive/30',
   },
-  suspended: { 
-    label: 'Sancionado', 
-    icon: Ban, 
-    color: 'text-gold-700 bg-gold-100 dark:text-gold-400 dark:bg-gold-950/40 border-gold-200 dark:border-gold-800' 
+  suspended: {
+    label: 'Sancionado',
+    icon: Ban,
+    color: 'text-primary bg-primary/10 border-primary/30',
   },
-  doubt: { 
-    label: 'Duda', 
-    icon: HelpCircle, 
-    color: 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800' 
+  doubt: {
+    label: 'Duda',
+    icon: HelpCircle,
+    color:
+      'text-[hsl(var(--status-warning))] bg-[hsl(var(--status-warning)/0.1)] border-[hsl(var(--status-warning)/0.3)]',
   },
-  last_minute: { 
-    label: 'Última hora', 
-    icon: Clock, 
-    color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' 
+  last_minute: {
+    label: 'Última hora',
+    icon: Clock,
+    color:
+      'text-[hsl(var(--status-info))] bg-[hsl(var(--status-info)/0.1)] border-[hsl(var(--status-info)/0.3)]',
   },
 };
 

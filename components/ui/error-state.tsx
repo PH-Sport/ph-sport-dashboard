@@ -19,13 +19,13 @@ export function ErrorState({
   className,
 }: ErrorStateProps) {
   return (
-    <Card className={cn('border border-red-500/30 bg-red-900/20 backdrop-blur-sm', className)}>
+    <Card className={cn('border-destructive/30 bg-destructive/10', className)}>
       <CardContent className="flex h-64 items-center justify-center">
         <div className="text-center space-y-3">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
           <div>
-            <p className="font-medium text-gray-200">{title}</p>
-            <p className="text-sm text-gray-400 mt-1">{message}</p>
+            <p className="font-medium text-foreground">{title}</p>
+            <p className="text-sm text-muted-foreground mt-1">{message}</p>
           </div>
           {onRetry && (
             <Button variant="outline" onClick={onRetry} className="mt-4">
@@ -37,6 +37,3 @@ export function ErrorState({
     </Card>
   );
 }
-
-
-

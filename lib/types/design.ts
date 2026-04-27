@@ -15,18 +15,19 @@ export const STATUS_LABELS: Record<DesignStatus, string> = {
   DELIVERED: 'Entregado',
 };
 
-// Color mapping por estado para UI consistente
+// Color mapping por estado para UI consistente.
+// Los valores usan los CSS vars definidos en globals.css para que respeten el tema activo.
 export const STATUS_COLORS = {
   BACKLOG: {
-    background: 'rgba(107, 114, 128, 0.2)', // gray-500/20
-    border: 'rgba(107, 114, 128, 0.5)', // gray-500
-    text: '#d1d5db', // gray-300
+    background: 'hsl(var(--muted))',
+    border: 'hsl(var(--muted-foreground) / 0.5)',
+    text: 'hsl(var(--muted-foreground))',
     badgeVariant: 'outline' as const,
   },
   DELIVERED: {
-    background: 'rgba(34, 197, 94, 0.3)', // green-500/30
-    border: 'rgba(34, 197, 94, 0.8)', // green-500
-    text: '#4ade80', // green-400
+    background: 'hsl(var(--status-success) / 0.2)',
+    border: 'hsl(var(--status-success) / 0.7)',
+    text: 'hsl(var(--status-success))',
     badgeVariant: 'secondary' as const,
   },
 } as const;

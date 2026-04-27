@@ -47,29 +47,17 @@ const DialogContent = React.forwardRef<
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content asChild>
-      {/* Wrapper que centra el panel y permite click-outside */}
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        onClick={(e) => {
-          // Solo cerrar si el click fue directamente en el wrapper (no en el contenido)
-          if (e.target === e.currentTarget) {
-            // Disparar el cierre del dialog
-            const closeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
-            document.dispatchEvent(closeEvent);
-          }
-        }}
-      >
+      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <motion.div
           ref={ref as unknown as React.Ref<HTMLDivElement>}
           className={cn(
-            'relative w-full max-w-lg border border-border bg-card text-card-foreground p-6 shadow-lg sm:rounded-lg transition-all duration-300 ease-out',
+            'pointer-events-auto relative w-full max-w-lg border border-border bg-card text-card-foreground p-6 shadow-lg sm:rounded-lg',
             className
           )}
           initial={contentAnimation.initial}
           animate={contentAnimation.animate}
           exit={contentAnimation.exit}
           transition={TRANSITIONS.modal}
-          onClick={(e) => e.stopPropagation()} // Prevenir que clics en contenido cierren el dialog
           {...props}
         >
           {children}

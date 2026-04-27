@@ -119,7 +119,7 @@ export default function LoginPage() {
         </p>
 
         {resetSent ? (
-          <div className="p-4 border border-green-500/50 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400">
+          <div className="p-4 border border-[hsl(var(--status-success)/0.5)] rounded-lg bg-[hsl(var(--status-success)/0.1)] text-[hsl(var(--status-success))]">
             <div className="flex items-center gap-2 mb-2">
               <Mail className="h-5 w-5" />
               <span className="font-medium">Email enviado</span>
@@ -127,7 +127,7 @@ export default function LoginPage() {
             <p className="text-sm">
               Revisa tu bandeja de entrada en <strong>{email}</strong> y sigue las instrucciones para restablecer tu contraseña.
             </p>
-            <p className="text-sm mt-2 text-green-600 dark:text-green-500">
+            <p className="text-sm mt-2 opacity-90">
               Si no lo encuentras, revisa tu carpeta de spam.
             </p>
           </div>

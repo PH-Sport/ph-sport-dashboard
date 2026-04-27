@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef } from 'react';
-import { useTheme } from 'next-themes';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -20,27 +19,9 @@ interface DesignCalendarProps {
 
 function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
-  // Colores para modo claro
-  const lightStatusColors = {
-    BACKLOG: {
-      background: 'rgba(107, 114, 128, 0.3)', // gray-500/30
-      border: 'rgba(107, 114, 128, 0.6)', // gray-500
-      text: '#374151', // gray-700
-    },
-    DELIVERED: {
-      background: 'rgba(34, 197, 94, 0.2)', // green-500/20
-      border: 'rgba(34, 197, 94, 0.8)', // green-500
-      text: '#16a34a', // green-600
-    },
-  };
 
   const events: EventInput[] = items.map((item) => {
-    const statusColor = isDark 
-      ? STATUS_COLORS[item.status] || STATUS_COLORS.BACKLOG
-      : lightStatusColors[item.status] || lightStatusColors.BACKLOG;
+    const statusColor = STATUS_COLORS[item.status] || STATUS_COLORS.BACKLOG;
     return {
       id: item.id,
       title: item.title,
@@ -63,7 +44,7 @@ function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
   };
 
   return (
-    <div className="glass-effect rounded-xl p-4 md:p-6 fc-calendar-custom">
+    <div className="rounded-xl border border-border bg-card p-4 md:p-6 shadow-md">
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -91,17 +72,12 @@ function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
             { locale: es }
           )}`;
         }}
-        eventClassNames="fc-event-custom"
       />
     </div>
   );
 }
 
 export default DesignCalendar;
-
-
-
-
 
 
 

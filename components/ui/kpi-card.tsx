@@ -27,10 +27,10 @@ export function KpiCard({
 }: KpiCardProps) {
   const variantStyles = {
     default: 'text-primary',
-    primary: 'text-blue-700 dark:text-blue-400',
-    success: 'text-green-700 dark:text-green-400',
-    warning: 'text-yellow-700 dark:text-yellow-400',
-    danger: 'text-red-700 dark:text-red-400',
+    primary: 'text-[hsl(var(--status-info))]',
+    success: 'text-[hsl(var(--status-success))]',
+    warning: 'text-[hsl(var(--status-warning))]',
+    danger: 'text-destructive',
   };
 
   return (
@@ -53,7 +53,9 @@ export function KpiCard({
             <p
               className={cn(
                 'text-xs',
-                trend.isPositive ? 'text-green-500' : 'text-red-500'
+                trend.isPositive
+                  ? 'text-[hsl(var(--status-success))]'
+                  : 'text-destructive'
               )}
             >
               {trend.isPositive ? '↑' : '↓'} {trend.value} {trend.label}

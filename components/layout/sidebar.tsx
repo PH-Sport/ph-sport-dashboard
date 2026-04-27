@@ -95,7 +95,7 @@ export function Sidebar({ collapsed, onToggle, onClose, overlay }: SidebarProps)
                   className={cn(
                     'group relative flex items-center rounded-lg px-3 py-2.5 transition-all duration-300 ease-in-out',
                     isActive
-                      ? 'border-l-[3px] border-primary bg-card font-medium text-foreground shadow-md'
+                      ? 'bg-primary/10 font-medium text-foreground'
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   )}
                 >

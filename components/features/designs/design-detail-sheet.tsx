@@ -104,14 +104,14 @@ export function DesignDetailSheet({
               >
                 {/* Icono según tipo de error */}
                 <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
-                  error === 'Diseño no encontrado' 
-                    ? 'bg-yellow-500/10' 
-                    : 'bg-red-500/10'
+                  error === 'Diseño no encontrado'
+                    ? 'bg-[hsl(var(--status-warning)/0.1)]'
+                    : 'bg-destructive/10'
                 }`}>
                   {error === 'Diseño no encontrado' ? (
-                    <SearchX className="h-8 w-8 text-yellow-500" />
+                    <SearchX className="h-8 w-8 text-[hsl(var(--status-warning))]" />
                   ) : (
-                    <AlertCircle className="h-8 w-8 text-red-500" />
+                    <AlertCircle className="h-8 w-8 text-destructive" />
                   )}
                 </div>
                 

@@ -266,9 +266,9 @@ export default function ConversationDetailPage() {
                         {!isEditing && (
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             {canEditThis && (
-                              <button 
+                              <button
                                 onClick={() => handleStartEdit(comment)}
-                                className="hover:text-blue-400"
+                                className="hover:text-primary"
                                 title="Editar"
                               >
                                 <Pencil className="h-3.5 w-3.5" />
@@ -309,7 +309,7 @@ export default function ConversationDetailPage() {
                               size="sm"
                               onClick={handleSaveEdit}
                               disabled={saving || !editContent.trim()}
-                              className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white"
+                              className="h-7 px-2"
                             >
                               {saving ? <Loader className="h-3 w-3" /> : <Check className="h-3 w-3 mr-1" />} Guardar
                             </Button>

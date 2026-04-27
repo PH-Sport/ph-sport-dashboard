@@ -24,10 +24,10 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <Card className={cn('border border-gray-700/30', className)}>
+    <Card className={cn('border-border', className)}>
       <CardContent className="flex h-64 items-center justify-center">
         <div className="text-center space-y-3">
-          <p className="text-gray-400">{description || title}</p>
+          <p className="text-muted-foreground">{description || title}</p>
           {(actionLabel && onAction) || actionHref ? (
             <div>
               {onAction ? (

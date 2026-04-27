@@ -62,7 +62,7 @@ export function UserMenu() {
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
   const displayRole = profile?.role === 'ADMIN' ? 'Manager' : 'Diseñador';
-  const roleColor = profile?.role === 'ADMIN' ? 'text-primary' : 'text-blue-400';
+  const roleColor = profile?.role === 'ADMIN' ? 'text-primary' : 'text-muted-foreground';
 
   return (
     <DropdownMenu>
@@ -130,7 +130,7 @@ export function UserMenu() {
         <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
           onClick={() => setLogoutDialogOpen(true)}
-          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer focus:text-red-300 focus:bg-red-500/10"
+          className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 cursor-pointer"
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Cerrar Sesión</span>
