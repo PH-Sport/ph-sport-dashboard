@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function TeamSkeleton() {
   return (
-    <div className="flex flex-col gap-6 p-6 md:p-8 max-w-7xl mx-auto">
+    <PageContainer>
       {/* Header skeleton */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
@@ -52,6 +53,6 @@ export function TeamSkeleton() {
           </Card>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

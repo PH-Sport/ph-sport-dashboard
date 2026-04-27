@@ -6,7 +6,7 @@ import { es } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PageTransition } from '@/components/ui/page-transition';
+import { DashboardPage } from '@/components/ui/dashboard-page';
 import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { DesignerCard } from '@/components/features/team/designer-card';
@@ -57,36 +57,30 @@ export default function TeamPage() {
   const showSkeleton = (isLoading && designers.length === 0) || authLoading;
 
   return (
-    <PageTransition loading={showSkeleton} skeleton={<TeamSkeleton />}>
-      <div className="flex flex-col gap-6 p-6 md:p-8 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" />
-              Equipo
-            </h1>
-            <p className="text-muted-foreground">Supervisa el progreso de tu equipo</p>
-          </div>
-
-          {/* Selector de semana */}
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={handlePrevWeek}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant={isCurrentWeek ? 'default' : 'outline'} 
-              onClick={handleCurrentWeek}
-              className="min-w-[180px]"
-            >
-              {weekLabel}
-            </Button>
-            <Button variant="outline" size="icon" onClick={handleNextWeek}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
+    <DashboardPage
+      title="Equipo"
+      icon={Users}
+      subtitle="Supervisa el progreso de tu equipo"
+      loading={showSkeleton}
+      skeleton={<TeamSkeleton />}
+      actions={
+        <>
+          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={isCurrentWeek ? 'default' : 'outline'}
+            onClick={handleCurrentWeek}
+            className="min-w-[180px]"
+          >
+            {weekLabel}
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleNextWeek}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </>
+      }
+    >
         {/* Grid de diseñadores */}
         {designers.length === 0 ? (
           <Card>
@@ -113,7 +107,6 @@ export default function TeamPage() {
           onOpenChange={setSheetOpen}
           weekLabel={weekLabel}
         />
-      </div>
-    </PageTransition>
+    </DashboardPage>
   );
 }

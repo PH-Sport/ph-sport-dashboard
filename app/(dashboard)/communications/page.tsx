@@ -12,7 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { CommunicationsSkeleton } from '@/components/skeletons/communications-skeleton';
-import { PageTransition } from '@/components/ui/page-transition';
+import { DashboardPage } from '@/components/ui/dashboard-page';
 import { EmptyState } from '@/components/ui/empty-state';
 
 export default function CommunicationsPage() {
@@ -34,21 +34,14 @@ export default function CommunicationsPage() {
   const showSkeleton = loading && conversations.length === 0;
 
   return (
-    <PageTransition loading={showSkeleton} skeleton={<CommunicationsSkeleton />}>
-      <div className="flex flex-col gap-6 p-6 md:p-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Activity className="h-8 w-8 text-primary" />
-            Actividad
-          </h1>
-          <p className="text-muted-foreground">
-            Conversaciones y actualizaciones del equipo
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
+    <DashboardPage
+      title="Actividad"
+      icon={Activity}
+      subtitle="Conversaciones y actualizaciones del equipo"
+      loading={showSkeleton}
+      skeleton={<CommunicationsSkeleton />}
+      actions={
+        <>
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -71,9 +64,9 @@ export default function CommunicationsPage() {
               </Badge>
             )}
           </Button>
-        </div>
-      </div>
-
+        </>
+      }
+    >
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -190,7 +183,6 @@ export default function CommunicationsPage() {
           </CardContent>
         </Card>
       )}
-    </div>
-    </PageTransition>
+    </DashboardPage>
   );
 }

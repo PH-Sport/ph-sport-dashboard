@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PageTransition } from '@/components/ui/page-transition';
+import { DashboardPage } from '@/components/ui/dashboard-page';
 import { MyWeekSkeleton } from '@/components/skeletons/my-week-skeleton';
 import {
   Select,
@@ -151,7 +151,7 @@ export default function MyWeekPage() {
       );
     } else if (hoursUntil < 48) {
       return (
-        <Badge className="bg-yellow-500/30 text-yellow-600 dark:text-yellow-400 border-yellow-500/50 shrink-0 gap-1">
+        <Badge variant="warning" className="shrink-0 gap-1">
           <AlertTriangle className="h-3 w-3" />
           {Math.floor(hoursUntil)}h
         </Badge>
@@ -227,18 +227,13 @@ export default function MyWeekPage() {
   };
 
   return (
-    <PageTransition loading={showSkeleton || status === 'INITIALIZING'} skeleton={<MyWeekSkeleton />}>
-      <div className="flex flex-col gap-6 p-6 md:p-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-              <Calendar className="h-8 w-8 text-primary" />
-              Mi Semana
-            </h1>
-            <p className="text-muted-foreground">Gestiona tus tareas y entregas</p>
-          </div>
-        </div>
-
+    <DashboardPage
+      title="Mi Semana"
+      icon={Calendar}
+      subtitle="Gestiona tus tareas y entregas"
+      loading={showSkeleton || status === 'INITIALIZING'}
+      skeleton={<MyWeekSkeleton />}
+    >
         {!hasAnyItems ? (
           <Card>
             <CardContent className="flex h-64 items-center justify-center">
@@ -340,7 +335,6 @@ export default function MyWeekPage() {
             </section>
           </div>
         )}
-      </div>
 
       {/* Confirm dialog for regressive status changes */}
       {options && (
@@ -363,6 +357,6 @@ export default function MyWeekPage() {
         onOpenChange={setDetailSheetOpen}
         onDesignUpdated={() => mutate()}
       />
-    </PageTransition>
+    </DashboardPage>
   );
 }

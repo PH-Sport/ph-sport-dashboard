@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UsersSkeleton } from '@/components/skeletons/users-skeleton';
-import { PageTransition } from '@/components/ui/page-transition';
+import { DashboardPage } from '@/components/ui/dashboard-page';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Plus, 
@@ -33,7 +33,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'bg-primary/20 text-primary border-primary/30',
-  DESIGNER: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  DESIGNER: 'bg-secondary text-secondary-foreground border-border',
 };
 
 export default function UsersPage() {
@@ -102,10 +102,17 @@ export default function UsersPage() {
   const getInvitationStatus = (invitation: Invitation) => {
     const usesCount = invitation.invitation_uses?.length || 0;
     if (usesCount >= invitation.max_uses) {
-      return { label: 'Usada', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+      return {
+        label: 'Usada',
+        color:
+          'bg-[hsl(var(--status-success)/0.15)] text-[hsl(var(--status-success))] border-[hsl(var(--status-success)/0.3)]',
+      };
     }
     if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
-      return { label: 'Expirada', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      return {
+        label: 'Expirada',
+        color: 'bg-destructive/15 text-destructive border-destructive/30',
+      };
     }
     return { label: 'Activa', color: 'bg-primary/20 text-primary border-primary/30' };
   };
@@ -113,23 +120,24 @@ export default function UsersPage() {
   // Only show skeleton on initial load (no cached data yet)
   const showSkeleton = (isLoading && users.length === 0) || status === 'INITIALIZING';
 
-  return (
-    <PageTransition loading={showSkeleton} skeleton={<UsersSkeleton />}>
-      {(!currentProfile || currentProfile.role !== 'ADMIN') ? null : (
-        <div className="flex flex-col gap-6 p-6 md:p-8 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Usuarios</h1>
-          <p className="text-muted-foreground">Gestiona el equipo de PH Sport</p>
-        </div>
+  if (status !== 'INITIALIZING' && (!currentProfile || currentProfile.role !== 'ADMIN')) {
+    return null;
+  }
 
+  return (
+    <DashboardPage
+      title="Usuarios"
+      subtitle="Gestiona el equipo de PH Sport"
+      loading={showSkeleton}
+      skeleton={<UsersSkeleton />}
+      maxWidth="4xl"
+      actions={
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Invitar Usuario
         </Button>
-      </div>
-
+      }
+    >
       {/* Users List */}
       <Card>
         <CardHeader>
@@ -229,7 +237,7 @@ export default function UsersPage() {
                             onClick={() => copyToClipboard(invitation.token, invitation.id)}
                           >
                             {copiedId === invitation.id ? (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              <CheckCircle className="h-4 w-4 text-[hsl(var(--status-success))]" />
                             ) : (
                               <Copy className="h-4 w-4" />
                             )}
@@ -253,13 +261,11 @@ export default function UsersPage() {
         )}
       </Card>
 
-      <CreateInvitationDialog 
-        open={dialogOpen} 
+      <CreateInvitationDialog
+        open={dialogOpen}
         onOpenChange={setDialogOpen}
         onCreated={() => mutate()}
       />
-        </div>
-      )}
-    </PageTransition>
+    </DashboardPage>
   );
 }
