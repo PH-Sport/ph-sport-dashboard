@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { LogoutOverlay } from '@/components/ui/logout-overlay';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // Types & Interfaces
@@ -68,14 +69,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializeAuth = useCallback(async (isMount = false) => {
     try {
       if (!isMount) {
-        console.log('[Auth] Refreshing session...');
+        logger.log('[Auth] Refreshing session...');
       }
 
       // 1. Get User
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError || !user) {
-        console.log('[Auth] No active session found.');
+        logger.log('[Auth] No active session found.');
         setState(prev => ({ ...prev, status: 'UNAUTHENTICATED', user: null, profile: null }));
         return;
       }
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (profileError) {
-        console.error('[Auth] Profile fetch failed:', profileError);
+        logger.error('[Auth] Profile fetch failed:', profileError);
         // Decision: If profile fails, is it a retry-able network error?
         // For simplicity and robustness: Treat as invalid session for now.
         // Ideally, we could add an ERROR state here with a "Retry" button.
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!profile) {
-        console.warn('[Auth] User exists but has NO profile. Critical data error.');
+        logger.warn('[Auth] User exists but has NO profile. Critical data error.');
         // User without profile -> Invalid state -> Force Logout
         await supabase.auth.signOut();
         setState(prev => ({ ...prev, status: 'UNAUTHENTICATED', user: null, profile: null }));
@@ -115,11 +116,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // If nothing changed, return previous state to avoid re-render
         if (prev.status === 'AUTHENTICATED' && isSameUser && isSameProfile) {
-          console.log('[Auth] Session verified, no changes detected.');
+          logger.log('[Auth] Session verified, no changes detected.');
           return prev;
         }
 
-        console.log('[Auth] Session & Profile verified. Access granted.');
+        logger.log('[Auth] Session & Profile verified. Access granted.');
         return {
           ...prev,
           status: 'AUTHENTICATED',
@@ -129,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
     } catch (error) {
-      console.error('[Auth] Initialization error:', error);
+      logger.error('[Auth] Initialization error:', error);
       // Fail-safe: Default to unauthenticated to prevent zombie UI
       setState(prev => ({ ...prev, status: 'UNAUTHENTICATED', user: null, profile: null }));
     }
@@ -145,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Supabase Auth Listener (Handles other tabs, token refreshes, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
-      console.log(`[Auth] Event: ${event}`);
+      logger.log(`[Auth] Event: ${event}`);
 
       if (event === 'SIGNED_OUT') {
         setState(prev => ({ ...prev, status: 'UNAUTHENTICATED', user: null, profile: null }));
@@ -179,18 +180,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setState(prev => ({ ...prev, loggingOut: true }));
       // Optimistic UI clear
       await supabase.auth.signOut();
-      
-      // Clear storage
+
+      // Limpiar SOLO claves auth de Supabase (preservamos theme, sidebar-collapsed, etc.).
       if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
+        const clearSupabaseKeys = (storage: Storage) => {
+          const keysToRemove: string[] = [];
+          for (let i = 0; i < storage.length; i++) {
+            const key = storage.key(i);
+            if (key && key.startsWith('sb-')) keysToRemove.push(key);
+          }
+          keysToRemove.forEach((k) => storage.removeItem(k));
+        };
+        clearSupabaseKeys(window.localStorage);
+        clearSupabaseKeys(window.sessionStorage);
       }
-      
+
       router.push('/login');
       // State update happens via onAuthStateChange --> SIGNED_OUT
     } catch (error) {
-      console.error('Logout error:', error);
-      // Force local cleanup anyway
+      logger.error('Logout error:', error);
       setState(prev => ({ ...prev, status: 'UNAUTHENTICATED', user: null, profile: null }));
       router.push('/login');
     }

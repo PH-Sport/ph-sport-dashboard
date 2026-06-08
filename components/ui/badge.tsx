@@ -12,15 +12,15 @@ const badgeVariants = cva(
         secondary: 'border-transparent bg-secondary text-secondary-foreground',
         destructive: 'border-transparent bg-destructive text-destructive-foreground',
         warning:
-          'border-[hsl(var(--status-warning)/0.5)] bg-[hsl(var(--status-warning)/0.15)] text-[hsl(var(--status-warning))]',
+          'border-status-warning/50 bg-status-warning/15 text-status-warning',
         success:
-          'border-[hsl(var(--status-success)/0.3)] bg-[hsl(var(--status-success)/0.15)] text-[hsl(var(--status-success))]',
+          'border-status-success/30 bg-status-success/15 text-status-success',
         outline: 'border-border text-foreground',
       },
       status: {
         BACKLOG: 'border-muted-foreground/30 bg-muted text-muted-foreground',
         DELIVERED:
-          'border-[hsl(var(--status-success)/0.3)] bg-[hsl(var(--status-success)/0.15)] text-[hsl(var(--status-success))]',
+          'border-status-success/30 bg-status-success/15 text-status-success',
       },
     },
     defaultVariants: {

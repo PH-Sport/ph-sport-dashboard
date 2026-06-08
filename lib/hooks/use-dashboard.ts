@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import type { Design } from '@/lib/types/design';
+import { designsFetcher } from '@/lib/utils/api-fetcher';
 
 interface UseDashboardReturn {
   items: Design[];
@@ -8,15 +9,6 @@ interface UseDashboardReturn {
   error: Error | null;
   mutate: () => void;
 }
-
-const fetcher = async (url: string): Promise<Design[]> => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Error al cargar los datos del dashboard');
-  }
-  const data = await response.json();
-  return data.items || [];
-};
 
 export function useDashboard(): UseDashboardReturn {
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -27,7 +19,7 @@ export function useDashboard(): UseDashboardReturn {
     weekEnd: format(weekEnd, 'yyyy-MM-dd'),
   }).toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR<Design[]>(url, fetcher);
+  const { data, error, isLoading, mutate } = useSWR<Design[]>(url, designsFetcher);
 
   return {
     items: data ?? [],

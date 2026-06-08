@@ -1,274 +1,226 @@
 # Refactor Plan — PH Sport Dashboard
 
-> Documento de continuidad para el refactor de cimientos + lavado de cara UX/UI.
-> Si retomas la conversación tras un `/compact` o en sesión nueva, **lee este fichero primero**.
-> Última actualización: 2026-04-27.
+> Plan de ejecución por fases del refactor estructural + lavado de cara UX/UI.
+> **Si retomas la conversación tras `/compact` o sesión nueva, lee este fichero PRIMERO**.
+> **Hallazgos completos**: ver [`audit-estructural.md`](./audit-estructural.md).
+> Última actualización: 2026-04-29.
 
 ---
 
-## Contexto y objetivo
+## Contexto
 
-PH Sport Dashboard es una herramienta interna para el equipo de diseño (Manager + Diseñador).
-Stack: Next.js 15, Tailwind, Shadcn UI, Söhne (custom font), Supabase.
-Identidad: negro de marca + acento dorado, con dark/light mode.
+PH Sport Dashboard — herramienta interna (8 personas) para gestión de diseños deportivos.
+Stack: Next.js 15, React 19, TypeScript, Tailwind, Shadcn UI, Geist + JetBrains Mono, Supabase.
+Identidad: charcoal authority + dorado Champions, con dark/light mode.
 
-El usuario pidió un **"lavado de cara"** completo. Tras auditoría se decidió que el problema raíz no es estético sino arquitectónico: cada cambio rompe varias cosas porque hay mega-componentes y un sistema de diseño a medio construir. **Cimientos primero, estética después.**
+### Origen del refactor
 
-### Estilo de trabajo del usuario (importante)
-- **Despacito y con buena letra** — paso por paso, validación entre pasos.
-- Le gusta entender el **porqué** del orden propuesto antes de ejecutar.
-- Prefiere fases pequeñas con feedback visible a refactors big-bang.
-- No quiere que se le pregunten cosas obvias en auto mode, pero sí que se le confirmen decisiones de scope/prioridad.
+El user pidió un "lavado de cara" estético. Audit reveló que **el problema raíz es arquitectónico, no de criterio**: tokens "isla", componentes monolíticos, agujeros de seguridad en API, lógica duplicada. Cada cambio estético rompe otras cosas. **Cimientos primero, estética después**.
 
----
+### Estilo de trabajo del usuario (regla de oro)
 
-## Estado actual (qué ya se ha hecho)
-
-### Olas 1-3 completadas (sin commit aún)
-
-**Ola 1 — Bugs P0:**
-- `dialog.tsx`: eliminado el wrapper que disparaba `KeyboardEvent('Escape')` global. Ahora usa wrapper `pointer-events-none` con flex-center y motion controla solo scale+opacity. Click-outside vía Radix nativo.
-- `design-calendar.tsx`: clase fantasma `glass-effect` (no existía) → `bg-card border border-border shadow-md`. Eliminados hooks vacíos `fc-calendar-custom`/`fc-event-custom` y workaround `lightStatusColors`.
-- `admin-dashboard.tsx`: KPI "Bloqueados" filtraba por estados inexistentes (siempre 0). Redefinida como "BACKLOG sin movimiento >48h".
-
-**Ola 2 — Theming:**
-- `lib/types/design.ts STATUS_COLORS`: RGB hard-coded → `hsl(var(--*))`.
-- `badge.tsx`: añadidas variantes `warning` y `success`. DELIVERED tokenizado.
-- Tokenizados: `error-state`, `empty-state`, `kpi-card`, `user-menu`, `notifications-dropdown`, `comments-section`, `settings/users page` (ROLE_COLORS), `confirm-dialog`, `admin-dashboard`, `designer-card`, `designer-detail-sheet`, `design-detail-sheet`, `player-status-tag`, `create-invitation-dialog`, `communications/[designId] page`, páginas auth (login/reset/invite).
-- Sidebar activo: quitado `border-l-[3px]` (anti-patrón AI-slop) → `bg-primary/10`.
-- `designs/page.tsx`: 4× `hover:text-gold-400` → `hover:text-primary`.
-
-**Ola 3 — Polish:**
-- `button.tsx`: eliminado `transition-all duration-200` duplicado en cada variant.
-- `confirm-dialog.tsx`: loading text "Eliminando..." → "Procesando..." (era engañoso para variants info/warning).
-
-**Bug post-Ola 1 corregido:** los Dialogs aparecían descentrados porque framer-motion `scale: 0.96` machacaba `translate-x-[-50%]`. Solucionado con wrapper flex.
-
-### Lo que NO se tocó deliberadamente
-- `(auth)` layout decorativo (cuadrados rotados, gold gradient, grid SVG) — pendiente para fase de estética.
-- `defaultTheme="dark" enableSystem={false}` — decisión de marca.
-- `--font-sans` = Helvetica (Söhne solo en headings) — pendiente para fase tipografía.
-- Overlays `bg-black/50` en dialog/sheet — son backdrops, válidos.
+- **Despacito y con buena letra** — paso por paso, validación entre fases.
+- **Exhaustividad sobre velocidad** — auditar antes de maquillar.
+- Confía en decisiones técnicas si están justificadas.
+- Quiere entender el **porqué** del orden antes de ejecutar.
 
 ---
 
-## Diagnóstico arquitectónico
+## Decisiones arquitectónicas tomadas
 
-### Health scores
-- **Audit técnico** (Olas 1-3 cerradas): a11y 3/4, perf 3/4, theming 1→3/4, responsive 3/4, anti-patterns 2→3/4 = ~13→16/20.
-- **Critique UX (Nielsen 10)**: 23/40. Bajos: control/freedom (sin undo), consistency (3 patrones de panel), efficiency (sin atajos), aesthetic (saturación), help/docs.
-
-### Mega-componentes (causa raíz de fragilidad)
-| Fichero | Líneas | Problema |
+| Decisión | Razón | Fecha |
 |---|---|---|
-| `components/features/designs/dialogs/create-design-dialog.tsx` | 825 | single + bulk + helpers + submit en un solo fichero |
-| `app/(dashboard)/designs/page.tsx` | 650 | filtros + búsqueda + paginación + sort + tabla + sheet |
-| `components/features/account/settings-dialog.tsx` | 524 | 3 tabs + lógica de preferencias + avatar upload |
-| `app/(dashboard)/my-week/page.tsx` | 368 | listado + agrupación + cambio estado + sheet |
-| `app/(dashboard)/communications/[designId]/page.tsx` | 365 | chat + edición + delete + auto-scroll |
-
-### Sistema de diseño incompleto
-- ✅ Tokens de color en `globals.css` (CSS vars).
-- ❌ Tokens de espaciado, radius (solo `--radius` único), shadow, font-size.
-- ❌ Primitivas de pattern (PageContainer, PageHeader, DashboardPage, etc.).
-- ❌ 8 esqueletos sueltos en `components/skeletons/` que duplican el wrapper de cada page → drift inevitable.
+| Tipografía: **Geist Sans + JetBrains Mono** | dotted zero, italic real, latín completo, OFL | 2026-04-28 |
+| Sidebar: **migrar a shadcn `Sidebar`** | actual custom monolítico con tokens isla, fijo+ml, sin variants. shadcn aporta SidebarProvider/Inset, mobile drawer integrado, keyboard shortcut, variants | 2026-04-29 |
+| Validación API: **zod** | sin validación actual, mass update vulnerability detectada | 2026-04-29 |
+| Rutas en español | producto interno solo es-ES; rutas claras para users | 2026-04-28 |
+| Eliminar `/communications` + comentarios | no se usaban | 2026-04-28 |
+| Eliminar paleta `gold-*` Tailwind, unificar en `--primary` | doble sistema de paleta | 2026-04-29 |
+| Exponer `--status-*` en Tailwind config | bracket syntax repetido 30 veces | 2026-04-29 |
 
 ---
 
-## Fase 1 — Inventario ✅ (completada)
+## Plan de fases
 
-### Tabla 1 · Patrones repetidos inline
+> El orden está diseñado por **dependencias**: cada fase deja el terreno listo para la siguiente. **No saltarlas**.
 
-| # | Patrón | Apariciones | Primitiva propuesta |
-|---|---|---|---|
-| 1 | `flex flex-col gap-6 p-6 md:p-8 max-w-7xl mx-auto` | 7 + 8 esqueletos = **15** | `<PageContainer maxWidth="7xl">` |
-| 2 | `flex flex-col md:flex-row md:items-center justify-between gap-4` (page header) | 6 + 6 esqueletos = **12** | `<PageHeader>` |
-| 3 | `<h1 text-3xl font-bold text-foreground flex items-center gap-3><Icon h-8 w-8 text-primary />` | **5** | parte de `<PageHeader title icon>` |
-| 4 | `<p text-muted-foreground>` subtitle | **3+** | parte de `<PageHeader subtitle>` |
-| 5 | `<CardContent flex h-64 items-center justify-center>` | **4** | refactor `<EmptyState>` extendido |
-| 6 | `flex h-10 w-10 items-center justify-center rounded-full bg-primary/10` | 2+ | `<RoundIcon>` o `<IconBadge>` |
-| 7 | `grid gap-4 md:grid-cols-{3,4}` o variantes | 8+ | `<CardGrid columns={n}>` |
-| 8 | `text-lg font-semibold ... flex items-center gap-2` con badge | 2+ | `<SectionHeader title count action>` |
-| 9 | PageTransition + skeleton | 6 | ya existe; los 8 esqueletos son el problema |
-| 10 | Macro: container + transition + header + skeleton | 6 | `<DashboardPage>` |
+### Fase 0 — Cimientos del design system ✅ HECHO (2026-04-29)
 
-### Tabla 2 · Primitivas a crear (orden)
-
-1. **`<PageContainer>`** — wrapper común
-2. **`<PageHeader title icon subtitle actions>`**
-3. **`<DashboardPage>`** (compone container + transition + header + skeleton wrapper)
-4. **`<EmptyState>` ampliada** (variants: empty/error/loading, icon, doble acción)
-5. **`<CardGrid columns>`**
-6. **`<SectionHeader>`**
-7. **`<RoundIcon>`**
-8. **`<DataCardSkeleton>`** o `pageSkeleton(variant)` parametrizado
-
-### Tabla 3 · Chunks a extraer de mega-componentes
-
-**`create-design-dialog.tsx`** (825 → ~3 ficheros 200-300):
-- Helpers (`generateId`, `createEmptyRow`, `isRowValid`, `isRowEmpty`, `isOutsideWeek`) → `lib/utils/design-form.ts`
-- Modo individual (líneas 361-506) → `<DesignFormSingle>`
-- Modo lote (líneas 507-680) → `<DesignFormBulk>`
-- Lógica submit → hook `useDesignSubmit`
-- Shell del dialog → ~120 líneas
-
-**`designs/page.tsx`** (650 → ~250 + 2 sub-componentes):
-- Filtros (statusFilter, designerFilter, week, search + debounce) → hook `useDesignsFilters()`
-- Paginación + sort → hook `useTablePagination<T>()` reutilizable
-- JSX "Filtros Avanzados" Card (288-350) → `<DesignsFilters>`
-- JSX tabla (404-580) → `<DesignsTable>`
-- JSX paginación (582-612) → `<TablePagination>` reutilizable
-
-**`settings-dialog.tsx`** (524 → ~150 + 3 tabs):
-- Tab Cuenta (269-342) → `<AccountTab>`
-- Tab Notificaciones (343-456) → `<NotificationsTab>`
-- Tab Apariencia (457-end) → `<AppearanceTab>`
-- Lógica preferencias dispersa → hook `useUserPreferences()`
+- [x] Eliminar paleta `gold-*` del `tailwind.config.ts`
+- [x] Migrar usos de `bg-gold-*`/`text-gold-*` a `bg-primary/N`, `text-primary` (auth layout gradient + design-detail-sheet hovers)
+- [x] Exponer `status-*` en Tailwind config (`status.success`, `status.warning`, `status.error`, `status.info`)
+- [x] Migrar 30 ocurrencias de `bg-[hsl(var(--status-*))]` a `bg-status-X`/`text-status-X` en 13 archivos
+- [x] Declarar `--font-mono` en `:root` con fallback (renombrada var de next/font a `--font-mono-base` para evitar recursión)
+- [x] Tintar `--card` light hacia warm (`36 30% 99%` en lugar de blanco puro), `--popover` igual
+- [x] Actualizar comentario header de `globals.css`
+- [x] Verificar contraste `--primary`/`--primary-foreground` light: **7.67:1 (pasa WCAG AAA)**
+- [x] Type-check + lint limpios
 
 ---
 
-## Fase 2 — Primitivas estructurales ✅ (completada)
+### Fase 0.5 — Seguridad API ✅ HECHO (2026-04-29)
 
-**Creadas:**
-- `components/ui/page-container.tsx` — wrapper con prop `maxWidth` (default `7xl`).
-- `components/ui/page-header.tsx` — props `title`, `icon`, `subtitle`, `actions` (slot).
-- `components/ui/dashboard-page.tsx` — compone PageContainer + PageTransition + PageHeader + skeleton.
-
-**Migradas (6 pages):** `/dashboard`, `/designs`, `/my-week`, `/team`, `/communications` (lista), `/settings/users` (`maxWidth="4xl"`).
-
-**No migrada:** `/communications/[designId]` — layout especial chat full-screen (`h-[calc(100vh-4rem)]`), no encaja en `<DashboardPage>`. Se queda con su wrapper propio.
-
-**Skeletons migrados a `<PageContainer>` (6/8):** dashboard, designs, my-week, team, communications, users (con `maxWidth="4xl"`).
-
-**Skeletons NO migrados (2/8):** `design-detail-skeleton` (panel interno de Sheet, no es page-level) y `sidebar-skeleton` (es la sidebar fija, no es page-level).
-
-**Validación:** type-check, lint y build limpios después de migrar todo.
-
-**Criterio cumplido:** cada page.tsx redujo el wrapper de cabecera a una llamada de ~10 líneas; todas comparten la misma fuente.
+- [x] `npm install zod`
+- [x] `lib/api/schemas.ts` con schemas: `weekFiltersSchema`, `bulkCreateDesignsSchema`, `updateDesignSchema` (whitelist `.strict()`), `updateStatusSchema`, `updateAssigneeSchema`
+- [x] `lib/api/errors.ts` con helpers `validationErrorResponse`, `internalErrorResponse`, `unauthorizedResponse`, `forbiddenResponse`, `notFoundResponse`. En prod oculta detalles, en dev los expone.
+- [x] Reescritos 5 routes: `route.ts`, `[id]/route.ts`, `[id]/status/route.ts`, `[id]/assignee/route.ts`, `bulk/route.ts`
+- [x] Whitelist explícita en PUT `[id]/route.ts` — eliminado spread `{ ...body }`. Loop sobre campos parseados.
+- [x] `[id]/assignee/route.ts` valida que el destino tenga rol DESIGNER (cuando designer_id es UUID).
+- [x] Eliminado branch deprecated `status` de PUT genérico (ahora solo `/status` lo maneja).
+- [x] `auth-context.tsx` logout: borra solo claves `sb-*` de localStorage + sessionStorage.
+- [x] Type-check + lint limpios.
 
 ---
 
-## Fase 3 — Tokens completos (después de Fase 2)
+### Fase 0.5b — Algoritmo asignación unificado ✅ HECHO (2026-04-29)
 
-**Objetivo**: añadir solo los tokens que las primitivas hayan revelado como necesarios.
-
-Probables tokens a añadir (no decidido aún, depende de Fase 2):
-- Escalas de espaciado semánticas (si las primitivas piden algo más allá de Tailwind directo).
-- Sistema de radius (hoy solo hay `--radius`; faltaría `--radius-sm/md/lg/xl`).
-- Sistema de shadows tokenizado.
-- Escala de font-size si decidimos algo más allá de las clases Tailwind.
-
-**Regla**: ningún token sin uso real. Si una primitiva usa `rounded-2xl` en 1 sitio, no se tokeniza.
+- [x] `lib/services/designs/select-designer.ts` con `selectDesignerByLoad(designerIds, loads, startIndex?)` puro, devuelve `{ id, nextIndex }`.
+- [x] `lib/services/designs/assignment.ts` (`assignDesignerAutomatically`) ahora delega en la función pura.
+- [x] `app/api/designs/bulk/route.ts` usa `selectDesignerByLoad` con cursor in-line — código más corto y sin lógica duplicada.
+- [x] `app/api/designs/assign/route.ts`: 1 fetch de cargas + distribución in-memory + **batch update por diseñador** (en vez de N round-trips secuenciales). Para 30 unassigned con 5 designers pasa de 30 round-trips a 5.
+- [x] Type-check + lint limpios.
 
 ---
 
-## Fase 4 — Descomponer mega-componentes
+### Fase 1 — Sidebar a shadcn ✅ HECHO (2026-04-29)
 
-**Estado:** parcialmente completada (1/3).
-
-### `create-design-dialog.tsx` ✅ (825 → 281 líneas)
-
-Descompuesto en:
-- `lib/utils/design-form.ts` (71 L) — tipos `BulkDesignRow`, `SingleDesignFormData`, `PlayerStatus` + helpers `generateId`, `createEmptyRow`, `isRowValid`, `isRowEmpty`, `isOutsideWeek`.
-- `components/features/designs/dialogs/design-form-single.tsx` (187 L) — JSX modo edit, controlado.
-- `components/features/designs/dialogs/design-form-bulk.tsx` (329 L) — JSX modo bulk, gestiona internamente `expandedRowIds` + `outsideWeekCount`.
-- `lib/hooks/use-design-submit.ts` (115 L) — encapsula `handleSubmit` (PUT vs POST bulk), maneja loading + toasts.
-- Shell dialog (281 L) — solo orquesta state, dialog wrapper y footer.
-
-Eliminado dead code en el camino: `if (!isEditMode && deadline < oneHourAgo)` dentro del bloque `if (isEditMode)` (siempre falso).
-
-### `designs/page.tsx` ✅ (644 → 275 líneas)
-
-Descompuesto en:
-- `lib/hooks/use-designs-filters.ts` (48 L) — encapsula `statusFilter`, `designerFilter`, `weekStart/End`, `searchQuery` + `useDebounce`.
-- `lib/hooks/use-designs-table.ts` (88 L) — sort + paginación + `handleSort`. Tipos `DesignSortColumn`, `SortDirection` exportados.
-- `components/features/designs/designs-filters.tsx` (128 L) — search input + Card de filtros avanzados.
-- `components/features/designs/designs-table.tsx` (322 L) — Card con tabla, columnas con sort, badges de urgencia, acciones (Drive/Edit/Delete) y controles de paginación.
-- Shell page.tsx (275 L) — orquesta auth, SWR, dialogos y conecta filters→items→table.
-
-Refactor incidental: `filteredItems` ahora es un `useMemo` (antes era `localItems.filter(...)` ejecutándose en cada render).
-
-### `settings-dialog.tsx` ✅ (524 → 156 líneas)
-
-Descompuesto en:
-- `lib/utils/notification-preferences.ts` (80 L) — tipos `NotificationPreferences`, `NotificationPreferencesDb` + `dbToUi`/`uiToDb` + `DEFAULT_NOTIFICATION_PREFERENCES`.
-- `lib/hooks/use-user-preferences.ts` (168 L) — load/save/togglePreference/uploadAvatar; orquesta supabase + localStorage.
-- `components/features/account/account-tab.tsx` (106 L) — avatar uploader + name + email + role.
-- `components/features/account/notifications-tab.tsx` (92 L) — grid 3 cols × 4 filas, refactorizado a `EVENT_ROWS.map(...)` (antes 4 bloques duplicados).
-- `components/features/account/appearance-tab.tsx` (43 L) — selector de defaultView.
-- Shell `settings-dialog.tsx` (156 L) — solo Dialog + Tabs + AnimatePresence + footer.
-
-Refactor incidental: las 4 filas de notificaciones eran 4 bloques copy-paste; ahora viven en una constante `EVENT_ROWS` y el JSX las mapea (~30 líneas → ~17).
-
-**Criterios de éxito**:
-- Ningún fichero >300 líneas. ✅ Cumplido en create-design-dialog (max 329 en bulk, justificado por complejidad de tabla bulk-edit).
-- Ningún componente con >5 useState.
-- Lógica de paginación/filtrado en hooks, no en pages.
+- [x] Instalado `@radix-ui/react-tooltip` (dep nueva).
+- [x] Creadas primitivas: `lib/hooks/use-mobile.ts`, `components/ui/tooltip.tsx`, `components/ui/sidebar.tsx` (~470L con `SidebarProvider`, `Sidebar`, `SidebarHeader/Content/Footer/Group/Menu/MenuItem/MenuButton/Inset`, `useSidebar`, `SidebarTrigger`, `SidebarRail`).
+- [x] Tokens migrados a naming shadcn estándar: `--sidebar-background`, `--sidebar-foreground`, `--sidebar-primary` (active), `--sidebar-primary-foreground`, `--sidebar-accent` (hover), `--sidebar-accent-foreground`, `--sidebar-border`, `--sidebar-ring`.
+- [x] Tailwind config con estructura `sidebar.{primary,accent}.foreground`.
+- [x] Reescrito `components/layout/sidebar.tsx` como `<AppSidebar>` componiendo primitivas (50L vs 127L original).
+- [x] Reescrito `components/layout/app-layout.tsx` con `<SidebarProvider>` + `<SidebarInset>`. Eliminada lógica `fixed`+`ml-64`/`ml-20` manual.
+- [x] Eliminado render duplicado mobile — shadcn lo gestiona internamente con Sheet drawer.
+- [x] Cada NavItem permite `matcher` custom (default = exact + startsWith), elimina hardcode `/inicio`.
+- [x] Sidebar collapsible="icon" (mantiene icons en collapsed, no offcanvas).
+- [x] Keyboard shortcut Cmd/Ctrl+B integrado vía `SidebarProvider`.
+- [x] `SidebarLogo` adaptado a `useSidebar()` en lugar de props.
+- [x] `sidebar-skeleton.tsx` actualizado a token nuevo (`bg-sidebar-accent`).
+- [x] Type-check + lint limpios. Pages /inicio y /login devuelven 200 OK.
 
 ---
 
-## Plan post-cimientos (estética / lavado de cara real)
+### Fase 2 — Tokens hardcoded en feature components ✅ HECHO (2026-04-30)
 
-### Pendiente de decidir con el usuario
-1. **Tipografía**: ¿Söhne también en body o pareja Söhne+otra? Actualmente `--font-sans` es Helvetica.
-2. **Modelo de estados**: ¿añadir IN_PROGRESS y/o REVIEW al workflow de diseños? Implica migración SQL + UI nueva. Decisión abierta.
-3. **Scope visual**: ¿solo dashboard+designs+my-week, o todo el shell, o solo identidad?
-
-### Frentes posibles (orden por impacto)
-1. **Auth layout** (la peor pantalla anti-patterns): rediseñar el panel derecho con identidad PH Sport real (foto/textura deportiva, logo, microcopy de marca).
-2. **Dashboard rework**: bajar densidad. Una pregunta principal por rol ("¿qué necesito hacer hoy?") en vez de 4 KPIs + alertas + carga apilados.
-3. **Designs table**: reducir columnas, dar más jerarquía. Considerar vista "tarjetas" como alternativa.
-4. **My-week**: agrupación visual por urgencia (hoy / esta semana / siguiente) en vez de lista plana.
-5. **Componentes con identidad** (no shadcn-genérico): KpiCard editorial, Card con textura, Badge con peso visual.
-6. **Eficiencia**: cmd+K palette, atajos de status, soft-delete con undo en toast.
-
-### Issues de UX detectados (referencia)
-- 2 estados (BACKLOG/DELIVERED) → demasiado pocos para flujo real.
-- Sin undo en delete/status change.
-- Tres patrones distintos para "panel lateral" (Sheet, Dialog, inline).
-- Cero atajos de teclado.
-- Alta densidad en `/dashboard` (4 KPI cards + alertas + tabla).
-- "BACKLOG" expuesto al usuario es jerga.
-- Empty states sin onboarding.
+- [x] `components/ui/table.tsx` — `text-gray-*` → `text-muted-foreground`/`text-foreground`, `border-gray-*` → `border-border`, hover/selected → `bg-muted`
+- [x] `components/features/designs/design-detail-sheet.tsx` — todos los `text-gray-500/900/100`, `dark:text-gray-*`, `border-gray-100/dark:border-white/10` migrados a `text-foreground`/`text-muted-foreground`/`border-border`
+- [x] `components/features/designs/dialogs/design-form-bulk.tsx` — bordes y hovers migrados a tokens
+- [x] `components/skeletons/design-detail-skeleton.tsx` — borders migrados a `border-border`
+- [x] `components/features/account/account-tab.tsx` — `bg-black/40` y `text-white` **mantenidos** (overlay de avatar editable, contextualmente correcto)
+- [x] `app/(auth)/layout.tsx` — `text-white`/`bg-white/10` **mantenidos** (texto sobre panel branding dorado, semánticamente OK)
+- [x] `components/ui/sheet.tsx`/`dialog.tsx` — `bg-black/50` overlay backdrops **mantenidos** (estándar shadcn, veil oscuro sobre cualquier color)
+- [x] Type-check + lint limpios.
 
 ---
 
-## Decisiones tomadas
+### Fase 3 — Logger consistente ✅ HECHO (2026-04-30)
 
-| Fecha | Decisión | Razón |
-|---|---|---|
-| 2026-04-26 | Ola 1: usar click-outside nativo de Radix en Dialog | El hack de Escape global cerraba todos los popovers |
-| 2026-04-26 | Ola 1: redefinir "Bloqueados" como BACKLOG sin mov >48h | Los estados antiguos no existen |
-| 2026-04-26 | Ola 2.5: quitar border-l-[3px] del sidebar activo | Anti-patrón AI-slop |
-| 2026-04-26 | Olas 2-3: tokenizar todo, no solo light mode | Cohesión + futura facilidad para temas |
-| 2026-04-27 | Cimientos antes que estética | Sin base sólida, cada cambio rompe N cosas |
-| 2026-04-27 | No definir tokens en abstracto | Las primitivas destilan los tokens necesarios |
-| 2026-04-27 | Empezar Fase 2 por PageContainer/Header/DashboardPage | Más usado, riesgo bajo, valida el approach |
-| 2026-04-27 | Fase 2 cerrada: 6 pages + 6 skeletons migrados | type-check/lint/build limpios; `/communications/[designId]` y 2 skeletons no-page-level se quedan fuera |
-| 2026-04-27 | Fase 4 paso 1 cerrado: create-design-dialog 825 → 281 L | 5 pasos por subextracción (helpers → single → bulk → hook submit → cleanup); type-check/lint limpios entre cada paso |
-| 2026-04-27 | Fase 4 paso 2 cerrado: designs/page.tsx 644 → 275 L | Hooks `useDesignsFilters` + `useDesignsTable`, componentes `DesignsFilters` + `DesignsTable`. `filteredItems` ahora memoizado |
-| 2026-04-27 | Fase 4 paso 3 cerrado: settings-dialog 524 → 156 L | Util `notification-preferences` + hook `useUserPreferences` + 3 tabs (Account/Notifications/Appearance). Notifications refactorizado de 4 bloques copy-paste a `EVENT_ROWS.map` |
-| 2026-04-27 | Fase 4 completa: 3/3 mega-componentes descompuestos | Ningún fichero >329 L; los hooks/utils ahora son reutilizables para futuras tablas/dialogs |
+- [x] `lib/auth/auth-context.tsx` — 10 `console.*` migrados a `logger.log`/`logger.error`/`logger.warn`
+- [x] `lib/supabase/middleware.ts` — `console.error` → `logger.serverError` (server-side, debe llegar a logs prod)
+- [x] `lib/hooks/use-user-preferences.ts` — 2 `console.error` → `logger.error`
+- [x] `lib/hooks/use-notifications.ts` — 5 `console.error` → `logger.error`
+- [x] `app/(auth)/invite/[token]/page.tsx` — 1 `console.error` → `logger.error`
+- [x] `components/invitations/create-invitation-dialog.tsx` — 1 `console.error` → `logger.error`
+- [x] `lib/config.ts` — 1 `console.error` → `logger.error`
+- [x] Type-check + lint limpios. 0 `console.*` directos en código frontend (`logger.ts` y `scripts/` son intencionales).
+- [ ] (opcional, no bloqueante) ESLint rule `no-console` con allowlist — backlog
 
 ---
 
-## Siguiente paso concreto al retomar
+### Fase 4 — Páginas pendientes de descomponer ✅ HECHO (2026-04-30)
 
-**Cimientos terminados.** Fases 1+2+4 cerradas; Fase 3 (tokens) la dejamos para cuando una primitiva real los pida.
+- [x] **`app/(auth)/*`** — 5 primitivas extraídas en `components/features/auth/*`: `AuthHeading`, `AuthError`, `AuthSuccess`, `AuthSubmitButton`, `PasswordInput`. Pages reducidas: login 278L→198L, reset 168L→121L, invite 277L→235L.
+- [x] **`mi-semana/page.tsx`** 362L → 145L (-60%). Extraídas: `<UrgencyBadge>`, `<DesignCard>`, `<DeliveredSection>`, hook `useMyWeekData`.
+- [x] **`ajustes/usuarios/page.tsx`** 272L → 56L (-80%). Extraídas: `<UsersList>`, `<InvitationsCard>` con `getInvitationStatus` interno.
+- [x] **`<DetailSheet>` primitiva común** — **decisión informada: NO extraer**. Tras releer ambos sheets, son estructuralmente distintos (uno fetcha async + estados loading/error/content; otro recibe prop + lista hijos + sub-sheet anidado). Lo único común es shadcn `<Sheet>` shell que ya es primitiva. DRY mal aplicado.
+- [x] Type-check + lint limpios.
 
-Validar visualmente las descomposiciones de hoy antes de pasar a estética:
-- `/designs`: filtrar, ordenar, paginar, buscar, abrir detalle, editar, eliminar.
-- `Settings dialog` (avatar arriba a la derecha → Configuración): los 3 tabs (Cuenta, Notificaciones, Apariencia), subir avatar, cambiar nombre, togglear switches, cambiar vista predeterminada, guardar.
-- `Crear/Editar diseño` (modo single + bulk).
+---
 
-Una vez validado, opciones:
+### Fase 5 — Resto API hardening + SWR config ✅ HECHO (2026-04-30)
 
-**A.** Comenzar fase estética. Frentes propuestos por orden de impacto (ver más arriba):
-1. Auth layout (peor pantalla anti-patterns).
-2. Dashboard rework (bajar densidad).
-3. Designs table simplificación.
-4. My-week con agrupación por urgencia.
+- [x] `lib/utils/api-fetcher.ts` con `apiFetcher<T>(url)` y variante `designsFetcher<T>(url)` que parsea `{ items: T[] }` directamente. Clase `ApiError` con `status`.
+- [x] `SWRProvider` configurado con `fetcher: apiFetcher` global. Defaults SWR mantenidos (revalidateOnFocus, errorRetryCount=2, dedupingInterval=5s).
+- [x] 3 hooks migrados a `designsFetcher`: `use-dashboard.ts`, `use-designs.ts`, `use-my-week.ts`. Eliminado el `const fetcher = async (url) => {...}` duplicado en cada uno.
+- [x] `use-team-data.ts` y `use-users-data.ts` mantienen sus fetchers propios (acceden directo a Supabase con keys complejas, no /api/*).
+- [x] Errores propagados desde server con mensaje (ya hecho en Fase 0.5 con `mapError`); ahora también desde fetcher de cliente con `ApiError.status`.
+- [x] Type-check + lint limpios.
 
-**B.** Fase 3 (tokens) en abstracto — recomendado solo si A va a destilar tokens necesarios; si no, saltar a A.
+---
 
-**C.** Empezar a hablar de decisiones abiertas: tipografía body, modelo de estados (IN_PROGRESS/REVIEW), workflow.
+### Fase 6 — A11y pass ✅ HECHO (2026-04-30)
+
+- [x] **Skip link** al `#main-content` añadido en AppLayout, visible al focus, sr-only por defecto.
+- [x] **`aria-current="page"`** en items activos de la sidebar.
+- [x] **`aria-label` dinámico** en triggers icon-only:
+  - ThemeToggle: "Cambiar a modo claro/oscuro" (según estado)
+  - NotificationsDropdown: "Notificaciones (N sin leer)" (con conteo)
+  - UserMenu: "Menú de usuario — {nombre}"
+  - Equipo prev/next week buttons
+  - InvitationsCard copy/delete
+  - DesignerDetailSheet edit/Drive
+  - CreateInvitationDialog copy
+- [x] **WCAG AA contrastes verificados** (cálculo HSL → RGB → luminancia → ratio):
+  - Ajustado `--status-warning` light: `38 92% 50%` → `38 92% 32%` (2.01 → 4.56)
+  - Ajustado `--status-success` light: `142 64% 38%` → `142 64% 28%` (3.22 → 5.42)
+  - Ajustado `--status-info` light: `217 80% 52%` → `217 80% 42%` (para coherencia)
+  - Ajustado `--destructive` dark: `0 65% 52%` → `0 75% 62%` (4.32 → 5.15)
+  - Verificados sidebar foreground/active: 15+ (AAA)
+  - Verificado primary/primary-foreground light: 7.67 (AAA, ya en Fase 0)
+- [x] Type-check + lint limpios.
+- [ ] (opcional, no bloqueante) Audit runtime con axe-core en Playwright — backlog (browser MCP bloqueado en sesión actual)
+
+---
+
+### Fase 7 — Estética final (2-3 días)
+
+Solo después de cimientos sólidos. Iteración rápida, retoques no estructurales.
+
+- [ ] Pulido visual sidebar shadcn
+- [ ] Dashboard charcoal authority pulido (admin + designer)
+- [ ] `/disenos` con vista Lista + Calendario (tabs)
+- [ ] Replicar lenguaje en `/mi-semana`, `/equipo`, `/ajustes`
+- [ ] Mobile pass (drawer, listas card vs tablas, bulk-create desktop-only)
+- [ ] Empty states + error states pulidos
+- [ ] Saludos rotativos de auth context (ya hecho en `lib/utils/greeting.ts`)
+
+---
+
+### Fuera de alcance (de momento)
+
+- DB migrations / RLS policies (patrimonio histórico)
+- Edge functions (`supabase/functions/*`) — patches mínimos solo si rompe algo
+- Tests E2E o unit — no hay infra; fase aparte cuando se decida
+- Performance profiling — solo si surge queja
+- I18n — proyecto mono-idioma (es-ES)
+- Feature dev account oculto — backlog separado (1-2h cuando se llegue)
+
+---
+
+## Estado de ejecución
+
+### Hecho (no commiteado todavía)
+
+- Limpieza `/communications` + sistema de comentarios (Fase A previa)
+- Rutas español (`/inicio`, `/disenos`, `/mi-semana`, `/equipo`, `/ajustes`) + redirects 308 desde URLs antiguas en `next.config.js`
+- Tipografía Geist + JetBrains Mono (`app/layout.tsx`, `globals.css`, `tailwind.config.ts`)
+- KPI/eyebrows con clase `mono` para dotted zero
+- Iteraciones varias de tokens sidebar (todas insatisfactorias — definitivo es shadcn migration)
+- Dashboards admin + designer reescritos con bloques nuevos (Próximas entregas, Compañeros, Próximos vencimientos)
+- Audit estructural completo (`docs/audit-estructural.md`)
+- Mini-audit complementario (auth, API, hooks, services)
+
+### Próximo paso al retomar
+
+**Arrancar Fase 0** — Cimientos design system. Es la base sin la cual todo lo demás chirría.
+
+---
+
+## Cómo continuar (instrucciones para futuras sesiones)
+
+1. Lee este `refactor-plan.md`.
+2. Lee `audit-estructural.md` para los hallazgos completos.
+3. Identifica la fase pendiente más antigua (`[ ]` sin marcar).
+4. Antes de ejecutar, recuerda al user qué fase toca y por qué.
+5. Después de cada fase: type-check + lint, marcar `[x]`, actualizar este doc.
+6. Estética solo en Fase 7. Cualquier "esto se ve mal" antes de Fase 7 → diagnóstico estructural primero.

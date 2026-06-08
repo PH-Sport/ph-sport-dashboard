@@ -139,7 +139,7 @@ export function DesignFormBulk({
                   const isExpanded = expandedRowIds.has(row.id);
 
                   const rowClass = cn(
-                    'border-b border-gray-300/50 dark:border-gray-700/50 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-800/30',
+                    'border-b border-border/50 transition-colors hover:bg-muted/50',
                     incomplete && 'bg-amber-500/5'
                   );
 
@@ -253,7 +253,7 @@ export function DesignFormBulk({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
-                      className="border-b border-gray-300/50 bg-muted/30 dark:border-gray-700/50"
+                      className="border-b border-border/50 bg-muted/30"
                     >
                       <td colSpan={8} className="p-0 align-top">
                         <motion.div

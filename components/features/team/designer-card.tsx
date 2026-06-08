@@ -57,7 +57,7 @@ export function DesignerCard({ designer, onClick }: DesignerCardProps) {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Entregados:</span>
-                <span className="font-medium text-[hsl(var(--status-success))]">{delivered}</span>
+                <span className="font-medium text-status-success">{delivered}</span>
               </div>
             </div>
 

@@ -3,81 +3,112 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+    PH Sport — Charcoal Authority
+    Light: cream warm body, sidebar cream casi-blanco, item activo charcoal invertido.
+    Dark: charcoal warm body (no negro puro), sidebar más oscura que el body.
+    Acento dorado Champions reservado: CTAs, focus, item activo, badges premium.
+  */
   :root {
-    /* PH Sport — light: negro de marca sobre blanco, acento dorado */
-    --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* Tipografía — Geist (display + body) + JetBrains Mono (datos, dotted zero) */
+    --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+    --font-mono: var(--font-mono-base), ui-monospace, SFMono-Regular, monospace;
 
-    --background: 0 0% 100%;
-    --foreground: 216 16% 6%;
+    /* Body — light cream (warm), charcoal text */
+    --background: 36 24% 97%;
+    --foreground: 220 14% 11%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 216 16% 6%;
+    /* Surfaces — card tintada hacia warm (no blanco puro) para coherencia con body */
+    --card: 36 30% 99%;
+    --card-foreground: 220 14% 11%;
 
-    --sidebar: 40 10% 97%;
-    --sidebar-foreground: 216 16% 6%;
+    --popover: 36 30% 99%;
+    --popover-foreground: 220 14% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 216 16% 6%;
+    /* Panel flotante — superficies elevadas (sidebar, command palette, etc).
+       Light: charcoal authority panel (decisión de marca: panel oscuro sobre
+       cream body, alto contraste deliberado). Pill activo en cream. */
+    --panel: 220 14% 9%;
+    --panel-foreground: 36 12% 92%;
+    --panel-active: 36 24% 97%;                /* pill activo cream */
+    --panel-active-foreground: 220 14% 11%;
+    --panel-hover: 220 12% 14%;                /* hover sutil sobre el panel */
+    --panel-border: 220 12% 16%;
 
-    --primary: 43 60% 60%;
-    --primary-foreground: 216 16% 6%;
+    /* Acento Champions — dorado más saturado y un punto más cálido */
+    --primary: 41 70% 52%;
+    --primary-foreground: 220 14% 11%;
 
-    --secondary: 40 8% 96%;
-    --secondary-foreground: 216 16% 6%;
+    --secondary: 220 14% 95%;
+    --secondary-foreground: 220 14% 11%;
 
-    --muted: 40 6% 94%;
-    --muted-foreground: 216 10% 40%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 40 10% 92%;
-    --accent-foreground: 216 16% 6%;
+    --accent: 220 14% 94%;
+    --accent-foreground: 220 14% 11%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 8% 88%;
-    --input: 40 8% 88%;
-    --ring: 43 60% 60%;
+    --border: 220 14% 91%;
+    --input: 220 14% 91%;
+    --ring: 41 70% 52%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --status-success: 142 71% 45%;
-    --status-warning: 45 93% 47%;
-    --status-error: 0 84% 60%;
-    --status-info: 217 91% 60%;
+    /* Estados (verificados WCAG AA contra --background light) */
+    --status-success: 142 64% 28%;
+    --status-warning: 38 92% 32%;
+    --status-error: 0 72% 50%;
+    --status-info: 217 80% 42%;
   }
 
   .dark {
-    /* Oscuro: base #0d0f12, superficies escalonadas, acento dorado */
-    --background: 216 16% 6%;
-    --foreground: 0 0% 98%;
+    /* Body charcoal warm, no negro puro */
+    --background: 220 14% 8%;
+    --foreground: 36 12% 96%;
 
-    --card: 216 14% 11%;
-    --card-foreground: 0 0% 98%;
+    --card: 220 13% 12%;
+    --card-foreground: 36 12% 96%;
 
-    --sidebar: 216 15% 8%;
-    --sidebar-foreground: 0 0% 98%;
+    --popover: 220 13% 13%;
+    --popover-foreground: 36 12% 96%;
 
-    --popover: 216 14% 11%;
-    --popover-foreground: 0 0% 98%;
+    /* Panel flotante dark — superficie ELEVADA (más clara que el body).
+       Lógica física: lo flotante recibe más luz que la superficie sobre la
+       que descansa. Pill activo cream invierte el panel. */
+    --panel: 220 12% 12%;                      /* > --background (8%) — elevada */
+    --panel-foreground: 36 12% 92%;
+    --panel-active: 36 18% 94%;                /* pill cream cálido */
+    --panel-active-foreground: 220 14% 8%;
+    --panel-hover: 220 12% 16%;
+    --panel-border: 220 12% 18%;
 
-    --primary: 43 60% 60%;
-    --primary-foreground: 216 16% 6%;
+    /* Acento dorado igual de visible en charcoal */
+    --primary: 41 70% 56%;
+    --primary-foreground: 220 14% 8%;
 
-    --secondary: 216 12% 14%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 12% 15%;
+    --secondary-foreground: 36 12% 96%;
 
-    --muted: 216 12% 16%;
-    --muted-foreground: 216 8% 58%;
+    --muted: 220 12% 14%;
+    --muted-foreground: 220 8% 62%;
 
-    --accent: 216 12% 16%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 220 12% 16%;
+    --accent-foreground: 36 12% 96%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 75% 62%;
+    --destructive-foreground: 36 12% 96%;
 
-    --border: 216 10% 18%;
-    --input: 216 10% 18%;
-    --ring: 43 60% 60%;
+    --border: 220 12% 17%;
+    --input: 220 12% 17%;
+    --ring: 41 70% 56%;
+
+    --status-success: 142 56% 50%;
+    --status-warning: 38 92% 56%;
+    --status-error: 0 65% 56%;
+    --status-info: 217 80% 60%;
   }
 }
 
@@ -87,18 +118,25 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
+    letter-spacing: -0.015em;
+  }
+  /* Numbers tabular by default — KPIs, stats and data tables align cleanly */
+  table, .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Mono accent — datos, IDs, deadlines, eyebrows técnicos.
+     JetBrains Mono lleva dotted zero por defecto; no activar la feature `zero`
+     porque convierte el 0 en slashed. */
+  .mono {
+    font-family: var(--font-mono);
   }
 }
 
-/* Scrollbar */
+/* Scrollbar fina */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;

@@ -32,7 +32,7 @@ export default function TeamPage() {
   // Redireccionar si no es admin
   useEffect(() => {
     if (!authLoading && profile && profile.role !== 'ADMIN') {
-      router.replace('/my-week');
+      router.replace('/mi-semana');
     }
   }, [authLoading, profile, router]);
 
@@ -65,7 +65,7 @@ export default function TeamPage() {
       skeleton={<TeamSkeleton />}
       actions={
         <>
-          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+          <Button variant="outline" size="icon" onClick={handlePrevWeek} aria-label="Semana anterior">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
@@ -75,7 +75,7 @@ export default function TeamPage() {
           >
             {weekLabel}
           </Button>
-          <Button variant="outline" size="icon" onClick={handleNextWeek}>
+          <Button variant="outline" size="icon" onClick={handleNextWeek} aria-label="Semana siguiente">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </>

@@ -124,7 +124,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
           bodyMessage:
             notification.message || `Se te han asignado ${assignmentCount} nuevos diseños.`,
           ctaText: "Ver mis asignaciones",
-          ctaUrl: normalizeLink(notification.link, "/my-week"),
+          ctaUrl: normalizeLink(notification.link, "/mi-semana"),
         };
       }
 
@@ -136,7 +136,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
           bodyMessage:
             notification.message || `Ya tienes disponible el diseño "${designTitle}".`,
           ctaText: "Ver diseño",
-          ctaUrl: normalizeLink(notification.link, "/my-week"),
+          ctaUrl: normalizeLink(notification.link, "/mi-semana"),
         };
       }
 
@@ -146,7 +146,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
         headline: "Tienes una nueva asignación",
         bodyMessage: notification.message || "Revisa tu panel para ver los detalles.",
         ctaText: "Ver asignación",
-        ctaUrl: normalizeLink(notification.link, "/my-week"),
+        ctaUrl: normalizeLink(notification.link, "/mi-semana"),
       };
     }
     case "comment":
@@ -168,7 +168,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
           notification.message ||
           "Hay un diseño con deadline próximo que requiere tu atención.",
         ctaText: "Ver detalles",
-        ctaUrl: normalizeLink(notification.link, "/my-week"),
+        ctaUrl: normalizeLink(notification.link, "/mi-semana"),
       };
     default:
       return {
@@ -177,7 +177,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
         headline: "Tienes una nueva notificación",
         bodyMessage: notification.message || notification.title,
         ctaText: "Ir al dashboard",
-        ctaUrl: normalizeLink(notification.link, "/dashboard"),
+        ctaUrl: normalizeLink(notification.link, "/inicio"),
       };
   }
 };

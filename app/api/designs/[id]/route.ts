@@ -1,28 +1,32 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { updateDesignSchema } from '@/lib/api/schemas';
+import {
+  validationErrorResponse,
+  internalErrorResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+} from '@/lib/api/errors';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  
+  if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
+
   const supabase = await createClient();
   const { data, error: userError } = await supabase.auth.getUser();
-  if (userError || !data.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  
+  if (userError || !data.user) return unauthorizedResponse();
+
   const { data: design, error } = await supabase
     .from('designs')
     .select('*')
     .eq('id', id)
     .single();
-  
-  if (error || !design) {
-    return NextResponse.json({ error: 'Design not found' }, { status: 404 });
-  }
+
+  if (error || !design) return notFoundResponse('Diseño');
   return NextResponse.json(design);
 }
 
@@ -30,28 +34,19 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const reqId = crypto.randomUUID();
   const { id } = await params;
-  const body = await request.json().catch(() => ({}));
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  
+  if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
+
+  const rawBody = await request.json().catch(() => ({}));
+  const parsed = updateDesignSchema.safeParse(rawBody);
+  if (!parsed.success) return validationErrorResponse(parsed.error, reqId);
+  const body = parsed.data;
+
   const supabase = await createClient();
-  
-  // Obtener usuario actual
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const hasStatusInBody = Object.prototype.hasOwnProperty.call(body, 'status');
-  const hasDesignerInBody = Object.prototype.hasOwnProperty.call(body, 'designer_id');
-
-  // Evita operaciones ambiguas que mezclen dos intenciones distintas.
-  if (hasStatusInBody && hasDesignerInBody) {
-    return NextResponse.json(
-      { error: 'Ambiguous payload: status and designer_id cannot be updated together' },
-      { status: 400 }
-    );
-  }
+  if (userError || !user) return unauthorizedResponse();
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -59,55 +54,34 @@ export async function PUT(
     .eq('id', user.id)
     .single();
 
-  if (profileError) {
-    return NextResponse.json({ error: 'Failed to verify role' }, { status: 500 });
+  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
+
+  // Solo admin puede reasignar diseñador.
+  if (body.designer_id !== undefined && profile?.role !== 'ADMIN') {
+    return forbiddenResponse();
   }
 
-  if (hasDesignerInBody && profile?.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  // Obtener el diseño actual ANTES de actualizarlo (para comparar designer_id)
-  const { data: originalDesign } = await supabase
-    .from('designs')
-    .select('designer_id, title, status')
-    .eq('id', id)
-    .single();
-  
-  const updateData = { ...body };
-
-  if (hasStatusInBody) {
-    // Compatibilidad temporal: seguimos aceptando status por esta ruta.
-    console.warn('[DEPRECATED] PUT /api/designs/:id status update. Use /api/designs/:id/status');
-    if (body.status === 'DELIVERED') {
-      updateData.delivered_at = new Date().toISOString();
-    } else if (originalDesign?.status === 'DELIVERED') {
-      updateData.delivered_at = null;
-    }
-  }
-
-  // Solo procesar designer_id si viene explícitamente en la request
-  if (hasDesignerInBody) {
-    let designerId = body.designer_id;
-    if (designerId === 'auto' || designerId === null || designerId === undefined) {
+  // Whitelist explícita: solo se modifican los campos permitidos por el schema.
+  // Resolver designer_id 'auto' a un id real antes de enviar a DB.
+  const updateData: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(body)) {
+    if (value === undefined) continue;
+    if (key === 'designer_id' && value === 'auto') {
       const { assignDesignerAutomatically } = await import('@/lib/services/designs/assignment');
-      designerId = await assignDesignerAutomatically(id); // Excluir el diseño actual del conteo
+      updateData.designer_id = await assignDesignerAutomatically(id);
+    } else {
+      updateData[key] = value;
     }
-
-    updateData.designer_id = designerId;
   }
-  
+
   const { data: updated, error } = await supabase
     .from('designs')
     .update(updateData)
     .eq('id', id)
     .select()
     .single();
-  
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
 
+  if (error) return internalErrorResponse(error, 'design update', reqId);
   return NextResponse.json(updated);
 }
 
@@ -115,16 +89,14 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const reqId = crypto.randomUUID();
   const { id } = await params;
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  
+  if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
+
   const supabase = await createClient();
-  
-  // Verificar que hay usuario autenticado
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (userError || !user) return unauthorizedResponse();
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -132,21 +104,11 @@ export async function DELETE(
     .eq('id', user.id)
     .single();
 
-  if (profileError) {
-    return NextResponse.json({ error: 'Failed to verify role' }, { status: 500 });
-  }
+  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
+  if (profile?.role !== 'ADMIN') return forbiddenResponse();
 
-  if (profile?.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-  
-  const { error } = await supabase
-    .from('designs')
-    .delete()
-    .eq('id', id);
-  
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-  return NextResponse.json({ ok: true, message: 'Design deleted successfully' });
+  const { error } = await supabase.from('designs').delete().eq('id', id);
+  if (error) return internalErrorResponse(error, 'design delete', reqId);
+
+  return NextResponse.json({ ok: true, message: 'Diseño eliminado' });
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { logger } from '@/lib/utils/logger';
 import {
   Dialog,
   DialogContent,
@@ -70,7 +71,7 @@ export function CreateInvitationDialog({
 
       if (error) {
         toast.error('Error al crear la invitación');
-        console.error('Error creating invitation:', error);
+        logger.error('Error creating invitation:', error);
         setCreating(false);
         return;
       }
@@ -149,9 +150,10 @@ export function CreateInvitationDialog({
                 variant="outline"
                 size="icon"
                 onClick={copyToClipboard}
+                aria-label={copied ? 'Link copiado' : 'Copiar link de invitación'}
               >
                 {copied ? (
-                  <CheckCircle className="h-4 w-4 text-[hsl(var(--status-success))]" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}

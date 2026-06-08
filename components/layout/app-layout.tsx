@@ -1,91 +1,64 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { Sidebar } from './sidebar';
-import { Header } from './header';
-import { SidebarSkeleton } from '@/components/skeletons/sidebar-skeleton';
 import { useAuth } from '@/lib/auth/auth-context';
+import { AppSidebar, SidebarProvider, useSidebar } from './app-sidebar';
+import { Header } from './header';
+import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const { status } = useAuth();
   const router = useRouter();
 
-  const authReady = status === 'AUTHENTICATED';
-
   useEffect(() => {
-    if (status === 'UNAUTHENTICATED') {
-      router.push('/login');
-    }
+    if (status === 'UNAUTHENTICATED') router.push('/login');
   }, [status, router]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved) {
-      try {
-        setSidebarCollapsed(JSON.parse(saved));
-      } catch {
-        setSidebarCollapsed(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
-  }, [sidebarCollapsed]);
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed((prev) => !prev);
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen((prev) => !prev);
-  };
+  if (status !== 'AUTHENTICATED') {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-background">
+        <div
+          className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground"
+          aria-label="Cargando"
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {authReady ? (
-        <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-      ) : (
-        <SidebarSkeleton collapsed={sidebarCollapsed} />
-      )}
-
-      {mobileMenuOpen && authReady && (
-        <>
-          <div
-            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm animate-in fade-in md:hidden"
-            onClick={toggleMobileMenu}
-          />
-          <div className="fixed left-0 top-0 z-40 md:hidden">
-            <Sidebar
-              collapsed={false}
-              onToggle={toggleMobileMenu}
-              onClose={toggleMobileMenu}
-              overlay
-            />
-          </div>
-        </>
-      )}
-
-      <div
-        className={cn(
-          'flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out',
-          !sidebarCollapsed ? 'md:ml-64' : 'md:ml-20'
-        )}
+    <SidebarProvider>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
-        <Header onMenuClick={toggleMobileMenu} />
-        <main className="flex-1 overflow-y-auto animate-page-enter">{children}</main>
-      </div>
+        Saltar al contenido principal
+      </a>
+      <AppSidebar />
+      <MainArea>{children}</MainArea>
+    </SidebarProvider>
+  );
+}
+
+function MainArea({ children }: { children: React.ReactNode }) {
+  const { isMobile, layout, setMobileOpen } = useSidebar();
+  return (
+    <div
+      style={{
+        paddingLeft: isMobile ? 0 : `${layout.contentPadLeftRem}rem`,
+      }}
+      className={cn(
+        'min-h-svh transition-[padding] duration-200 ease-out'
+      )}
+    >
+      <Header onMenuClick={() => setMobileOpen(true)} />
+      <main id="main-content" className="animate-page-enter">
+        {children}
+      </main>
     </div>
   );
 }

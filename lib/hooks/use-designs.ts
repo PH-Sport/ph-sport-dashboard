@@ -2,6 +2,7 @@ import useSWR from 'swr';
 import { format } from 'date-fns';
 import type { Design } from '@/lib/types/design';
 import type { DesignStatus } from '@/lib/types/filters';
+import { designsFetcher } from '@/lib/utils/api-fetcher';
 
 interface UseDesignsParams {
   weekStart: Date | undefined;
@@ -17,22 +18,12 @@ interface UseDesignsReturn {
   mutate: () => void;
 }
 
-const fetcher = async (url: string): Promise<Design[]> => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Error al cargar los diseños');
-  }
-  const data = await response.json();
-  return data.items || [];
-};
-
 export function useDesigns({
   weekStart,
   weekEnd,
   statusFilter = 'all',
   designerFilter = 'all',
 }: UseDesignsParams): UseDesignsReturn {
-  // Build URL only when we have valid dates
   const url =
     weekStart && weekEnd
       ? `/api/designs?${new URLSearchParams({
@@ -43,7 +34,7 @@ export function useDesigns({
         }).toString()}`
       : null;
 
-  const { data, error, isLoading, mutate } = useSWR<Design[]>(url, fetcher);
+  const { data, error, isLoading, mutate } = useSWR<Design[]>(url, designsFetcher);
 
   return {
     items: data ?? [],

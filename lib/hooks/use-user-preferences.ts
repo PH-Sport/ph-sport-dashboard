@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { logger } from '@/lib/utils/logger';
 import {
   type NotificationChannel,
   type NotificationEvent,
@@ -117,7 +118,7 @@ export function useUserPreferences({
       toast.success('Avatar actualizado correctamente');
       window.location.reload();
     } catch (error) {
-      console.error('Error updating avatar:', error);
+      logger.error('Error updating avatar:', error);
       toast.error('Error al actualizar el avatar');
     } finally {
       setUploading(false);
@@ -146,7 +147,7 @@ export function useUserPreferences({
       onSaved();
       window.location.reload();
     } catch (error) {
-      console.error('Error saving settings:', error);
+      logger.error('Error saving settings:', error);
       toast.error('Error al guardar la configuración');
     } finally {
       setSaving(false);

@@ -94,7 +94,7 @@ export function DesignerDetailSheet({
               size="icon"
               className="h-8 w-8"
               onClick={() => handleEditDesign(design)}
-              title="Editar"
+              aria-label="Editar diseño"
             >
               <Edit2 className="h-4 w-4" />
             </Button>
@@ -105,7 +105,12 @@ export function DesignerDetailSheet({
                 className="h-8 w-8"
                 asChild
               >
-                <a href={design.folder_url} target="_blank" rel="noopener noreferrer" title="Abrir carpeta">
+                <a
+                  href={design.folder_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Abrir carpeta en Drive"
+                >
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
@@ -174,7 +179,7 @@ export function DesignerDetailSheet({
             ) : (
               <>
                 {renderSection('Pendientes', backlog, 'text-muted-foreground')}
-                {renderSection('Entregados', delivered, 'text-[hsl(var(--status-success))]')}
+                {renderSection('Entregados', delivered, 'text-status-success')}
               </>
             )}
           </div>

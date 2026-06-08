@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/auth-context';
+import { logger } from '@/lib/utils/logger';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface Notification {
@@ -50,7 +51,7 @@ export function useNotifications() {
         setUnreadCount(count || 0);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      logger.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
     }
@@ -101,7 +102,7 @@ export function useNotifications() {
         .update({ read: true })
         .eq('id', notificationId);
     } catch (error) {
-      console.error('Error marking as read:', error);
+      logger.error('Error marking as read:', error);
       // Revert if error? (Simplification: keep optimistic state for UI responsiveness)
     }
   };
@@ -118,7 +119,7 @@ export function useNotifications() {
         .eq('user_id', user!.id)
         .eq('read', false);
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      logger.error('Error marking all as read:', error);
     }
   };
 
@@ -136,7 +137,7 @@ export function useNotifications() {
         .delete()
         .eq('id', notificationId);
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      logger.error('Error deleting notification:', error);
     }
   };
 
@@ -151,7 +152,7 @@ export function useNotifications() {
         .delete()
         .eq('user_id', user!.id);
     } catch (error) {
-      console.error('Error deleting all notifications:', error);
+      logger.error('Error deleting all notifications:', error);
     }
   };
 

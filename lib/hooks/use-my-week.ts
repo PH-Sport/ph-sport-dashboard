@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useAuth } from '@/lib/auth/auth-context';
 import { getDefaultWeekRange } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
+import { designsFetcher } from '@/lib/utils/api-fetcher';
 
 interface UseMyWeekReturn {
   items: Design[];
@@ -11,20 +12,10 @@ interface UseMyWeekReturn {
   mutate: () => void;
 }
 
-const fetcher = async (url: string): Promise<Design[]> => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Error al cargar las tareas');
-  }
-  const data = await response.json();
-  return data.items || [];
-};
-
 export function useMyWeek(): UseMyWeekReturn {
   const { user, status } = useAuth();
   const { weekStart, weekEnd } = getDefaultWeekRange();
 
-  // Build the URL with query params
   const url = user?.id
     ? `/api/designs?${new URLSearchParams({
         weekStart: format(weekStart, 'yyyy-MM-dd'),
@@ -34,9 +25,8 @@ export function useMyWeek(): UseMyWeekReturn {
     : null;
 
   const { data, error, isLoading, mutate } = useSWR<Design[]>(
-    // Only fetch when authenticated and have user id
     status === 'AUTHENTICATED' && url ? url : null,
-    fetcher
+    designsFetcher
   );
 
   return {

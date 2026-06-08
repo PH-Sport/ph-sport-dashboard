@@ -5,46 +5,56 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const year = new Date().getFullYear();
+
   return (
-    <div className="min-h-screen flex">
-      {/* Left side - Form */}
-      <div className="flex-1 flex flex-col justify-center px-8 py-12 lg:px-16 xl:px-24 bg-background">
-        <div className="w-full max-w-md mx-auto">
-          {/* Form content */}
-          {children}
-        </div>
+    <div className="flex min-h-screen">
+      {/* Form panel — cream warm, form centrado vertical */}
+      <div className="flex flex-1 flex-col justify-center bg-background px-8 py-12 lg:px-16 xl:px-24">
+        <div className="mx-auto w-full max-w-md">{children}</div>
       </div>
 
-      {/* Right side - Branding (hidden on mobile) */}
-      <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-primary via-gold-500 to-gold-700 relative overflow-hidden">
-        {/* Abstract shapes */}
-        <div className="absolute inset-0">
-          {/* Large shape top right */}
-          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
-          {/* Geometric lines */}
-          <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="1"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-          {/* Diagonal accent */}
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-gold-900/50 to-transparent" />
-          {/* Arrow shapes */}
-          <div className="absolute top-1/4 right-10 w-32 h-32 border-2 border-white/20 rotate-45" />
-          <div className="absolute bottom-1/4 left-10 w-24 h-24 border-2 border-white/20 rotate-12" />
-        </div>
+      {/* Brand panel — Charcoal Authority editorial, oculto en mobile */}
+      <aside className="relative hidden overflow-hidden bg-panel text-panel-foreground lg:flex lg:flex-1">
+        {/* Monograma como elemento arquitectónico de fondo (cropado abajo-derecha).
+            Acento dorado al 8% — el "metal cepillado sutil" de la guía de marca. */}
+        <PhSportMark
+          decorative
+          className="pointer-events-none absolute -bottom-16 -right-20 h-[78%] w-auto text-primary/[0.07]"
+        />
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center w-full px-12">
-          <PhSportMark className="h-16 w-auto max-w-[280px] mb-6 text-white" />
-          <p className="text-white/80 text-lg text-center max-w-sm">
-            Gestión de diseños deportivos
-          </p>
+        <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
+          {/* Eyebrow */}
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <span className="mono text-[11px] font-medium uppercase tracking-[0.32em] text-panel-foreground/70">
+              PHSPORT — Career Performance Agency
+            </span>
+          </div>
+
+          {/* Statement editorial — headline + apoyo */}
+          <div className="flex max-w-xl flex-col gap-5">
+            <h2 className="font-heading text-[clamp(2.75rem,5vw,4rem)] font-semibold leading-[0.96] tracking-[-0.02em] text-panel-foreground">
+              Sin ruido.
+              <br />
+              Con intención.
+            </h2>
+            <p className="max-w-sm text-base leading-relaxed text-panel-foreground/65">
+              Cada paso cuenta. Decisiones que duran.
+            </p>
+          </div>
+
+          {/* Footer mono — tagline + año */}
+          <div className="flex items-end justify-between">
+            <span className="mono text-[10px] font-medium uppercase tracking-[0.32em] text-panel-foreground/50">
+              Now. Next. Forever.
+            </span>
+            <span className="mono tabular text-[10px] font-medium uppercase tracking-[0.32em] text-panel-foreground/50">
+              © {year}
+            </span>
+          </div>
         </div>
-      </div>
+      </aside>
     </div>
   );
 }

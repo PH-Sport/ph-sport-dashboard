@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
 
@@ -16,6 +16,14 @@ interface KpiCardProps {
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
 }
 
+const VALUE_TONE: Record<NonNullable<KpiCardProps['variant']>, string> = {
+  default: 'text-foreground',
+  primary: 'text-primary',
+  success: 'text-status-success',
+  warning: 'text-status-warning',
+  danger: 'text-destructive',
+};
+
 export function KpiCard({
   title,
   value,
@@ -25,47 +33,39 @@ export function KpiCard({
   className,
   variant = 'default',
 }: KpiCardProps) {
-  const variantStyles = {
-    default: 'text-primary',
-    primary: 'text-[hsl(var(--status-info))]',
-    success: 'text-[hsl(var(--status-success))]',
-    warning: 'text-[hsl(var(--status-warning))]',
-    danger: 'text-destructive',
-  };
-
   return (
     <Card className={cn(className)}>
-      <CardHeader>
+      <CardContent className="flex flex-col gap-3 p-5">
         <div className="flex items-center justify-between">
-          <CardTitle className={cn('text-sm font-medium', variantStyles[variant])}>
+          <span className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {title}
-          </CardTitle>
-          {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+          </span>
+          {Icon && <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />}
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-4xl font-bold text-primary">{value}</div>
+        <div
+          className={cn(
+            'mono text-[2.75rem] font-semibold leading-none tracking-tight tabular',
+            VALUE_TONE[variant]
+          )}
+        >
+          {value}
+        </div>
         {description && (
-          <p className="text-sm text-muted-foreground mt-2">{description}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
         )}
         {trend && (
-          <div className="mt-2">
-            <p
-              className={cn(
-                'text-xs',
-                trend.isPositive
-                  ? 'text-[hsl(var(--status-success))]'
-                  : 'text-destructive'
-              )}
-            >
-              {trend.isPositive ? '↑' : '↓'} {trend.value} {trend.label}
-            </p>
-          </div>
+          <p
+            className={cn(
+              'text-xs font-medium',
+              trend.isPositive
+                ? 'text-status-success'
+                : 'text-destructive'
+            )}
+          >
+            {trend.isPositive ? '↑' : '↓'} {trend.value} {trend.label}
+          </p>
         )}
       </CardContent>
     </Card>
   );
 }
-
-
-

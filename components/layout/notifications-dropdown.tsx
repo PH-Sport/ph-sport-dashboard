@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Check, MessageSquare, Calendar, AlertCircle, Info, Trash2 } from 'lucide-react';
+import { Bell, Check, Calendar, AlertCircle, Info, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -40,9 +40,8 @@ export function NotificationsDropdown() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'comment': return <MessageSquare className="h-4 w-4 text-[hsl(var(--status-info))]" />;
       case 'assignment': return <Calendar className="h-4 w-4 text-primary" />;
-      case 'deadline': return <AlertCircle className="h-4 w-4 text-[hsl(var(--status-warning))]" />;
+      case 'deadline': return <AlertCircle className="h-4 w-4 text-status-warning" />;
       default: return <Info className="h-4 w-4 text-muted-foreground" />;
     }
   };
@@ -50,12 +49,21 @@ export function NotificationsDropdown() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative text-muted-foreground hover:text-foreground"
+          aria-label={
+            unreadCount > 0
+              ? `Notificaciones (${unreadCount} sin leer)`
+              : 'Notificaciones'
+          }
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+            <span className="absolute right-1.5 top-1.5 flex h-2.5 w-2.5" aria-hidden>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
             </span>
           )}
         </Button>

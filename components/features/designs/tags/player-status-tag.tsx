@@ -24,13 +24,13 @@ export const PLAYER_STATUS_CONFIG = {
     label: 'Duda',
     icon: HelpCircle,
     color:
-      'text-[hsl(var(--status-warning))] bg-[hsl(var(--status-warning)/0.1)] border-[hsl(var(--status-warning)/0.3)]',
+      'text-status-warning bg-status-warning/10 border-status-warning/30',
   },
   last_minute: {
     label: 'Última hora',
     icon: Clock,
     color:
-      'text-[hsl(var(--status-info))] bg-[hsl(var(--status-info)/0.1)] border-[hsl(var(--status-info)/0.3)]',
+      'text-status-info bg-status-info/10 border-status-info/30',
   },
 };
 

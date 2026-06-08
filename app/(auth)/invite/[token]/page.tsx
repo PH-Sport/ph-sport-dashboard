@@ -6,9 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/utils/logger';
+import { AuthHeading } from '@/components/features/auth/auth-heading';
+import { AuthSuccess } from '@/components/features/auth/auth-success';
+import { AuthSubmitButton } from '@/components/features/auth/auth-submit-button';
 
 interface Invitation {
   id: string;
@@ -42,7 +46,7 @@ export default function InvitePage() {
   useEffect(() => {
     const validateToken = async () => {
       const supabase = createClient();
-      
+
       const { data, error: fetchError } = await supabase
         .from('invitations')
         .select('*')
@@ -83,9 +87,8 @@ export default function InvitePage() {
     try {
       const supabase = createClient();
 
-      // FIRST: Validate the invitation is still valid before creating auth user
       const { data: isValid, error: validateError } = await supabase.rpc('validate_invitation', {
-        p_invitation_id: invitation.id
+        p_invitation_id: invitation.id,
       });
 
       if (validateError || !isValid) {
@@ -94,16 +97,11 @@ export default function InvitePage() {
         return;
       }
 
-      // The invitation's role is applied server-side inside use_invitation(),
-      // reading from the invitations table. We never pass role from the client.
+      // El rol se aplica server-side dentro de use_invitation(), nunca se pasa desde el cliente.
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
+        options: { data: { full_name: fullName } },
       });
 
       if (signUpError) {
@@ -122,23 +120,18 @@ export default function InvitePage() {
         return;
       }
 
-      // Use atomic database function to validate and register the invitation use
-      // This MUST succeed for the registration to be considered complete
       const { error: useError } = await supabase.rpc('use_invitation', {
         p_invitation_id: invitation.id,
         p_user_id: authData.user.id,
         p_email: email,
-        p_full_name: fullName
+        p_full_name: fullName,
       });
 
       if (useError) {
-        console.error('Error using invitation:', useError);
-        // The invitation was not valid - show error and abort
-        // Note: The auth user was created but without a valid invitation use,
-        // they won't be able to access the app (profile won't be created properly)
+        logger.error('Error using invitation:', useError);
         toast.error(useError.message || 'Esta invitación ya no es válida');
         setSubmitting(false);
-        return; // CRITICAL: Don't proceed to success
+        return;
       }
 
       setSuccess(true);
@@ -147,7 +140,6 @@ export default function InvitePage() {
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-
     } catch {
       toast.error('Error al crear la cuenta. Intenta de nuevo.');
       setSubmitting(false);
@@ -165,13 +157,11 @@ export default function InvitePage() {
   if (error) {
     return (
       <div className="text-center py-10">
-        <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
           <AlertCircle className="h-8 w-8 text-destructive" />
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">
-          Invitación no válida
-        </h1>
-        <p className="text-muted-foreground mb-6">{error}</p>
+        <h1 className="mb-2 text-2xl font-bold text-foreground">Invitación no válida</h1>
+        <p className="mb-6 text-muted-foreground">{error}</p>
         <Button onClick={() => router.push('/login')} variant="outline">
           Ir al login
         </Button>
@@ -180,28 +170,13 @@ export default function InvitePage() {
   }
 
   if (success) {
-    return (
-      <div className="text-center py-10">
-        <div className="mx-auto w-16 h-16 rounded-full bg-[hsl(var(--status-success)/0.15)] flex items-center justify-center mb-4">
-          <CheckCircle className="h-8 w-8 text-[hsl(var(--status-success))]" />
-        </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">
-          ¡Cuenta creada!
-        </h1>
-        <p className="text-muted-foreground">Redirigiendo al login...</p>
-      </div>
-    );
+    return <AuthSuccess title="¡Cuenta creada!" description="Redirigiendo al login..." />;
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-2">
-        Has sido invitado
-      </h1>
-      <p className="text-muted-foreground mb-4">
-        Crea tu cuenta en PH Sport
-      </p>
-      <div className="mb-8">
+      <AuthHeading title="Has sido invitado" subtitle="Crea tu cuenta en PH Sport" />
+      <div className="mb-8 -mt-4">
         <Badge variant="outline" className="text-sm">
           Rol: {ROLE_LABELS[invitation?.role || 'DESIGNER']}
         </Badge>
@@ -254,21 +229,9 @@ export default function InvitePage() {
           />
         </div>
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          className="w-full h-11"
-          size="lg"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creando cuenta...
-            </>
-          ) : (
-            'Crear Cuenta'
-          )}
-        </Button>
+        <AuthSubmitButton loading={submitting} loadingLabel="Creando cuenta...">
+          Crear Cuenta
+        </AuthSubmitButton>
       </form>
     </div>
   );

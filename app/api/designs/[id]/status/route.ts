@@ -1,29 +1,30 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { updateStatusSchema } from '@/lib/api/schemas';
+import {
+  validationErrorResponse,
+  internalErrorResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+} from '@/lib/api/errors';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const reqId = crypto.randomUUID();
   const { id } = await params;
-  const body = await request.json().catch(() => ({}));
+  if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
 
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  if (!Object.prototype.hasOwnProperty.call(body, 'status')) {
-    return NextResponse.json({ error: 'status is required' }, { status: 400 });
-  }
-  if (Object.prototype.hasOwnProperty.call(body, 'designer_id')) {
-    return NextResponse.json(
-      { error: 'designer_id is not allowed in status endpoint' },
-      { status: 400 }
-    );
-  }
+  const rawBody = await request.json().catch(() => ({}));
+  const parsed = updateStatusSchema.safeParse(rawBody);
+  if (!parsed.success) return validationErrorResponse(parsed.error, reqId);
+  const { status } = parsed.data;
 
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (userError || !user) return unauthorizedResponse();
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -31,9 +32,7 @@ export async function PATCH(
     .eq('id', user.id)
     .single();
 
-  if (profileError) {
-    return NextResponse.json({ error: 'Failed to verify role' }, { status: 500 });
-  }
+  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
 
   const { data: originalDesign, error: originalError } = await supabase
     .from('designs')
@@ -41,18 +40,15 @@ export async function PATCH(
     .eq('id', id)
     .single();
 
-  if (originalError || !originalDesign) {
-    return NextResponse.json({ error: 'Design not found' }, { status: 404 });
-  }
+  if (originalError || !originalDesign) return notFoundResponse('Diseño');
 
-  // Un diseñador solo puede mover el estado de sus propios diseños.
+  // Diseñador solo puede mover sus propios diseños.
   if (profile?.role !== 'ADMIN' && originalDesign.designer_id !== user.id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return forbiddenResponse();
   }
 
-  const updateData: Record<string, unknown> = { status: body.status };
-
-  if (body.status === 'DELIVERED') {
+  const updateData: Record<string, unknown> = { status };
+  if (status === 'DELIVERED') {
     updateData.delivered_at = new Date().toISOString();
   } else if (originalDesign.status === 'DELIVERED') {
     updateData.delivered_at = null;
@@ -65,9 +61,6 @@ export async function PATCH(
     .select()
     .single();
 
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 400 });
-  }
-
+  if (updateError) return internalErrorResponse(updateError, 'status update', reqId);
   return NextResponse.json(updated);
 }

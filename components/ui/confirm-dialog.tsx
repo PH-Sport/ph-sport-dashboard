@@ -39,14 +39,14 @@ const variantConfig = {
   },
   warning: {
     icon: AlertTriangle,
-    iconClassName: 'text-[hsl(var(--status-warning))]',
-    bgClassName: 'bg-[hsl(var(--status-warning)/0.1)]',
+    iconClassName: 'text-status-warning',
+    bgClassName: 'bg-status-warning/10',
     buttonVariant: 'default' as const,
   },
   info: {
     icon: Info,
-    iconClassName: 'text-[hsl(var(--status-info))]',
-    bgClassName: 'bg-[hsl(var(--status-info)/0.1)]',
+    iconClassName: 'text-status-info',
+    bgClassName: 'bg-status-info/10',
     buttonVariant: 'default' as const,
   },
 };

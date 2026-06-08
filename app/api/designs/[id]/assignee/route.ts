@@ -1,29 +1,29 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { updateAssigneeSchema } from '@/lib/api/schemas';
+import {
+  validationErrorResponse,
+  internalErrorResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from '@/lib/api/errors';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const reqId = crypto.randomUUID();
   const { id } = await params;
-  const body = await request.json().catch(() => ({}));
+  if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 });
 
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  if (!Object.prototype.hasOwnProperty.call(body, 'designer_id')) {
-    return NextResponse.json({ error: 'designer_id is required' }, { status: 400 });
-  }
-  if (Object.prototype.hasOwnProperty.call(body, 'status')) {
-    return NextResponse.json(
-      { error: 'status is not allowed in assignee endpoint' },
-      { status: 400 }
-    );
-  }
+  const rawBody = await request.json().catch(() => ({}));
+  const parsed = updateAssigneeSchema.safeParse(rawBody);
+  if (!parsed.success) return validationErrorResponse(parsed.error, reqId);
+  const { designer_id } = parsed.data;
 
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (userError || !user) return unauthorizedResponse();
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -31,30 +31,36 @@ export async function PATCH(
     .eq('id', user.id)
     .single();
 
-  if (profileError) {
-    return NextResponse.json({ error: 'Failed to verify role' }, { status: 500 });
-  }
+  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
+  if (profile?.role !== 'ADMIN') return forbiddenResponse();
 
-  if (profile?.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  let designerId = body.designer_id;
-  if (designerId === 'auto' || designerId === null || designerId === undefined) {
+  // Resolver 'auto' a id concreto.
+  let resolvedDesignerId: string | null = designer_id ?? null;
+  if (designer_id === 'auto') {
     const { assignDesignerAutomatically } = await import('@/lib/services/designs/assignment');
-    designerId = await assignDesignerAutomatically(id);
+    resolvedDesignerId = await assignDesignerAutomatically(id);
+  } else if (designer_id) {
+    // Verificar que el destino sea un usuario con rol DESIGNER.
+    const { data: target, error: targetError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', designer_id)
+      .single();
+    if (targetError || !target || target.role !== 'DESIGNER') {
+      return NextResponse.json(
+        { error: 'designer_id debe corresponder a un usuario con rol DESIGNER' },
+        { status: 400 }
+      );
+    }
   }
 
   const { data: updated, error: updateError } = await supabase
     .from('designs')
-    .update({ designer_id: designerId })
+    .update({ designer_id: resolvedDesignerId })
     .eq('id', id)
     .select()
     .single();
 
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 400 });
-  }
-
+  if (updateError) return internalErrorResponse(updateError, 'assignee update', reqId);
   return NextResponse.json(updated);
 }

@@ -1,8 +1,10 @@
 /**
  * Client-side environment variables configuration
- * 
+ *
  * Next.js replaces these at build time, so they're safe to use in browser.
  */
+
+import { logger } from '@/lib/utils/logger';
 
 export const config = {
   supabase: {
@@ -13,5 +15,5 @@ export const config = {
 
 // Validar configuración crítica en desarrollo
 if (!config.supabase.url || !config.supabase.anonKey) {
-  console.error('Faltan variables de entorno de Supabase (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)');
+  logger.error('Faltan variables de entorno de Supabase (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)');
 }

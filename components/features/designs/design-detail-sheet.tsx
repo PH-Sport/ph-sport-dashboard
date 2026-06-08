@@ -21,7 +21,6 @@ import type { Design } from '@/lib/types/design';
 import { STATUS_LABELS } from '@/lib/types/design';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
-import { CommentsSection } from '@/components/features/comments/comments-section';
 
 interface DesignDetailSheetProps {
   designId: string | null;
@@ -105,11 +104,11 @@ export function DesignDetailSheet({
                 {/* Icono según tipo de error */}
                 <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
                   error === 'Diseño no encontrado'
-                    ? 'bg-[hsl(var(--status-warning)/0.1)]'
+                    ? 'bg-status-warning/10'
                     : 'bg-destructive/10'
                 }`}>
                   {error === 'Diseño no encontrado' ? (
-                    <SearchX className="h-8 w-8 text-[hsl(var(--status-warning))]" />
+                    <SearchX className="h-8 w-8 text-status-warning" />
                   ) : (
                     <AlertCircle className="h-8 w-8 text-destructive" />
                   )}
@@ -170,10 +169,10 @@ export function DesignDetailSheet({
               >
                 {/* Scrollable design info section */}
                 <div className="overflow-y-auto p-6 pb-0">
-                <SheetHeader className="pb-4 border-b border-gray-100 dark:border-white/10">
+                <SheetHeader className="pb-4 border-b border-border">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <SheetTitle className="text-xl font-bold text-gray-900 dark:text-white truncate">
+                      <SheetTitle className="text-xl font-bold text-foreground truncate">
                         {design.title}
                       </SheetTitle>
                       <SheetDescription className="mt-1">
@@ -186,25 +185,25 @@ export function DesignDetailSheet({
                         href={design.folder_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-500/10 transition-colors group"
+                        className="p-2 rounded-lg hover:bg-primary/10 transition-colors group"
                         title="Abrir carpeta en Drive"
                       >
-                        <ExternalLink className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gold-400" />
+                        <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                       </a>
                     )}
                     <button
                       onClick={() => setIsEditDialogOpen(true)}
-                        className="p-2 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-500/10 transition-colors group"
+                        className="p-2 rounded-lg hover:bg-primary/10 transition-colors group"
                         title="Editar"
                       >
-                        <Edit2 className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gold-400" />
+                        <Edit2 className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                       </button>
                       <button
                         onClick={() => onOpenChange(false)}
-                        className="p-2 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-500/10 transition-colors group"
+                        className="p-2 rounded-lg hover:bg-primary/10 transition-colors group"
                         title="Cerrar"
                       >
-                        <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gold-400" />
+                        <X className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                       </button>
                     </div>
                   </div>
@@ -213,7 +212,7 @@ export function DesignDetailSheet({
                 <div className="py-6 space-y-6">
                   {/* Status */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <span className="text-sm font-medium text-muted-foreground">
                       Estado
                     </span>
                     <Badge status={design.status}>{STATUS_LABELS[design.status]}</Badge>
@@ -222,7 +221,7 @@ export function DesignDetailSheet({
                   {/* Player Status */}
                   {design.player_status && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <span className="text-sm font-medium text-muted-foreground">
                         Estado del Jugador
                       </span>
                       <PlayerStatusTag status={design.player_status} />
@@ -231,11 +230,11 @@ export function DesignDetailSheet({
 
                   {/* Deadline */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       Fecha de entrega
                     </span>
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                    <span className="text-sm text-foreground">
                       {format(new Date(design.deadline_at), 'dd MMM yyyy, HH:mm', { locale: es })}
                     </span>
                   </div>
@@ -243,12 +242,12 @@ export function DesignDetailSheet({
                   {/* Designer */}
                   {designer && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <User className="h-4 w-4" />
                         Diseñador
                       </span>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <p className="text-sm font-medium text-foreground">
                           {designer.name}
                         </p>
                       </div>
@@ -258,11 +257,6 @@ export function DesignDetailSheet({
 
                 </div>
 
-                </div>
-
-                {/* Comments Section - Fixed input at bottom */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <CommentsSection designId={design.id} />
                 </div>
               </motion.div>
             ) : null}

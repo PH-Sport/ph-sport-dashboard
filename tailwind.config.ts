@@ -11,14 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', 'Helvetica', 'Arial', 'sans-serif'],
-        heading: [
-          'var(--font-heading)',
-          'var(--font-sans)',
-          'Helvetica',
-          'Arial',
-          'sans-serif',
-        ],
+        sans: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -54,22 +49,21 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        sidebar: {
-          DEFAULT: 'hsl(var(--sidebar))',
-          foreground: 'hsl(var(--sidebar-foreground))',
+        panel: {
+          DEFAULT: 'hsl(var(--panel))',
+          foreground: 'hsl(var(--panel-foreground))',
+          active: {
+            DEFAULT: 'hsl(var(--panel-active))',
+            foreground: 'hsl(var(--panel-active-foreground))',
+          },
+          hover: 'hsl(var(--panel-hover))',
+          border: 'hsl(var(--panel-border))',
         },
-        gold: {
-          50: '#faf7f0',
-          100: '#f3edd8',
-          200: '#e8dcb8',
-          300: '#dfc06f',
-          400: '#d6b25e',
-          500: '#c4a050',
-          600: '#a8883d',
-          700: '#8a6f32',
-          800: '#6b5628',
-          900: '#4a3b1c',
-          950: '#2d2412',
+        status: {
+          success: 'hsl(var(--status-success))',
+          warning: 'hsl(var(--status-warning))',
+          error: 'hsl(var(--status-error))',
+          info: 'hsl(var(--status-info))',
         },
       },
       borderRadius: {

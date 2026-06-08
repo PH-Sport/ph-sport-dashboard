@@ -69,6 +69,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
+          aria-label={`Menú de usuario — ${displayName}`}
           className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent"
         >
           <Avatar className="h-10 w-10 border-2 border-primary/30">
@@ -101,7 +102,7 @@ export function UserMenu() {
         </DropdownMenuItem>
         {profile?.role === 'ADMIN' && (
           <DropdownMenuItem
-            onClick={() => router.push('/settings/users')}
+            onClick={() => router.push('/ajustes/usuarios')}
             className="text-foreground hover:bg-accent cursor-pointer"
           >
             <Users className="mr-2 h-4 w-4" />

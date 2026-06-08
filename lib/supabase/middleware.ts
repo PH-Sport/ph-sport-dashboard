@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { config } from '@/lib/config'
+import { logger } from '@/lib/utils/logger'
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -38,7 +39,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (userError) {
-    console.error('[Auth] getUser error in middleware:', userError)
+    logger.serverError('[Auth] getUser error in middleware:', userError)
     return response
   }
 
@@ -67,9 +68,9 @@ export async function updateSession(request: NextRequest) {
       
       const url = request.nextUrl.clone()
       if (profile?.role === 'ADMIN') {
-        url.pathname = '/dashboard'
+        url.pathname = '/inicio'
       } else {
-        url.pathname = '/my-week'
+        url.pathname = '/mi-semana'
       }
       return NextResponse.redirect(url)
     }

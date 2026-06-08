@@ -1,18 +1,24 @@
 import { NextResponse } from 'next/server';
-import { assignDesignerAutomatically } from '@/lib/services/designs/assignment';
 import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/utils/logger';
+import {
+  internalErrorResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from '@/lib/api/errors';
+import { selectDesignerByLoad } from '@/lib/services/designs/select-designer';
 
 /**
- * Round-robin balanced assignment algorithm
- * Distribuye diseños sin asignar entre diseñadores de forma equilibrada
+ * Round-robin balanced assignment.
+ * Distribuye diseños sin asignar entre diseñadores en una sola pasada
+ * (1 fetch de cargas + reparto in-memory + batch update por diseñador).
  */
 export async function POST(_request: Request) {
+  const reqId = crypto.randomUUID();
   const supabase = await createClient();
+
   const { data, error: userError } = await supabase.auth.getUser();
-  if (userError || !data.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (userError || !data.user) return unauthorizedResponse();
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -21,48 +27,91 @@ export async function POST(_request: Request) {
     .single();
 
   if (profileError) {
-    logger.error('[API Assign] Role check error:', profileError);
-    return NextResponse.json({ error: 'Failed to verify role' }, { status: 500 });
+    logger.serverError('[API Assign] Role check error', { reqId, error: profileError });
+    return internalErrorResponse(profileError, 'role check', reqId);
   }
+  if (profile?.role !== 'ADMIN') return forbiddenResponse();
 
-  if (profile?.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  // Obtener todos los diseños pendientes sin asignar
-  const { data: unassigned, error } = await supabase
+  // 1. Diseños sin asignar.
+  const { data: unassigned, error: unassignedError } = await supabase
     .from('designs')
     .select('id')
     .is('designer_id', null)
     .eq('status', 'BACKLOG');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
+  if (unassignedError) return internalErrorResponse(unassignedError, 'fetch unassigned', reqId);
   if (!unassigned || unassigned.length === 0) {
     return NextResponse.json({ message: 'No hay diseños sin asignar', assigned: 0 });
   }
 
-  let assignedCount = 0;
-  
-  // Asignar cada diseño
+  // 2. Diseñadores activos.
+  const { data: designers, error: designersError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'DESIGNER');
+
+  if (designersError) return internalErrorResponse(designersError, 'fetch designers', reqId);
+  const designerIds = (designers ?? []).map((d) => d.id);
+  if (designerIds.length === 0) {
+    return NextResponse.json(
+      { error: 'No hay diseñadores disponibles' },
+      { status: 400 }
+    );
+  }
+
+  // 3. Carga actual.
+  const { data: activeDesigns, error: activeError } = await supabase
+    .from('designs')
+    .select('designer_id')
+    .neq('status', 'DELIVERED')
+    .not('designer_id', 'is', null);
+
+  if (activeError) return internalErrorResponse(activeError, 'fetch active designs', reqId);
+
+  const taskCounts = new Map<string, number>();
+  designerIds.forEach((id) => taskCounts.set(id, 0));
+  activeDesigns?.forEach((d) => {
+    if (d.designer_id && taskCounts.has(d.designer_id)) {
+      taskCounts.set(d.designer_id, (taskCounts.get(d.designer_id) || 0) + 1);
+    }
+  });
+
+  // 4. Round-robin in-memory: agrupar por diseñador asignado.
+  let cursor = 0;
+  const assignmentsByDesigner = new Map<string, string[]>();
+
   for (const design of unassigned) {
-    const designerId = await assignDesignerAutomatically(design.id);
-    if (designerId) {
-      const { error: updateError } = await supabase
-        .from('designs')
-        .update({ designer_id: designerId })
-        .eq('id', design.id);
-        
-      if (!updateError) {
-        assignedCount++;
-      }
+    const { id: selectedId, nextIndex } = selectDesignerByLoad(designerIds, taskCounts, cursor);
+    if (!selectedId) continue;
+    cursor = nextIndex;
+
+    taskCounts.set(selectedId, (taskCounts.get(selectedId) || 0) + 1);
+
+    if (!assignmentsByDesigner.has(selectedId)) {
+      assignmentsByDesigner.set(selectedId, []);
+    }
+    assignmentsByDesigner.get(selectedId)!.push(design.id);
+  }
+
+  // 5. Update por diseñador (un round-trip por designer en lugar de uno por diseño).
+  let assignedCount = 0;
+  for (const [designerId, designIds] of assignmentsByDesigner.entries()) {
+    const { error: updateError } = await supabase
+      .from('designs')
+      .update({ designer_id: designerId })
+      .in('id', designIds);
+    if (!updateError) {
+      assignedCount += designIds.length;
+    } else {
+      logger.serverError('[API Assign] Update failed', { reqId, designerId, count: designIds.length, error: updateError });
     }
   }
 
   if (assignedCount === 0) {
-    return NextResponse.json({ error: 'No se pudo asignar ningún diseño (posible falta de diseñadores)' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'No se pudo asignar ningún diseño' },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({

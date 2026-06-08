@@ -35,11 +35,6 @@ const EVENT_ROWS: EventRow[] = [
     label: 'Deadlines Próximos',
     description: 'Recordatorios de fechas límite',
   },
-  {
-    type: 'comments',
-    label: 'Nuevos Comentarios',
-    description: 'Cuando alguien comenta en tu diseño',
-  },
 ];
 
 export function NotificationsTab({ preferences, onToggle }: NotificationsTabProps) {

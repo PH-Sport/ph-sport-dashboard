@@ -1,20 +1,18 @@
-/**
- * Utilidades para asignación automática de diseños a diseñadores
- */
-
 import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/utils/logger';
+import { selectDesignerByLoad } from './select-designer';
 
 /**
- * Calcula el diseñador con menor carga de trabajo usando algoritmo round-robin
- * @param excludeDesignId - ID del diseño a excluir del conteo (útil al actualizar)
- * @returns ID del diseñador seleccionado o null si no hay diseñadores disponibles
+ * Asigna automáticamente un diseñador a UN diseño basándose en la carga actual.
+ * Para asignaciones masivas, ver `assign/route.ts` o `bulk/route.ts` que mantienen
+ * cursor entre llamadas para mejor distribución.
+ *
+ * @param excludeDesignId — id del diseño a excluir del conteo (útil al actualizar)
  */
 export async function assignDesignerAutomatically(excludeDesignId?: string): Promise<string | null> {
   try {
     const supabase = await createClient();
 
-    // 1. Obtener todos los diseñadores
     const { data: designers, error: designersError } = await supabase
       .from('profiles')
       .select('id')
@@ -30,7 +28,8 @@ export async function assignDesignerAutomatically(excludeDesignId?: string): Pro
       return null;
     }
 
-    // 2. Obtener diseños activos (no entregados) para contar carga
+    const designerIds = designers.map((d) => d.id);
+
     const { data: activeDesigns, error: designsError } = await supabase
       .from('designs')
       .select('id, designer_id')
@@ -42,37 +41,19 @@ export async function assignDesignerAutomatically(excludeDesignId?: string): Pro
       return null;
     }
 
-    // 3. Calcular carga por diseñador
     const taskCounts = new Map<string, number>();
-    designers.forEach((d) => taskCounts.set(d.id, 0));
+    designerIds.forEach((id) => taskCounts.set(id, 0));
 
     activeDesigns?.forEach((d) => {
-      // Asegurarse de que el designer_id existe en nuestra lista de diseñadores
-      // y que no es el diseño que estamos excluyendo
       if (d.designer_id && taskCounts.has(d.designer_id)) {
         if (excludeDesignId && d.id === excludeDesignId) return;
         taskCounts.set(d.designer_id, (taskCounts.get(d.designer_id) || 0) + 1);
       }
     });
 
-    // 4. Encontrar el diseñador con menos tareas
-    let minCount = Infinity;
-    let selectedDesignerId = designers[0].id;
-
-    for (const designer of designers) {
-      const count = taskCounts.get(designer.id) || 0;
-      if (count < minCount) {
-        minCount = count;
-        selectedDesignerId = designer.id;
-      }
-    }
-
-    return selectedDesignerId;
-
+    return selectDesignerByLoad(designerIds, taskCounts).id;
   } catch (error) {
     logger.error('Unexpected error in assignDesignerAutomatically:', error);
     return null;
   }
 }
-
-

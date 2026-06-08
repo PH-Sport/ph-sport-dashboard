@@ -4,6 +4,7 @@ import { Menu, Search } from 'lucide-react';
 import { UserMenu } from './user-menu';
 import { Input } from '@/components/ui/input';
 import { NotificationsDropdown } from './notifications-dropdown';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -15,28 +16,25 @@ interface HeaderProps {
 export function Header({ onMenuClick, searchValue = '', onSearchChange, showSearch = false }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-background">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6 gap-4">
-        {/* Left: Menu button - visible on mobile */}
+      <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6">
+        {/* Mobile menu button — desktop usa el toggle interno del sidebar */}
         <button
           onClick={onMenuClick}
-          className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground md:hidden"
-          aria-label="Toggle menu"
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+          aria-label="Abrir menú"
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Logo for mobile or when sidebar is hidden */}
-        <div className="flex items-center md:hidden flex-1 ml-4">
-          <span className="text-lg font-bold text-primary">
-            PH Sport
-          </span>
+        {/* Mobile brand */}
+        <div className="ml-4 flex flex-1 items-center md:hidden">
+          <span className="text-lg font-bold text-primary">PH Sport</span>
         </div>
 
-        {/* Center: Search bar - visible on desktop when enabled */}
-        {showSearch && (
-          <div className="hidden md:flex flex-1 max-w-md mx-auto">
+        {showSearch ? (
+          <div className="mx-auto hidden max-w-md flex-1 md:flex">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Buscar diseños, jugadores, partidos..."
@@ -46,20 +44,17 @@ export function Header({ onMenuClick, searchValue = '', onSearchChange, showSear
               />
             </div>
           </div>
+        ) : (
+          <div className="hidden flex-1 md:block" />
         )}
 
-        {/* Spacer for desktop when no search */}
-        {!showSearch && <div className="hidden md:block flex-1" />}
-
-        {/* Right: Notifications and User menu */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
           <NotificationsDropdown />
           <UserMenu />
         </div>
       </div>
-      {/* Inset divider */}
       <div className="mx-4 border-b border-border" />
     </header>
   );
 }
-

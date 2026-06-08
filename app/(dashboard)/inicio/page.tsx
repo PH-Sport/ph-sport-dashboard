@@ -1,17 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton';
 import { toast } from 'sonner';
-import { Home } from 'lucide-react';
 import { CreateDesignButton } from '@/components/features/designs/dialogs/create-design-button';
 import { useAuth } from '@/lib/auth/auth-context';
 import { DesignerDashboard } from '@/components/features/dashboard/designer-dashboard';
 import { AdminDashboard } from '@/components/features/dashboard/admin-dashboard';
 import { useDashboard } from '@/lib/hooks/use-dashboard';
+import { getStaticGreeting, pickGreeting } from '@/lib/utils/greeting';
+
+function getFirstName(fullName: string | null | undefined, email: string | null | undefined): string {
+  if (fullName) return fullName.split(' ')[0];
+  if (email) return email.split('@')[0];
+  return '';
+}
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
@@ -20,7 +26,13 @@ export default function Dashboard() {
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
-  const dateRangeLabel = `${format(weekStart, 'd MMM', { locale: es })} - ${format(weekEnd, 'd MMM', { locale: es })}`;
+  const dateRangeLabel = `${format(weekStart, 'd MMM', { locale: es })} – ${format(weekEnd, 'd MMM', { locale: es })}`;
+
+  const firstName = getFirstName(profile?.full_name, user?.email);
+  const [title, setTitle] = useState<string>(() => getStaticGreeting(firstName));
+  useEffect(() => {
+    setTitle(pickGreeting(firstName));
+  }, [firstName]);
 
   const handleAssign = async () => {
     setAssigning(true);
@@ -48,8 +60,7 @@ export default function Dashboard() {
 
   return (
     <DashboardPage
-      title="Inicio"
-      icon={Home}
+      title={title}
       subtitle={`Semana del ${dateRangeLabel}`}
       actions={
         profile?.role === 'ADMIN' ? (
