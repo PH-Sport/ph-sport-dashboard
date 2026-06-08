@@ -32,3 +32,9 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Design-iteration screenshots (fuera del historial; mover a docs/ si alguna sirve de referencia)
+/*.png
+
+# Playwright MCP artifacts
+.playwright-mcp/
