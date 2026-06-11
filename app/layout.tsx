@@ -11,6 +11,7 @@ const fontMono = JetBrains_Mono({
 });
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SWRProvider } from '@/components/providers/swr-provider';
+import { MotionProvider } from '@/components/providers/motion-provider';
 import { AuthProvider } from '@/lib/auth/auth-context';
 
 export const metadata: Metadata = {
@@ -45,11 +46,13 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <AuthProvider>
-            <SWRProvider>
-              {children}
-            </SWRProvider>
-          </AuthProvider>
+          <MotionProvider>
+            <AuthProvider>
+              <SWRProvider>
+                {children}
+              </SWRProvider>
+            </AuthProvider>
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,0 +1,82 @@
+# Plan de rediseño — Fase 7 (PHSPORT)
+
+> Fuente de verdad de la Fase 7 (UX/estética). Complementa `refactor-plan.md` (cimientos 0-6) e `inventario-estado-actual.md` (estado real, viga/pared).
+> Dos mitades: **(1) Estructura/IA — DEFINIDA** · **(2) Lenguaje visual + movimiento — EN CURSO**.
+> Última actualización: 2026-06-09.
+
+## Principios
+
+- **Charcoal Authority** + dorado Champions como **acento raro** (60-30-10). "Sin ruido. Con intención."
+- **Premium = física de muelle + fluidez + respuesta instantánea + profundidad + pulido.** NO glassmorphism.
+- **Reutilizar vigas** (datos/API/lógica/routing), **re-pintar** la presentación. Todo token-driven → rebrand-safe ("lápices sobre plantillas").
+- Estilo de trabajo: por fases con validación, no big-bang.
+
+## Decisiones de producto (cerradas 2026-06-09)
+
+1. **Inicio (Designer) = "Hoy"** vs **Mi Semana = "Semana"** — diferenciadas, sin solaparse.
+2. **Diseños: vista Lista + Calendario** — cablear el `DesignCalendar` que ya existe.
+3. **Estados: binario** Pendiente/Entregado — trabajos de ~20 min, no más estados.
+4. **"Compañeros" (dashboard Designer): secundario e intencional** — algo que se mira a propósito, no un KPI habitual.
+
+## Regla de interacción global
+
+**Una superficie canónica por entidad, a la que se llega navegando — nunca apilada.** Por cosa, la superficie correcta:
+- **Página** → entidades con identidad (un diseñador → `/equipo/[id]`, un diseño → `/disenos?open=id`, ajustes → `/ajustes`).
+- **Sheet** → vistazo rápido que **no** apila otro encima.
+- **Modal** → solo crear enfocado o confirmar/borrar.
+- **Inline / popover** → cambios rápidos (estado, asignar).
+
+Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-sobre-modales. Mata: sheet-sobre-sheet en Equipo, modal-de-editar-sobre-detalle en Diseños, `/ajustes` como modal disfrazado de página.
+
+## Estructura por pantalla (qué muestra / qué cambia / cómo navega)
+
+| Pantalla | Debería mostrar | Cambios clave de navegación/contenido |
+|---|---|---|
+| **Inicio · Manager** | Héroe de triage (en riesgo / sin asignar, con acción directa) + tira fina de salud + carga real del equipo | Quitar tarjeta "repartir" e "inactivos" sueltos; "Sin asignar" una sola vez; asignar inline; demote de "Crear" |
+| **Inicio · Designer ("Hoy")** | "Tu siguiente" (diseño más urgente, acción directa) + cola del día | Quitar KPI duplicado y saludo cambiante; cambiar estado inline; "Compañeros" secundario |
+| **Equipo · Manager** | Carga real por diseñador (saturado / libre) | Card sin "% completado"; clic → página `/equipo/[id]`; clic diseño → detalle canónico. Sin apilar. Encaja el sistema de **% de carga** |
+| **Diseños** | Lista filtrable + Calendario; estado cambiable; detalle canónico | Una sola barra de filtros; **cambiar estado desde aquí**; editar dentro del detalle (no modal encima); cards en móvil |
+| **Mi Semana · Designer ("Semana")** | Cola completa priorizada por deadline | Sin copy interno; entregados plegados; diferenciada de "Hoy" |
+| **Ajustes** | Página real con pestañas (Cuenta/Apariencia/Notificaciones) | Página, no modal; tema dentro de Apariencia; guardar sin recargar; quitar "Vista por defecto" no-op |
+
+## Mitad 2 — Lenguaje visual + movimiento (CERRADO 2026-06-09)
+
+**Movimiento** (extender `components/ui/animations.ts`). Física de muelle, **fluida con autoridad, cero rebote** (damping alto → aterriza limpio, sin oscilar). Interrumpible. Optimista (update instantáneo, sync por detrás).
+- `spring.snappy` `{stiffness 420, damping 32}` — feedback UI (botones, toggles, flip de estado).
+- `spring.smooth` `{stiffness 300, damping 34}` — paneles, sheets, colapsar sidebar, layout.
+- `spring.gentle` `{stiffness 220, damping 30}` — entradas de página/contenido.
+- `tween.fast` 0.12s / `tween.base` 0.2s, ease `[0.16,1,0.3,1]` (easeOutExpo) — solo opacidad/color.
+- `stagger` 0.04s. `prefers-reduced-motion` → muelles a instantáneo, solo fades.
+- **Momentos firma:** (1) pill de nav activa con `layoutId` (shared-element); (2) contenido que se asienta (gentle+fade+stagger); (3) flip de estado optimista (snappy).
+
+**Profundidad** — mate, **border-led**. Tokens de elevación:
+- `flat` (default): sin sombra, separación por hairline + espaciado. (Mata la sombra global de `card.tsx`.)
+- `raised` (interactivo): sombra suave charcoal-tintada, p.ej. `0 1px 2px -1px / 0 2px 8px -4px` baja opacidad.
+- `overlay`: la sombra intencional de la sidebar `0 2px 24px -12px rgb(0 0 0 / 0.22)`.
+- **Frosted glass** (acento raro, **anclado en marca** — los diseñadores PHSPORT lo usan en plantillas): charcoal ahumado, `bg hsl(var(--panel) / .72)` + `backdrop-blur(12px) saturate(120%)` + borde sutil. **Solo en overlays flotantes** (command palette, dialog, popover). Nunca sobre datos/cards/tablas.
+
+**Tipografía** — Geist + JetBrains Mono. Escala fija (rem), **un peso de heading (semibold 600)**:
+- page-title 28px · section 20px · card-title 16px · body 14px · caption 12px · eyebrow 11px mono uppercase `tracking .18em`.
+- Tabular nums en datos. `<Eyebrow>` tokenizado (hoy copy-pasteado 9×).
+
+**Espaciado** — escala 4pt semántica: `2xs 4 · xs 8 · sm 12 · md 16 · lg 24 · xl 32 · 2xl 48 · 3xl 64`. Card density: `compact = md(16)` / `default = lg(24)`. Fin del `p-4/5/6` ad-hoc.
+
+**Acento** — dorado 60-30-10 (raro: CTA, nav activa, foco, una urgencia). Status colors como están.
+
+**Territorios** — Charcoal (todo el chrome) · **Champions Pulse** (frosted glass + único highlight con brillo contenido) · Family Proof (calidez en empty states/onboarding).
+
+**Command palette (⌘K)** — fuera del núcleo (opcional/después). El sistema se diseña para que entre limpio (encaja con el overlay de frosted glass).
+
+---
+
+## Plan de ejecución — Fase 7
+
+> Orden por dependencias. Cada sub-fase: type-check + lint + build, validar, marcar `[x]`.
+
+- [x] **7.1 — Fundamentos de tokens** ✅ (2026-06-11): `spacing` semántico 4pt (`2xs..3xl`) + `fontSize` escala fija (`page-title/section/card-title/body/caption/eyebrow`, heading weight 600) + `boxShadow.raised/overlay` + `ease-out-expo` en Tailwind; `SPRINGS/TWEENS/EASE_OUT_EXPO/STAGGER` en `animations.ts` (TRANSITIONS legacy re-apuntado al sistema nuevo); utilidades `.glass-panel`/`.glass-scrim` con fallback `@supports` en globals.css; `MotionProvider` (`reducedMotion="user"`) en layout raíz. Type-check + lint + build ✓.
+- [ ] **7.2 — Normalizar primitivas**: `Card` sin sombra global + variantes de densidad; unificar anillo de foco, radio de inputs, variantes de Badge; `<Eyebrow>`; frosted-glass en dialog/sheet/popover; presets de muelle cableados en `PageTransition`.
+- [ ] **7.3 — Arquitectura de interacción** (mitad 1): `/equipo/[id]` (mata sheet apilado); detalle de diseño canónico único + editar inline; `/ajustes` página real; cambio de estado optimista desde Diseños.
+- [ ] **7.4 — Re-pintar pantallas** (una a una, validando): Inicio Manager → Inicio Designer "Hoy" → Mi Semana → Diseños (+ cablear calendario) → Equipo (+ carga) → Ajustes → pulido Auth.
+- [ ] **7.5 — Estados + pulido de movimiento**: empty/error/loading; momentos firma (pill, asentado, flip optimista); pase mobile/responsive.
+
+**Fontanería independiente** (cuando convenga, no bloquea): borrar código muerto, `design-detail-sheet` fetch→hook, auditoría RLS de seguridad (aparte).

@@ -15,6 +15,35 @@ const config: Config = {
         heading: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
+      // Escala de espaciado semántica (4pt) — p-md, gap-lg, space-y-sm…
+      // Regla: cards default=lg(24), cards compact=md(16). Fin del p-4/5/6 ad-hoc.
+      spacing: {
+        '2xs': '0.25rem', //  4px
+        xs: '0.5rem',     //  8px
+        sm: '0.75rem',    // 12px
+        md: '1rem',       // 16px
+        lg: '1.5rem',     // 24px
+        xl: '2rem',       // 32px
+        '2xl': '3rem',    // 48px
+        '3xl': '4rem',    // 64px
+      },
+      // Escala tipográfica fija (app UI, no fluida) — un solo peso de heading (600)
+      fontSize: {
+        'page-title': ['1.75rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em', fontWeight: '600' }],
+        section: ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.015em', fontWeight: '600' }],
+        'card-title': ['1rem', { lineHeight: '1.5rem', fontWeight: '600' }],
+        body: ['0.875rem', { lineHeight: '1.25rem' }],
+        caption: ['0.75rem', { lineHeight: '1rem' }],
+        eyebrow: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.18em', fontWeight: '500' }],
+      },
+      // Elevación — modelo mate border-led: flat (sin sombra) / raised / overlay
+      boxShadow: {
+        raised: '0 1px 2px -1px rgb(0 0 0 / 0.08), 0 2px 8px -4px rgb(0 0 0 / 0.12)',
+        overlay: '0 2px 24px -12px rgb(0 0 0 / 0.22)',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

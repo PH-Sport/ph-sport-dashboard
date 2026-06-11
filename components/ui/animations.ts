@@ -3,21 +3,53 @@
 import type { Transition } from 'framer-motion';
 
 // ============================================
-// Transitions (duraciones + easings combinados)
+// Sistema de movimiento PHSPORT — Fase 7
+// Física de muelle "fluida con autoridad": damping alto,
+// el elemento aterriza limpio en su sitio, CERO rebote.
+// Tweens (easeOutExpo) solo para opacidad/color, nunca posición.
+// ============================================
+
+/** easeOutExpo — arranque decidido, frenada suave. Para tweens de opacidad/color. */
+export const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+
+export const SPRINGS = {
+  /** Feedback de UI: botones, toggles, flip de estado (~150ms percibidos) */
+  snappy: { type: 'spring', stiffness: 420, damping: 32 } as Transition,
+
+  /** Paneles, sheets, colapsar sidebar, cambios de layout */
+  smooth: { type: 'spring', stiffness: 300, damping: 34 } as Transition,
+
+  /** Entradas de página/contenido, reveals grandes */
+  gentle: { type: 'spring', stiffness: 220, damping: 30 } as Transition,
+} as const;
+
+export const TWEENS = {
+  /** Micro-fades: tooltips, hovers, swaps pequeños */
+  fast: { duration: 0.12, ease: EASE_OUT_EXPO } as Transition,
+
+  /** Fades estándar: skeleton↔contenido, overlays */
+  base: { duration: 0.2, ease: EASE_OUT_EXPO } as Transition,
+} as const;
+
+/** Retardo entre hijos en entradas orquestadas (stagger) */
+export const STAGGER = 0.04;
+
+// ============================================
+// Transitions legacy (API estable — internals re-apuntados al sistema nuevo)
 // ============================================
 
 export const TRANSITIONS = {
-  /** Para contenido que carga/descarga rápidamente (0.15s) */
-  fade: { duration: 0.15, ease: [0.4, 0, 0.6, 1] } as Transition,
-  
-  /** Para diálogos, modales y overlays (0.25s) */
-  modal: { duration: 0.25, ease: [0.4, 0, 0.2, 1] } as Transition,
-  
-  /** Para cambios de layout y redimensionado (0.4s) */
-  layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } as Transition,
-  
-  /** Para redimensionado de contenedores (spring suave) */
-  layoutSpring: { type: 'spring', stiffness: 200, damping: 25 } as Transition,
+  /** Para contenido que carga/descarga rápidamente */
+  fade: TWEENS.fast,
+
+  /** Para diálogos, modales y overlays */
+  modal: TWEENS.base,
+
+  /** Para cambios de layout y redimensionado */
+  layout: SPRINGS.smooth,
+
+  /** Para redimensionado de contenedores */
+  layoutSpring: SPRINGS.smooth,
 } as const;
 
 // ============================================

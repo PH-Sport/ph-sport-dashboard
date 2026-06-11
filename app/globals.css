@@ -136,6 +136,35 @@
   }
 }
 
+/* Frosted glass — acento raro, SOLO superficies flotantes (command palette,
+   overlays de marca, menús). Nunca sobre datos densos (cards, tablas, KPIs).
+   Anclaje de marca: los diseñadores PHSPORT usan cristal esmerilado en plantillas. */
+@layer utilities {
+  /* Panel charcoal ahumado — overlays de marca. Fija su propio foreground. */
+  .glass-panel {
+    background-color: hsl(var(--panel) / 0.72);
+    color: hsl(var(--panel-foreground));
+    border: 1px solid hsl(var(--panel-border) / 0.7);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    backdrop-filter: blur(12px) saturate(120%);
+  }
+  /* Velo tras dialogs/sheets — oscurece y desenfoca el contenido de fondo */
+  .glass-scrim {
+    background-color: rgb(0 0 0 / 0.45);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  /* Fallback sin backdrop-filter: superficie opaca, misma legibilidad */
+  @supports not (backdrop-filter: blur(12px)) {
+    .glass-panel {
+      background-color: hsl(var(--panel));
+    }
+    .glass-scrim {
+      background-color: rgb(0 0 0 / 0.6);
+    }
+  }
+}
+
 /* Scrollbar fina */
 @layer utilities {
   .scrollbar-thin {
