@@ -88,6 +88,18 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
   - [x] **7.4e Auth** ✅: invite usa `PasswordInput` compartido (show/hide, coherente con login/reset) + requisito de longitud visible inline.
 - [x] **7.5 — Estados + momentos firma** ✅ (2026-06-11): **(1) pill de nav activa deslizante** entre items con `layoutId` + muelle smooth (firma Apple-grade); **(2) entrada que se asienta** — `fadeSlide` por defecto en DashboardPage con y:muelle gentle + opacidad:tween; **(3) flip de estado optimista** (hecho en 7.3b/7.4c3). Empty state de Equipo con salida (CTA a invitar). Pase mobile hecho en 7.4 (cards bajo md, filas de dos zonas). Type-check + lint + build ✓.
 
+---
+
+## Fase 8 — Cambio de look TOTAL (EN CURSO, 2026-06-12)
+
+> La Fase 7 fue restyling; el usuario quiere **reinventar la interfaz** (shell, contenedores, modales, distribución). Mockups navegables en `/concepts` (datos fake, no tocan la app real; borrar carpeta al terminar).
+
+**Veredicto del usuario sobre los 3 conceptos:** Sidebar SÍ (diseño fino después) · **B descartado** (lee como newsletter) · dirección = **A × C**: distribución/densidad de A sin su rejilla encasillada, materiales de C (placas suaves, Apple-like), usando el ancho real (C tenía demasiado aire lateral).
+
+**Concepto D (`/concepts/d`) = la síntesis construida**, mini-app completa: rail+topbar, Inicio (triage+KPIs+2col en placas), Semana (placas por diseñador 2-col), Diseños (búsqueda + estado + **filtro diseñador** + **Lista/Calendario** + modales funcionando: detalle=sheet derecha, crear=modal centrado, sobre glass-scrim), Ajustes con pestaña **Miembros** (cards clicables → popup nombre/rol/eliminar). Nav final: Inicio · Semana · Diseños · ⚙Ajustes (Miembros DENTRO de Ajustes; "Semana" fusiona Equipo+Mi Semana por rol).
+
+**Estado:** usuario vio D: "no está mal" — **pendiente: sus ajustes finos sobre D → congelar dirección → extender a la app real** (los tokens/hooks de Fase 7 hacen esto barato). Todo commiteado en main local, sin push.
+
 **Backlog opcional post-Fase 7** (no bloqueante): skeletons de equipo/usuarios afinados al detalle; bulk-create en móvil (hoy scroll horizontal, uso real es desktop); migrar player-status-tag/invitations-card a variantes Badge; editar inline dentro del sheet (hoy modal-sobre-sheet); soft-delete con undo (necesita soporte API); command palette ⌘K (frosted glass listo).
 
 **Fontanería independiente** (cuando convenga, no bloquea): borrar código muerto, `design-detail-sheet` fetch→hook, auditoría RLS de seguridad (aparte).
