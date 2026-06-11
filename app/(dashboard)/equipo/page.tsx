@@ -10,17 +10,14 @@ import { DashboardPage } from '@/components/ui/dashboard-page';
 import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { DesignerCard } from '@/components/features/team/designer-card';
-import { DesignerDetailSheet } from '@/components/features/team/designer-detail-sheet';
 import { TeamSkeleton } from '@/components/skeletons/team-skeleton';
-import { useTeamData, type DesignerWithDesigns } from '@/lib/hooks/use-team-data';
+import { useTeamData } from '@/lib/hooks/use-team-data';
 
 export default function TeamPage() {
   const router = useRouter();
   const { profile, status } = useAuth();
   const authLoading = status === 'INITIALIZING';
   const [selectedWeek, setSelectedWeek] = useState(new Date());
-  const [selectedDesigner, setSelectedDesigner] = useState<DesignerWithDesigns | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   // Calcular rango de la semana seleccionada (lunes a domingo)
   const weekStart = useMemo(() => startOfWeek(selectedWeek, { weekStartsOn: 1 }), [selectedWeek]);
@@ -36,9 +33,10 @@ export default function TeamPage() {
     }
   }, [authLoading, profile, router]);
 
-  const handleDesignerClick = (designer: DesignerWithDesigns) => {
-    setSelectedDesigner(designer);
-    setSheetOpen(true);
+  // Navegación canónica: cada diseñador tiene su página, con la semana en la URL
+  const handleDesignerClick = (designerId: string) => {
+    const param = format(weekStart, 'yyyy-MM-dd');
+    router.push(`/equipo/${designerId}?semana=${param}`);
   };
 
   const handlePrevWeek = () => setSelectedWeek(prev => subWeeks(prev, 1));
@@ -94,19 +92,11 @@ export default function TeamPage() {
               <DesignerCard
                 key={designer.id}
                 designer={designer}
-                onClick={() => handleDesignerClick(designer)}
+                onClick={() => handleDesignerClick(designer.id)}
               />
             ))}
           </div>
         )}
-
-        {/* Sheet de detalle */}
-        <DesignerDetailSheet
-          designer={selectedDesigner}
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
-          weekLabel={weekLabel}
-        />
     </DashboardPage>
   );
 }

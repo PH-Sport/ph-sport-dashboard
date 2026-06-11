@@ -28,8 +28,9 @@ export function DesignerCard({ designer, onClick }: DesignerCardProps) {
   const completionRate = total > 0 ? Math.round((delivered / total) * 100) : 0;
 
   return (
-    <Card 
-      className="cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:scale-[1.02]"
+    <Card
+      elevation="raised"
+      className="cursor-pointer hover:border-primary/40"
       onClick={onClick}
     >
       <CardHeader className="pb-2">
