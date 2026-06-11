@@ -77,13 +77,13 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
               <span className="mono tabular text-5xl font-semibold leading-none text-destructive">
                 {Math.floor(hoursUntilNext!)}h
               </span>
-              <span className="mono pb-1 text-[10px] font-medium uppercase tracking-[0.18em] text-destructive md:pb-0">
+              <span className="font-mono pb-1 text-eyebrow uppercase text-destructive md:pb-0">
                 Vence en
               </span>
             </div>
 
             <div className="flex-1 space-y-1.5">
-              <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-destructive">
+              <p className="font-mono text-eyebrow uppercase text-destructive">
                 Entrega urgente
               </p>
               <h2 className="font-heading text-lg font-semibold text-foreground">
@@ -154,7 +154,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           <CardContent className="p-6">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="font-mono text-eyebrow uppercase text-muted-foreground">
                   Próximas entregas
                 </p>
                 <h2 className="font-heading text-base font-semibold text-foreground">
@@ -218,7 +218,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
         <Card>
           <CardContent className="p-6">
             <div className="mb-4">
-              <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
                 Compañeros
               </p>
               <h2 className="font-heading text-base font-semibold text-foreground">
@@ -250,7 +250,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           <Card className="h-full transition-colors hover:border-primary/40">
             <CardContent className="flex items-center justify-between gap-6 p-5">
               <div className="space-y-1">
-                <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="font-mono text-eyebrow uppercase text-muted-foreground">
                   Mi Semana
                 </p>
                 <p className="font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary">
@@ -268,7 +268,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           <Card className="h-full transition-colors hover:border-primary/40">
             <CardContent className="flex items-center justify-between gap-6 p-5">
               <div className="space-y-1">
-                <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="font-mono text-eyebrow uppercase text-muted-foreground">
                   Diseños
                 </p>
                 <p className="font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary">

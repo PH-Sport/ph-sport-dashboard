@@ -15,6 +15,7 @@ const badgeVariants = cva(
           'border-status-warning/50 bg-status-warning/15 text-status-warning',
         success:
           'border-status-success/30 bg-status-success/15 text-status-success',
+        info: 'border-status-info/30 bg-status-info/15 text-status-info',
         outline: 'border-border text-foreground',
       },
       status: {

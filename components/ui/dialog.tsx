@@ -27,7 +27,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay asChild>
     <motion.div
       ref={ref as unknown as React.Ref<HTMLDivElement>}
-      className={cn('fixed inset-0 z-50 bg-black/50 dark:bg-black/80', className)}
+      className={cn('glass-scrim fixed inset-0 z-50', className)}
       initial={overlayAnimation.initial}
       animate={overlayAnimation.animate}
       exit={overlayAnimation.exit}
@@ -51,7 +51,7 @@ const DialogContent = React.forwardRef<
         <motion.div
           ref={ref as unknown as React.Ref<HTMLDivElement>}
           className={cn(
-            'pointer-events-auto relative w-full max-w-lg border border-border bg-card text-card-foreground p-6 shadow-lg sm:rounded-lg',
+            'pointer-events-auto relative w-full max-w-lg border border-border bg-card text-card-foreground p-6 shadow-overlay sm:rounded-lg',
             className
           )}
           initial={contentAnimation.initial}

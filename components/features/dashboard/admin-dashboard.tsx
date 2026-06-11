@@ -111,7 +111,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                 <span className="mono tabular text-5xl font-semibold leading-none text-primary">
                   {String(totalAlerts).padStart(2, '0')}
                 </span>
-                <span className="mono pb-1 text-[10px] font-medium uppercase tracking-[0.18em] text-primary md:pb-0">
+                <span className="font-mono pb-1 text-eyebrow uppercase text-primary md:pb-0">
                   Avisos
                 </span>
               </div>
@@ -214,7 +214,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
         <CardContent className="p-6">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
                 Próximas 48 horas
               </p>
               <h2 className="font-heading text-base font-semibold text-foreground">
@@ -292,7 +292,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
         <CardContent className="p-6">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
                 Carga del equipo
               </p>
               <h2 className="font-heading text-base font-semibold text-foreground">

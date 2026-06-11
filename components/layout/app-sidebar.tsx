@@ -363,7 +363,7 @@ function SidebarFooterToggle({ expanded }: { expanded: boolean }) {
       >
         <Icon className="h-4 w-4 shrink-0" aria-hidden />
         {expanded && (
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-panel-foreground/50">
+          <span className="font-mono text-eyebrow uppercase text-panel-foreground/50">
             ⌘B
           </span>
         )}

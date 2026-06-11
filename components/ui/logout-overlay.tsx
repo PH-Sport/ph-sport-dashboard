@@ -11,9 +11,9 @@ export function LogoutOverlay({ isVisible }: LogoutOverlayProps) {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm">
+    <div className="glass-panel fixed inset-0 z-[100] flex flex-col items-center justify-center border-0">
       <PhSportMark className="h-16 w-16 mb-4 text-primary animate-pulse" />
-      <div className="flex items-center gap-2 text-muted-foreground">
+      <div className="flex items-center gap-2 text-panel-foreground/70">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span>Cerrando sesión...</span>
       </div>
