@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-const CONCEPTS = ['a', 'b', 'c'] as const;
+const CONCEPTS = ['a', 'b', 'c', 'd'] as const;
 
 /**
  * Conmutador flotante. Mantiene la subpágina al cambiar de concepto:
@@ -12,7 +12,7 @@ const CONCEPTS = ['a', 'b', 'c'] as const;
  */
 export function ConceptSwitcher() {
   const pathname = usePathname() ?? '';
-  const match = pathname.match(/^\/concepts\/([abc])(\/.*)?$/);
+  const match = pathname.match(/^\/concepts\/([abcd])(\/.*)?$/);
   const current = match?.[1];
   const subpath = match?.[2] ?? '';
 

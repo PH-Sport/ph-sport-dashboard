@@ -7,20 +7,31 @@ import Link from 'next/link';
 
 const CONCEPTS = [
   {
+    id: 'd',
+    name: 'Síntesis',
+    tagline: 'A × C — la dirección elegida',
+    description:
+      'La distribución de cabina de la A (sidebar, triage, dos columnas, ancho aprovechado) construida con los materiales de la C (placas suaves, avatares, pills). Con todo: filtro por diseñador, vista Lista/Calendario, y los modales de crear/detalle funcionando. Miembros vive en Ajustes con cards clicables.',
+    knobs: 'Sidebar rail · placas a densidad media-alta · modales glass · ancho real',
+    highlight: true,
+  },
+  {
     id: 'a',
     name: 'Cabina',
     tagline: 'Sala de mando',
     description:
       'Rail de iconos + una sola superficie dividida por hairlines. Denso, técnico, mono tabular como protagonista. Cero cards flotantes. Para sentir la app como un puesto de control.',
     knobs: 'Rail 56px · rejilla hairline · densidad alta · dorado mínimo',
+    highlight: false,
   },
   {
     id: 'b',
     name: 'Editorial',
-    tagline: 'Programa de partido',
+    tagline: 'Programa de partido · descartado',
     description:
-      'Sin sidebar: cabecera tipo revista y la página estructurada por los territorios de marca — Ahora / Próximo / Balance. La tipografía ES la interfaz. Mucho aire, lista numerada, números gigantes.',
+      'Sin sidebar: cabecera tipo revista, territorios de marca, tipografía gigante. Descartado: lee como newsletter, no como herramienta diaria.',
     knobs: 'Top-bar · columna asimétrica · densidad baja · Now/Next/Forever',
+    highlight: false,
   },
   {
     id: 'c',
@@ -29,6 +40,7 @@ const CONCEPTS = [
     description:
       'Dock flotante de cristal esmerilado abajo, placas redondeadas con profundidad y el único momento de brillo Champions (halo dorado). Cálido, premium, hospitality.',
     knobs: 'Dock glass · placas elevadas · densidad media · halo Champions',
+    highlight: false,
   },
 ];
 
@@ -52,7 +64,11 @@ export default function ConceptsIndex() {
             <Link
               key={c.id}
               href={`/concepts/${c.id}`}
-              className="group block rounded-2xl border border-border bg-card p-xl transition-colors hover:border-primary/40"
+              className={
+                c.highlight
+                  ? 'group block rounded-2xl border border-primary/40 bg-card p-xl shadow-overlay transition-colors hover:border-primary/70'
+                  : 'group block rounded-2xl border border-border bg-card p-xl transition-colors hover:border-primary/40'
+              }
             >
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="font-heading text-2xl font-semibold tracking-tight">
