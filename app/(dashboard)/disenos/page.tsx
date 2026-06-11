@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Palette } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { Palette, List, CalendarDays } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
 import { CreateDesignButton } from '@/components/features/designs/dialogs/create-design-button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -19,6 +22,14 @@ import { useDesignsFilters } from '@/lib/hooks/use-designs-filters';
 import { useDesignsTable } from '@/lib/hooks/use-designs-table';
 import { DesignsFilters } from '@/components/features/designs/designs-filters';
 import { DesignsTable } from '@/components/features/designs/designs-table';
+
+// FullCalendar es pesado: solo se carga cuando se usa la vista calendario
+const DesignCalendar = dynamic(
+  () => import('@/components/features/designs/calendar/design-calendar'),
+  { ssr: false, loading: () => <Skeleton className="h-[560px] w-full rounded-lg" /> }
+);
+
+type DesignsView = 'list' | 'calendar';
 
 // Wrapper component para Suspense boundary requerido por useSearchParams
 export default function DesignsPage() {
@@ -46,6 +57,7 @@ function DesignsPageContent() {
 
   const { designers } = useDesigners();
   const filters = useDesignsFilters();
+  const router = useRouter();
 
   // Leer query param ?open para abrir diseño automáticamente
   const searchParams = useSearchParams();
@@ -57,6 +69,34 @@ function DesignsPageContent() {
     }
   }, [searchParams]);
 
+  // Vista Lista/Calendario — ?view= manda; si no, la preferencia de Ajustes
+  const [view, setView] = useState<DesignsView>('list');
+  const viewInitialized = useRef(false);
+  useEffect(() => {
+    if (viewInitialized.current) return;
+    viewInitialized.current = true;
+    const param = searchParams.get('view');
+    if (param === 'calendar' || param === 'list') {
+      setView(param);
+      return;
+    }
+    if (localStorage.getItem('defaultView') === 'calendar') {
+      setView('calendar');
+    }
+  }, [searchParams]);
+
+  const setViewAndUrl = (next: DesignsView) => {
+    setView(next);
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === 'list') {
+      params.delete('view');
+    } else {
+      params.set('view', 'calendar');
+    }
+    const qs = params.toString();
+    router.replace(`/disenos${qs ? `?${qs}` : ''}`, { scroll: false });
+  };
+
   // SWR Hook for fetching designs
   const { items, isLoading, error, mutate } = useDesigns({
     weekStart: filters.weekStartFilter,
@@ -64,17 +104,6 @@ function DesignsPageContent() {
     statusFilter: filters.statusFilter,
     designerFilter: filters.designerFilter,
   });
-
-  // Local state for optimistic updates
-  const [localItems, setLocalItems] = useState<Design[]>([]);
-
-  // Sync SWR data with local state
-  useEffect(() => {
-    setLocalItems(items);
-  }, [items]);
-
-  // NOTE: We intentionally avoid clearing localItems on filter changes.
-  // Logs proved this could run after SWR sync and wipe valid data for the new range.
 
   // Show toast when revalidation fails (even if we have cached data)
   useEffect(() => {
@@ -86,14 +115,14 @@ function DesignsPageContent() {
   // Filtrar items localmente basado en searchQuery (usando debounced)
   const filteredItems = useMemo(() => {
     const query = filters.debouncedSearchQuery.toLowerCase();
-    if (!query) return localItems;
-    return localItems.filter((design) =>
+    if (!query) return items;
+    return items.filter((design) =>
       design.title.toLowerCase().includes(query) ||
       design.player.toLowerCase().includes(query) ||
       design.match_home.toLowerCase().includes(query) ||
       design.match_away.toLowerCase().includes(query)
     );
-  }, [localItems, filters.debouncedSearchQuery]);
+  }, [items, filters.debouncedSearchQuery]);
 
   const table = useDesignsTable(filteredItems);
 
@@ -147,7 +176,7 @@ function DesignsPageContent() {
   };
 
   // Error state se maneja fuera del PageTransition cuando no hay datos cacheados
-  if (error && localItems.length === 0) {
+  if (error && items.length === 0) {
     return (
       <div className="p-6">
         <EmptyState
@@ -161,7 +190,7 @@ function DesignsPageContent() {
   }
 
   // Only show skeleton on initial load (no cached data yet)
-  const showSkeleton = isLoading && localItems.length === 0;
+  const showSkeleton = isLoading && items.length === 0;
   const searchQueryActive = !!filters.debouncedSearchQuery;
 
   return (
@@ -172,13 +201,27 @@ function DesignsPageContent() {
       loading={showSkeleton}
       skeleton={<DesignsSkeleton />}
       actions={
-        <CreateDesignButton
-          onDesignCreated={() => mutate()}
-          disabled={!isAdmin}
-          disabledReason="Solo administradores pueden crear diseños"
-          activeWeekStart={filters.weekStartFilter}
-          activeWeekEnd={filters.weekEndFilter}
-        />
+        <>
+          <Tabs value={view} onValueChange={(v) => setViewAndUrl(v as DesignsView)}>
+            <TabsList>
+              <TabsTrigger value="list">
+                <List className="mr-1.5 h-4 w-4" />
+                Lista
+              </TabsTrigger>
+              <TabsTrigger value="calendar">
+                <CalendarDays className="mr-1.5 h-4 w-4" />
+                Calendario
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <CreateDesignButton
+            onDesignCreated={() => mutate()}
+            disabled={!isAdmin}
+            disabledReason="Solo administradores pueden crear diseños"
+            activeWeekStart={filters.weekStartFilter}
+            activeWeekEnd={filters.weekEndFilter}
+          />
+        </>
       }
     >
       <DesignsFilters
@@ -193,9 +236,16 @@ function DesignsPageContent() {
         weekEndFilter={filters.weekEndFilter}
         onWeekEndChange={filters.setWeekEndFilter}
         designers={designers}
+        hasActiveFilters={filters.hasActiveFilters}
+        onReset={filters.resetFilters}
       />
 
-      {filteredItems.length === 0 ? (
+      {view === 'calendar' ? (
+        <DesignCalendar
+          items={filteredItems}
+          onEventClick={(item) => handleOpenDetail(item.id)}
+        />
+      ) : filteredItems.length === 0 ? (
         <EmptyState
           title={searchQueryActive ? 'No se encontraron resultados' : 'No hay diseños programados'}
           description={searchQueryActive ? 'Intenta con otros términos de búsqueda' : 'Crea tu primer diseño para comenzar'}
@@ -217,7 +267,7 @@ function DesignsPageContent() {
           paginatedItems={table.paginatedItems}
           designers={designers}
           totalItems={table.totalItems}
-          totalUnfilteredCount={localItems.length}
+          totalUnfilteredCount={items.length}
           searchQueryActive={searchQueryActive}
           itemsPerPage={table.itemsPerPage}
           currentPage={table.currentPage}

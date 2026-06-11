@@ -44,7 +44,7 @@ function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 md:p-6 shadow-md">
+    <div className="rounded-lg border border-border bg-card p-4 md:p-6">
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
