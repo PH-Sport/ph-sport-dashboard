@@ -13,6 +13,7 @@ import { logger } from '@/lib/utils/logger';
 import { AuthHeading } from '@/components/features/auth/auth-heading';
 import { AuthSuccess } from '@/components/features/auth/auth-success';
 import { AuthSubmitButton } from '@/components/features/auth/auth-submit-button';
+import { PasswordInput } from '@/components/features/auth/password-input';
 
 interface Invitation {
   id: string;
@@ -215,18 +216,17 @@ export default function InvitePage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">Contraseña</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={6}
-            placeholder="Mínimo 6 caracteres"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             disabled={submitting}
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Mínimo 6 caracteres.</p>
         </div>
 
         <AuthSubmitButton loading={submitting} loadingLabel="Creando cuenta...">
