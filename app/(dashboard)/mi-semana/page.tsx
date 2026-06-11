@@ -88,7 +88,7 @@ export default function MyWeekPage() {
     <DashboardPage
       title="Mi Semana"
       icon={Calendar}
-      subtitle="Gestiona tus tareas y entregas"
+      subtitle="Tu semana completa, ordenada por entrega"
       loading={showSkeleton || status === 'INITIALIZING'}
       skeleton={<MyWeekSkeleton />}
     >
@@ -96,9 +96,12 @@ export default function MyWeekPage() {
         <Card>
           <CardContent className="flex h-64 items-center justify-center">
             <div className="space-y-3 text-center">
-              <p className="text-muted-foreground">No tienes tareas asignadas</p>
-              <Button asChild>
-                <Link href="/disenos">Ver backlog</Link>
+              <p className="font-medium text-foreground">Semana despejada</p>
+              <p className="text-sm text-muted-foreground">
+                Cuando te asignen trabajo, aparecerá aquí.
+              </p>
+              <Button asChild variant="outline">
+                <Link href="/disenos">Ver el backlog del equipo</Link>
               </Button>
             </div>
           </CardContent>

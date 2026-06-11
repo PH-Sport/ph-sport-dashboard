@@ -69,9 +69,7 @@ export function DeliveredSection({
 
       {totalCount === 0 ? (
         <p className="text-sm text-muted-foreground">Aún no hay entregas</p>
-      ) : !open ? (
-        <p className="text-sm text-muted-foreground">Sección colapsada para reducir ruido visual.</p>
-      ) : (
+      ) : !open ? null : (
         <div className="space-y-6">
           {visibleGroups.map((group) => (
             <div key={group.key} className="space-y-2">

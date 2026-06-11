@@ -1,53 +1,49 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/**
+ * Skeleton de /mi-semana — espeja el layout real: título de sección +
+ * filas compactas de dos zonas (identidad | meta). Sin paginación inventada.
+ */
 export function MyWeekSkeleton() {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <Skeleton className="h-9 w-32 mb-2" />
-          <Skeleton className="h-5 w-48" />
+          <Skeleton className="mb-2 h-9 w-44" />
+          <Skeleton className="h-5 w-64" />
         </div>
-        <Skeleton className="h-10 w-52 rounded-lg" />
       </div>
 
-      {/* Pagination controls */}
+      {/* Sección Pendientes */}
+      <div>
+        <Skeleton className="mb-3 h-6 w-36" />
+        <div className="space-y-2">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} density="compact">
+              <CardContent className="pt-md">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <Skeleton className="mb-2 h-4 w-56" />
+                    <Skeleton className="h-3 w-72" />
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-8 w-[140px]" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Sección Entregados (cabecera plegada) */}
       <div className="flex items-center justify-between">
-        <Skeleton className="h-4 w-32" />
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-10 w-20" />
-        </div>
-      </div>
-
-      {/* Task cards */}
-      <div className="grid gap-4">
-        {[...Array(5)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-48 mb-2" />
-              <Skeleton className="h-4 w-64" />
-              <div className="flex items-center gap-2 mt-2">
-                <Skeleton className="h-4 w-4" />
-                <Skeleton className="h-4 w-48" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-6 w-24 rounded-full" />
-                  <Skeleton className="h-8 w-8" />
-                </div>
-                <div className="flex gap-2">
-                  <Skeleton className="h-9 w-28" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-8 w-16" />
       </div>
     </PageContainer>
   );
