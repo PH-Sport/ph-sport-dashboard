@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * CONCEPTO D — Ajustes: pestañas Cuenta · Apariencia · Notificaciones · MIEMBROS.
- * Miembros vive aquí (gestión, no uso diario). Cards clicables → popup de acciones
- * (cambiar nombre, rol, eliminar usuario).
+ * CONCEPTO D — Ajustes: UNA sola vista con subapartados al scrollear
+ * (Cuenta · Apariencia · Notificaciones). Lo único separado es Miembros,
+ * con cards clicables → popup de acciones (nombre, rol, eliminar).
  */
 
 import { useState } from 'react';
@@ -15,7 +15,7 @@ import { MEMBERS, PENDING_INVITE, NOTIF_PREFS } from '../../_data';
 
 type Member = (typeof MEMBERS)[number];
 
-const TABS = ['Cuenta', 'Apariencia', 'Notificaciones', 'Miembros'] as const;
+const TABS = ['General', 'Miembros'] as const;
 type Tab = (typeof TABS)[number];
 
 const rise = {
@@ -38,8 +38,29 @@ function Pill({ on }: { on: boolean }) {
   );
 }
 
+/** Subapartado: rótulo eyebrow + descripción a la izquierda del scroll, placa debajo. */
+function Section({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <p className="font-mono text-eyebrow uppercase text-primary">{label}</p>
+      <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
+      <div className="mt-3 rounded-2xl border border-border bg-card p-lg shadow-raised">
+        {children}
+      </div>
+    </section>
+  );
+}
+
 export default function ConceptDAjustes() {
-  const [tab, setTab] = useState<Tab>('Miembros');
+  const [tab, setTab] = useState<Tab>('General');
   const [member, setMember] = useState<Member | null>(null);
 
   return (
@@ -56,7 +77,7 @@ export default function ConceptDAjustes() {
         </p>
       </motion.div>
 
-      {/* Pestañas */}
+      {/* Pestañas: General (todo en un scroll) · Miembros (gestión, aparte) */}
       <motion.div
         variants={rise}
         className="inline-flex items-center gap-0.5 rounded-xl border border-border bg-card p-1 shadow-raised"
@@ -77,10 +98,9 @@ export default function ConceptDAjustes() {
         ))}
       </motion.div>
 
-      {/* Contenido por pestaña */}
-      <motion.div variants={rise}>
-        {tab === 'Cuenta' && (
-          <section className="max-w-xl rounded-2xl border border-border bg-card p-lg shadow-raised">
+      {tab === 'General' && (
+        <motion.div variants={rise} className="max-w-2xl space-y-xl pb-xl">
+          <Section label="Cuenta" hint="Tu nombre y datos de acceso">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-lg font-semibold text-primary">
                 M
@@ -99,13 +119,10 @@ export default function ConceptDAjustes() {
             <button className="mt-5 flex h-9 items-center rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
               Guardar cambios
             </button>
-          </section>
-        )}
+          </Section>
 
-        {tab === 'Apariencia' && (
-          <section className="max-w-xl rounded-2xl border border-border bg-card p-lg shadow-raised">
-            <p className="font-mono text-eyebrow uppercase text-muted-foreground">Tema</p>
-            <div className="mt-3 grid grid-cols-2 gap-3">
+          <Section label="Apariencia" hint="Cómo se ve la app en este dispositivo">
+            <div className="grid grid-cols-2 gap-3">
               <button className="flex h-11 items-center justify-center gap-2 rounded-xl border border-border text-sm text-muted-foreground transition-colors hover:bg-panel-hover/40">
                 <Sun className="h-4 w-4" />
                 Claro
@@ -115,11 +132,9 @@ export default function ConceptDAjustes() {
                 Oscuro
               </button>
             </div>
-          </section>
-        )}
+          </Section>
 
-        {tab === 'Notificaciones' && (
-          <section className="max-w-xl rounded-2xl border border-border bg-card p-lg shadow-raised">
+          <Section label="Notificaciones" hint="Qué te avisa la app y por dónde">
             <ul className="space-y-4">
               {NOTIF_PREFS.map((p) => (
                 <li key={p.label} className="flex items-center justify-between gap-4">
@@ -141,56 +156,56 @@ export default function ConceptDAjustes() {
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          </Section>
+        </motion.div>
+      )}
 
-        {tab === 'Miembros' && (
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {MEMBERS.map((m) => (
-                <button
-                  key={m.email}
-                  onClick={() => setMember(m)}
-                  className="rounded-2xl border border-border bg-card p-lg text-left shadow-raised transition-colors hover:border-primary/30"
+      {tab === 'Miembros' && (
+        <motion.div variants={rise} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {MEMBERS.map((m) => (
+              <button
+                key={m.email}
+                onClick={() => setMember(m)}
+                className="rounded-2xl border border-border bg-card p-lg text-left shadow-raised transition-colors hover:border-primary/30"
+              >
+                <div
+                  className={cn(
+                    'flex h-12 w-12 items-center justify-center rounded-full font-mono text-base font-semibold',
+                    m.admin ? 'bg-primary/15 text-primary' : 'bg-panel-hover text-foreground'
+                  )}
                 >
-                  <div
-                    className={cn(
-                      'flex h-12 w-12 items-center justify-center rounded-full font-mono text-base font-semibold',
-                      m.admin ? 'bg-primary/15 text-primary' : 'bg-panel-hover text-foreground'
-                    )}
-                  >
-                    {m.name.charAt(0)}
-                  </div>
-                  <p className="mt-3 truncate font-heading text-base font-semibold">{m.name}</p>
-                  <p className="truncate font-mono text-xs text-muted-foreground">{m.email}</p>
-                  <span
-                    className={cn(
-                      'mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
-                      m.admin ? 'bg-primary/15 text-primary' : 'bg-panel-hover text-muted-foreground'
-                    )}
-                  >
-                    {m.role}
-                  </span>
-                </button>
-              ))}
-              <button className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
-                <Plus className="h-6 w-6" />
-                <span className="text-sm font-medium">Invitar miembro</span>
+                  {m.name.charAt(0)}
+                </div>
+                <p className="mt-3 truncate font-heading text-base font-semibold">{m.name}</p>
+                <p className="truncate font-mono text-xs text-muted-foreground">{m.email}</p>
+                <span
+                  className={cn(
+                    'mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
+                    m.admin ? 'bg-primary/15 text-primary' : 'bg-panel-hover text-muted-foreground'
+                  )}
+                >
+                  {m.role}
+                </span>
               </button>
-            </div>
-
-            <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
-              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
-                Invitación pendiente
-              </p>
-              <div className="mt-2 flex items-center justify-between gap-4">
-                <span className="truncate font-mono text-sm">{PENDING_INVITE.email}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{PENDING_INVITE.note}</span>
-              </div>
-            </section>
+            ))}
+            <button className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+              <Plus className="h-6 w-6" />
+              <span className="text-sm font-medium">Invitar miembro</span>
+            </button>
           </div>
-        )}
-      </motion.div>
+
+          <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+            <p className="font-mono text-eyebrow uppercase text-muted-foreground">
+              Invitación pendiente
+            </p>
+            <div className="mt-2 flex items-center justify-between gap-4">
+              <span className="truncate font-mono text-sm">{PENDING_INVITE.email}</span>
+              <span className="shrink-0 text-xs text-muted-foreground">{PENDING_INVITE.note}</span>
+            </div>
+          </section>
+        </motion.div>
+      )}
 
       {/* ───── Popup de acciones sobre un miembro ───── */}
       <AnimatePresence>

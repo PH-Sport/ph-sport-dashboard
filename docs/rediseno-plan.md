@@ -98,7 +98,12 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
 
 **Concepto D (`/concepts/d`) = la síntesis construida**, mini-app completa: rail+topbar, Inicio (triage+KPIs+2col en placas), Semana (placas por diseñador 2-col), Diseños (búsqueda + estado + **filtro diseñador** + **Lista/Calendario** + modales funcionando: detalle=sheet derecha, crear=modal centrado, sobre glass-scrim), Ajustes con pestaña **Miembros** (cards clicables → popup nombre/rol/eliminar). Nav final: Inicio · Semana · Diseños · ⚙Ajustes (Miembros DENTRO de Ajustes; "Semana" fusiona Equipo+Mi Semana por rol).
 
-**Estado:** usuario vio D: "no está mal" — **pendiente: sus ajustes finos sobre D → congelar dirección → extender a la app real** (los tokens/hooks de Fase 7 hacen esto barato). Todo commiteado en main local, sin push.
+**Estado:** usuario vio D: "no está mal, buen punto de partida" — **iterando sus ajustes finos sobre D → congelar dirección → extender a la app real** (los tokens/hooks de Fase 7 hacen esto barato). Todo commiteado en main local, sin push.
+
+**Ajustes del usuario aplicados (2026-06-12, ronda 1):**
+- ✅ Sidebar **flotante estilo macOS 26**: placa glass-panel despegada de los bordes (inset 12px, rounded-2xl, shadow-overlay), **plegable** a solo-iconos (208↔64px con SPRINGS.smooth; el lienzo se desplaza con el mismo muelle). Pill activa deslizante `layoutId="d-nav-pill"`. Botón Contraer/Expandir abajo.
+- ✅ Ajustes: **una sola vista con subapartados al scrollear** (Cuenta · Apariencia · Notificaciones, rótulo eyebrow + placa). Pestañas reducidas a **General · Miembros** — solo Miembros vive aparte (cards clicables → popup intactos).
+- Pendiente: siguiente ronda de ajustes del usuario ("cuando termines, te digo más cosas").
 
 **Backlog opcional post-Fase 7** (no bloqueante): skeletons de equipo/usuarios afinados al detalle; bulk-create en móvil (hoy scroll horizontal, uso real es desktop); migrar player-status-tag/invitations-card a variantes Badge; editar inline dentro del sheet (hoy modal-sobre-sheet); soft-delete con undo (necesita soporte API); command palette ⌘K (frosted glass listo).
 
