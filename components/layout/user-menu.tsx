@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -12,8 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, Moon, Sun, ChevronDown, Users } from 'lucide-react';
-import { SettingsDialog } from '@/components/features/account/settings-dialog';
+import { LogOut, Settings, ChevronDown, Users } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useAuth } from '@/lib/auth/auth-context';
 import { cn } from '@/lib/utils';
@@ -30,8 +28,6 @@ function getInitials(name: string) {
 export function UserMenu() {
   const router = useRouter();
   const { user, profile, status, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -40,10 +36,6 @@ export function UserMenu() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.push('/login');
     router.refresh();
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const authLoading = status === 'INITIALIZING';
@@ -61,7 +53,7 @@ export function UserMenu() {
   }
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
-  const displayRole = profile?.role === 'ADMIN' ? 'Manager' : 'Diseñador';
+  const displayRole = profile?.role === 'ADMIN' ? 'Mánager' : 'Diseñador';
   const roleColor = profile?.role === 'ADMIN' ? 'text-primary' : 'text-muted-foreground';
 
   return (
@@ -94,11 +86,11 @@ export function UserMenu() {
         <DropdownMenuSeparator className="bg-border" />
 
         <DropdownMenuItem
-          onClick={() => setSettingsOpen(true)}
+          onClick={() => router.push('/ajustes')}
           className="text-foreground hover:bg-accent cursor-pointer"
         >
           <Settings className="mr-2 h-4 w-4" />
-          <span>Configuración</span>
+          <span>Ajustes</span>
         </DropdownMenuItem>
         {profile?.role === 'ADMIN' && (
           <DropdownMenuItem
@@ -109,25 +101,6 @@ export function UserMenu() {
             <span>Usuarios</span>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault();
-            toggleTheme();
-          }}
-          className="text-foreground hover:bg-accent cursor-pointer"
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun className="mr-2 h-4 w-4" />
-              <span>Modo Claro</span>
-            </>
-          ) : (
-            <>
-              <Moon className="mr-2 h-4 w-4" />
-              <span>Modo Oscuro</span>
-            </>
-          )}
-        </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
           onClick={() => setLogoutDialogOpen(true)}
@@ -138,7 +111,6 @@ export function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
 
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <ConfirmDialog
         open={logoutDialogOpen}
         onOpenChange={setLogoutDialogOpen}
@@ -148,7 +120,7 @@ export function UserMenu() {
         cancelLabel="Cancelar"
         variant="warning"
         onConfirm={handleLogout}
-        customIcon="/images/logo-ph-sport-gold.svg"
+        customIcon="/images/logo-ph-sport.svg"
       />
     </DropdownMenu>
   );

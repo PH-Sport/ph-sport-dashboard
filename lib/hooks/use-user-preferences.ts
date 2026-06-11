@@ -17,13 +17,6 @@ import {
 
 export type DefaultView = 'list' | 'calendar';
 
-interface UseUserPreferencesParams {
-  /** Only load when the dialog is open to avoid unnecessary requests. */
-  open: boolean;
-  /** Called after a successful save (used to close the dialog). */
-  onSaved: () => void;
-}
-
 interface UseUserPreferencesResult {
   name: string;
   setName: (name: string) => void;
@@ -37,11 +30,8 @@ interface UseUserPreferencesResult {
   uploadAvatar: (file: File) => Promise<void>;
 }
 
-export function useUserPreferences({
-  open,
-  onSaved,
-}: UseUserPreferencesParams): UseUserPreferencesResult {
-  const { user, profile } = useAuth();
+export function useUserPreferences(): UseUserPreferencesResult {
+  const { user, profile, refreshSession } = useAuth();
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -52,8 +42,6 @@ export function useUserPreferences({
   );
 
   useEffect(() => {
-    if (!open) return;
-
     if (profile?.full_name) {
       setName(profile.full_name);
     } else if (user?.email) {
@@ -78,7 +66,7 @@ export function useUserPreferences({
 
     const storedView = localStorage.getItem('defaultView');
     if (storedView) setDefaultView(storedView as DefaultView);
-  }, [open, profile, user, supabase]);
+  }, [profile, user, supabase]);
 
   const togglePreference = (channel: NotificationChannel, type: NotificationEvent) => {
     setPreferences((prev) => ({
@@ -115,8 +103,8 @@ export function useUserPreferences({
 
       if (updateError) throw updateError;
 
+      await refreshSession();
       toast.success('Avatar actualizado correctamente');
-      window.location.reload();
     } catch (error) {
       logger.error('Error updating avatar:', error);
       toast.error('Error al actualizar el avatar');
@@ -143,9 +131,8 @@ export function useUserPreferences({
 
       if (error) throw error;
 
+      await refreshSession();
       toast.success('Configuración guardada correctamente');
-      onSaved();
-      window.location.reload();
     } catch (error) {
       logger.error('Error saving settings:', error);
       toast.error('Error al guardar la configuración');
