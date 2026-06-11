@@ -1,69 +1,75 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/**
+ * Skeleton de /inicio — espeja el layout real (tira de KPIs + lista de
+ * vencimientos + bloque de equipo). Sin icon-boxes ni pills que no existen.
+ */
 export function DashboardSkeleton() {
   return (
     <PageContainer>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header: saludo + subtítulo + acción */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <Skeleton className="h-9 w-32 mb-2" />
-          <Skeleton className="h-5 w-48" />
+          <Skeleton className="mb-2 h-9 w-56" />
+          <Skeleton className="h-5 w-40" />
         </div>
         <Skeleton className="h-10 w-36" />
       </div>
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
+      {/* Tira de KPIs */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
           <Card key={i}>
-            <CardContent className="pt-6">
-              <Skeleton className="h-4 w-32 mb-2" />
-              <Skeleton className="h-8 w-20 mb-1" />
+            <CardContent className="flex flex-col gap-3 p-5">
               <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-11 w-16" />
+              <Skeleton className="h-4 w-32" />
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex items-center gap-4 p-4">
-              <Skeleton className="h-11 w-11 rounded-lg" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-24 mb-1" />
-                <Skeleton className="h-3 w-32" />
-              </div>
-              <Skeleton className="h-5 w-5" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Recent Designs */}
+      {/* Lista de vencimientos */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <Skeleton className="h-6 w-40 mb-2" />
-            <Skeleton className="h-4 w-56" />
+        <CardContent className="pt-lg">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <Skeleton className="mb-2 h-3 w-28" />
+              <Skeleton className="h-5 w-48" />
+            </div>
+            <Skeleton className="h-8 w-24" />
           </div>
-          <Skeleton className="h-8 w-20" />
-        </CardHeader>
-        <CardContent>
           <div className="divide-y divide-border">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between py-4">
-                <div className="flex-1">
-                  <Skeleton className="h-5 w-48 mb-2" />
-                  <Skeleton className="h-4 w-64" />
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between gap-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="mb-2 h-4 w-48" />
+                  <Skeleton className="h-3 w-64" />
                 </div>
-                <div className="flex items-center gap-2 ml-4">
-                  <Skeleton className="h-6 w-20 rounded-full" />
-                  <Skeleton className="h-5 w-5" />
+                <Skeleton className="h-4 w-24 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bloque de equipo / compañeros */}
+      <Card>
+        <CardContent className="pt-lg">
+          <div className="mb-5">
+            <Skeleton className="mb-2 h-3 w-28" />
+            <Skeleton className="h-5 w-56" />
+          </div>
+          <div className="space-y-5">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-28" />
                 </div>
+                <Skeleton className="h-1.5 w-full" />
               </div>
             ))}
           </div>

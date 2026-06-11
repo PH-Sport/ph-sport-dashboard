@@ -1,33 +1,28 @@
+/**
+ * Saludos del dashboard — tono PHSPORT: directo, seguro, cálido. Sin chistes.
+ * El saludo es DETERMINISTA por día y franja horaria (no cambia entre renders
+ * ni al refrescar): la personalidad de la app debe ser estable, no aleatoria.
+ */
+
 const MORNING_GREETINGS = [
   'Buenos días, {name}',
   'Hola, {name}',
-  'Buen día, {name}',
-  '¿Listo para empezar, {name}?',
-  '{name}, ¿café cargado?',
   '{name}, empieza el día',
 ];
 
 const AFTERNOON_GREETINGS = [
   'Buenas tardes, {name}',
   'Hola, {name}',
-  '¿Cómo va el día, {name}?',
-  '{name}, ¿qué tal?',
   '{name}, sigamos',
 ];
 
 const EVENING_GREETINGS = [
   'Buenas tardes, {name}',
-  'Hola, {name}',
-  '¿Cierre del día, {name}?',
   '{name}, última pasada',
+  'Hola, {name}',
 ];
 
-const NIGHT_GREETINGS = [
-  'Buenas noches, {name}',
-  'Hola, {name}',
-  '¿Aún por aquí, {name}?',
-  '{name}, ¿trabajando hasta tarde?',
-];
+const NIGHT_GREETINGS = ['Buenas noches, {name}', 'Hola, {name}'];
 
 const FALLBACKS = {
   morning: 'Buenos días',
@@ -69,11 +64,12 @@ function fillTemplate(template: string, name: string): string {
   return template.replace('{name}', name);
 }
 
-export function pickGreeting(name: string, now: Date = new Date()): string {
+/** Saludo estable durante todo el día (rota entre días, no entre renders). */
+export function getDailyGreeting(name: string, now: Date = new Date()): string {
   const slot = getSlot(now.getHours());
   const pool = getPool(slot);
-  const template = pool[Math.floor(Math.random() * pool.length)];
-  return fillTemplate(template, name);
+  const dayIndex = Math.floor(now.getTime() / 86_400_000);
+  return fillTemplate(pool[dayIndex % pool.length], name);
 }
 
 export function getStaticGreeting(name: string, now: Date = new Date()): string {

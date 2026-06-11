@@ -1,13 +1,15 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format, isToday, isTomorrow, formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
+import { TWEENS } from '@/components/ui/animations';
+import { TrendingUp, Clock, CheckCircle2, ArrowRight, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
@@ -66,6 +68,8 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
       .slice(0, TEAMMATE_LIMIT);
   }, [items, designers, userId]);
 
+  const [teamOpen, setTeamOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-6">
       {/* Hero — entrega urgente cuando hay <24 h. Countdown como ancla visual editorial. */}
@@ -103,7 +107,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
         </Card>
       )}
 
-      {/* KPIs */}
+      {/* KPIs — tres datos distintos, siempre los mismos tres (nada de ramas que dupliquen) */}
       <div className="grid gap-4 md:grid-cols-3">
         <KpiCard
           title="Tareas activas"
@@ -112,45 +116,37 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           variant={activeDesigns > 0 ? 'primary' : 'default'}
         />
 
-        {nextDeadline && !isUrgent ? (
-          <KpiCard
-            title="Próxima entrega"
-            value={hoursUntilNext && hoursUntilNext > 0 ? `${Math.floor(hoursUntilNext)}h` : '—'}
-            description={nextDeadline.title}
-            variant={hoursUntilNext && hoursUntilNext < 48 ? 'warning' : 'default'}
-            icon={Clock}
-          />
-        ) : !nextDeadline ? (
-          <KpiCard
-            title="Próxima entrega"
-            value="—"
-            description="Sin entregas pendientes"
-            variant="success"
-            icon={CheckCircle2}
-          />
-        ) : (
-          <KpiCard
-            title="Esta semana"
-            value={completedThisWeek}
-            description="Diseños entregados"
-            variant="success"
-            icon={TrendingUp}
-          />
-        )}
+        <KpiCard
+          title="Próxima entrega"
+          value={
+            nextDeadline
+              ? `${Math.max(0, Math.floor(hoursUntilNext ?? 0))}h`
+              : '—'
+          }
+          description={nextDeadline ? nextDeadline.title : 'Sin entregas pendientes'}
+          variant={
+            !nextDeadline
+              ? 'success'
+              : hoursUntilNext !== null && hoursUntilNext < 24
+                ? 'danger'
+                : hoursUntilNext !== null && hoursUntilNext < 48
+                  ? 'warning'
+                  : 'default'
+          }
+          icon={nextDeadline ? Clock : CheckCircle2}
+        />
 
         <KpiCard
-          title="Entregados"
+          title="Entregadas"
           value={completedThisWeek}
-          description="Completados esta semana"
-          variant="success"
+          description="Esta semana"
+          variant={completedThisWeek > 0 ? 'success' : 'default'}
           icon={TrendingUp}
         />
       </div>
 
-      {/* Próximas entregas + Trabajo del equipo */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {/* Próximas entregas — span 2 cols en desktop */}
-        <Card className="md:col-span-2">
+      {/* Próximas entregas — contenido principal, ancho completo */}
+        <Card>
           <CardContent className="p-6">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
@@ -214,22 +210,39 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           </CardContent>
         </Card>
 
-        {/* Trabajo del equipo — preview compañeros */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
-                Compañeros
-              </p>
-              <h2 className="font-heading text-base font-semibold text-foreground">
-                Trabajo activo
-              </h2>
-            </div>
+      {/* Compañeros — secundario e intencional: se abre a propósito, no es un KPI */}
+      {teammates.length > 0 && (
+        <Card density="compact">
+          <CardContent className="pt-md">
+            <button
+              type="button"
+              onClick={() => setTeamOpen((v) => !v)}
+              aria-expanded={teamOpen}
+              className="flex w-full items-center justify-between rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+            >
+              <span className="flex items-center gap-2">
+                <span className="font-mono text-eyebrow uppercase text-muted-foreground">
+                  Compañeros
+                </span>
+                <Badge variant="secondary" className="font-normal">
+                  {teammates.length}
+                </Badge>
+              </span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 text-muted-foreground transition-transform duration-200',
+                  teamOpen && 'rotate-180'
+                )}
+              />
+            </button>
 
-            {teammates.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No hay otros diseñadores activos.</p>
-            ) : (
-              <ul className="space-y-3">
+            {teamOpen && (
+              <motion.ul
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={TWEENS.base}
+                className="mt-4 space-y-3"
+              >
                 {teammates.map((mate) => (
                   <li key={mate.id} className="flex items-center justify-between gap-3 text-sm">
                     <span className="truncate font-medium text-foreground">{mate.name}</span>
@@ -238,11 +251,11 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
                     </span>
                   </li>
                 ))}
-              </ul>
+              </motion.ul>
             )}
           </CardContent>
         </Card>
-      </div>
+      )}
 
       {/* Accesos rápidos — sin icono-box, cada link con peso visual diferenciado */}
       <div className="grid gap-4 md:grid-cols-2">

@@ -8,7 +8,7 @@ import { KpiCard } from '@/components/ui/kpi-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, Users, Clock, User, ArrowRight, CalendarClock } from 'lucide-react';
+import { Users, Clock, ArrowRight, CalendarClock, CheckCircle2, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
@@ -54,6 +54,8 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
   }).length;
 
   const unassignedCount = items.filter((d) => !d.designer_id).length;
+  const activeCount = items.filter((d) => d.status === 'BACKLOG').length;
+  const deliveredCount = items.filter((d) => d.status === 'DELIVERED').length;
 
   const designerLoads = useMemo<DesignerLoad[]>(() => {
     return designers
@@ -88,8 +90,9 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
     return hoursLeft < 24;
   }).length;
 
+  // El héroe de triage es la ÚNICA superficie de acción: riesgo + sin asignar viven aquí
   const hasAlerts =
-    atRisk > 5 || overloadedDesigners.length > 0 || criticalCount > 0;
+    atRisk > 5 || overloadedDesigners.length > 0 || criticalCount > 0 || unassignedCount > 0;
 
   const activeDesignersCount = designerLoads.filter((d) => d.active > 0).length;
 
@@ -102,7 +105,10 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
       {/* Alertas que requieren atención — ancla tipográfica (recuento total), sin icono-box */}
       {hasAlerts && (() => {
         const totalAlerts =
-          (criticalCount > 0 ? 1 : 0) + (atRisk > 5 ? 1 : 0) + (overloadedDesigners.length > 0 ? 1 : 0);
+          (criticalCount > 0 ? 1 : 0) +
+          (atRisk > 5 ? 1 : 0) +
+          (overloadedDesigners.length > 0 ? 1 : 0) +
+          (unassignedCount > 0 ? 1 : 0);
         return (
           <Card className="border-primary/40 bg-primary/[0.04]">
             <CardContent className="flex flex-col gap-5 p-6 md:flex-row md:items-stretch md:gap-8">
@@ -144,27 +150,51 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                       con sobrecarga ({overloadedDesigners.map((d) => d.name).join(', ')}).
                     </li>
                   )}
+                  {unassignedCount > 0 && (
+                    <li>
+                      <span className="font-medium text-foreground">
+                        {unassignedCount} diseño{unassignedCount !== 1 ? 's' : ''}
+                      </span>{' '}
+                      sin asignar.
+                    </li>
+                  )}
                 </ul>
               </div>
-              <Button size="sm" asChild className="shrink-0 self-end md:self-center">
-                <Link href="/equipo">
-                  Ver equipo
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              {/* Acción directa donde está el problema — sin tarjetas intermedias */}
+              <div className="flex shrink-0 flex-col gap-2 self-end md:justify-center md:self-center">
+                {unassignedCount > 0 && (
+                  <Button size="sm" onClick={onAssign} disabled={assigning}>
+                    <Users className="mr-2 h-4 w-4" />
+                    {assigning ? 'Repartiendo…' : 'Repartir sin asignar'}
+                  </Button>
+                )}
+                <Button size="sm" variant="outline" asChild>
+                  <Link href="/equipo">
+                    Ver equipo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );
       })()}
 
-      {/* KPIs editoriales */}
+      {/* Tira de salud — datos sin acción; el riesgo y lo sin asignar viven en el héroe */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          title="En riesgo"
-          value={atRisk}
-          description="No llegarán a tiempo"
-          variant={atRisk > 0 ? 'danger' : 'success'}
-          icon={AlertTriangle}
+          title="Activas"
+          value={activeCount}
+          description="Pendientes esta semana"
+          variant="default"
+          icon={Layers}
+        />
+        <KpiCard
+          title="Entregados"
+          value={deliveredCount}
+          description="Completados esta semana"
+          variant={deliveredCount > 0 ? 'success' : 'default'}
+          icon={CheckCircle2}
         />
         <KpiCard
           title="Bloqueados"
@@ -174,13 +204,6 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
           icon={Clock}
         />
         <KpiCard
-          title="Sin asignar"
-          value={unassignedCount}
-          description="Trabajo sin dueño"
-          variant={unassignedCount > 0 ? 'warning' : 'success'}
-          icon={User}
-        />
-        <KpiCard
           title="Equipo activo"
           value={`${activeDesignersCount}/${designers.length}`}
           description="Con trabajo asignado"
@@ -188,26 +211,6 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
           icon={Users}
         />
       </div>
-
-      {/* Repartir si hay sin asignar */}
-      {unassignedCount > 0 && (
-        <Card>
-          <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="font-heading text-base font-semibold text-foreground">
-                {unassignedCount} diseño{unassignedCount !== 1 ? 's' : ''} sin asignar
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Reparte automáticamente entre el equipo o asigna manualmente.
-              </p>
-            </div>
-            <Button onClick={onAssign} disabled={assigning} className="shrink-0">
-              <Users className="mr-2 h-4 w-4" />
-              {assigning ? 'Repartiendo…' : 'Repartir diseños'}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Próximos vencimientos */}
       <Card>
@@ -333,29 +336,22 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
               <p className="text-sm text-muted-foreground">Sin actividad esta semana.</p>
             )}
           </div>
+
+          {/* Inactivos plegados dentro del bloque de equipo — un solo bloque, menos ruido */}
+          {inactiveDesigners.length > 0 && (
+            <div className="mt-5 border-t border-border pt-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground">Sin trabajo esta semana:</span>
+                {inactiveDesigners.map((d) => (
+                  <Badge key={d.id} variant="outline" className="font-normal">
+                    {d.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Diseñadores inactivos */}
-      {inactiveDesigners.length > 0 && (
-        <Card>
-          <CardContent className="space-y-3 p-5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-foreground">Sin trabajo esta semana</h3>
-              <Badge variant="outline" className="mono h-5 px-1.5 text-[10px]">
-                {inactiveDesigners.length}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {inactiveDesigners.map((d) => (
-                <Badge key={d.id} variant="outline" className="font-normal">
-                  {d.name}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
