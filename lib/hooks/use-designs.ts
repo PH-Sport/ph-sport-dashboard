@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWR, { type KeyedMutator } from 'swr';
 import { format } from 'date-fns';
 import type { Design } from '@/lib/types/design';
 import type { DesignStatus } from '@/lib/types/filters';
@@ -15,7 +15,8 @@ interface UseDesignsReturn {
   items: Design[];
   isLoading: boolean;
   error: Error | null;
-  mutate: () => void;
+  /** KeyedMutator real de SWR — permite updates optimistas con rollback. */
+  mutate: KeyedMutator<Design[]>;
 }
 
 export function useDesigns({

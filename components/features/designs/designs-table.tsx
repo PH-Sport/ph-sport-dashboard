@@ -22,6 +22,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Edit2,
   Trash2,
   ExternalLink,
@@ -31,8 +37,10 @@ import {
   ChevronRight,
   Flame,
   AlertTriangle,
+  MoreHorizontal,
+  Calendar,
 } from 'lucide-react';
-import type { Design } from '@/lib/types/design';
+import type { Design, DesignStatus } from '@/lib/types/design';
 import { STATUS_LABELS } from '@/lib/types/design';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
@@ -61,8 +69,121 @@ interface DesignsTableProps {
   onOpenDetail: (designId: string) => void;
   onEdit: (design: Design) => void;
   onDelete: (design: Design) => void;
+  onStatusChange: (design: Design, newStatus: DesignStatus) => void;
+  updatingId: string | null;
   isAdmin: boolean;
   deletingId: string | null;
+}
+
+function getUrgency(design: Design) {
+  const hoursLeft = (new Date(design.deadline_at).getTime() - Date.now()) / (1000 * 60 * 60);
+  const pending = design.status !== 'DELIVERED';
+  return {
+    hoursLeft,
+    isCritical: pending && hoursLeft > 0 && hoursLeft < 24,
+    isUrgent: pending && hoursLeft >= 24 && hoursLeft < 48,
+  };
+}
+
+function UrgencyBadges({ design }: { design: Design }) {
+  const { hoursLeft, isCritical, isUrgent } = getUrgency(design);
+  if (isCritical) {
+    return (
+      <Badge variant="destructive" className="h-6 shrink-0 gap-1">
+        <Flame className="h-3 w-3" />
+        {Math.floor(hoursLeft)}h
+      </Badge>
+    );
+  }
+  if (isUrgent) {
+    return (
+      <Badge variant="warning" className="h-6 shrink-0 gap-1">
+        <AlertTriangle className="h-3 w-3" />
+        {Math.floor(hoursLeft)}h
+      </Badge>
+    );
+  }
+  return null;
+}
+
+/** Acciones de fila tras menú ⋯ — borrar deja de ser un objetivo siempre visible. */
+function RowActions({
+  design,
+  isAdmin,
+  deletingId,
+  onEdit,
+  onDelete,
+}: {
+  design: Design;
+  isAdmin: boolean;
+  deletingId: string | null;
+  onEdit: (design: Design) => void;
+  onDelete: (design: Design) => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          aria-label={`Acciones — ${design.title}`}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {design.folder_url && (
+          <DropdownMenuItem asChild>
+            <a href={design.folder_url} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Abrir en Drive
+            </a>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onClick={() => onEdit(design)}>
+          <Edit2 className="mr-2 h-4 w-4" />
+          Editar
+        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem
+            onClick={() => onDelete(design)}
+            disabled={deletingId === design.id}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Eliminar
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function StatusSelect({
+  design,
+  onStatusChange,
+  disabled,
+}: {
+  design: Design;
+  onStatusChange: (design: Design, newStatus: DesignStatus) => void;
+  disabled: boolean;
+}) {
+  return (
+    <Select
+      value={design.status}
+      onValueChange={(v) => onStatusChange(design, v as DesignStatus)}
+      disabled={disabled}
+    >
+      <SelectTrigger className="h-8 w-[130px] text-xs" aria-label="Cambiar estado">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="BACKLOG">{STATUS_LABELS.BACKLOG}</SelectItem>
+        <SelectItem value="DELIVERED">{STATUS_LABELS.DELIVERED}</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 }
 
 export function DesignsTable({
@@ -84,6 +205,8 @@ export function DesignsTable({
   onOpenDetail,
   onEdit,
   onDelete,
+  onStatusChange,
+  updatingId,
   isAdmin,
   deletingId,
 }: DesignsTableProps) {
@@ -96,10 +219,21 @@ export function DesignsTable({
     );
   };
 
+  const sortableHead = (column: DesignSortColumn, label: string) => (
+    <button
+      type="button"
+      onClick={() => onSort(column)}
+      className="flex select-none items-center gap-1 rounded-sm outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {label}
+      {renderSortIcon(column)}
+    </button>
+  );
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <CardTitle>Lista de Diseños</CardTitle>
             <CardDescription>
@@ -107,7 +241,7 @@ export function DesignsTable({
               {searchQueryActive && ` (filtrado de ${totalUnfilteredCount} total${totalUnfilteredCount !== 1 ? 'es' : ''})`}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-2 sm:flex">
             <Label className="text-sm text-muted-foreground">Mostrar</Label>
             <Select
               value={itemsPerPage.toString()}
@@ -127,167 +261,147 @@ export function DesignsTable({
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead
-                className="cursor-pointer hover:text-primary transition-colors select-none"
-                onClick={() => onSort('title')}
-              >
-                <div className="flex items-center gap-1">
-                  Título
-                  {renderSortIcon('title')}
-                </div>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:text-primary transition-colors select-none"
-                onClick={() => onSort('player')}
-              >
-                <div className="flex items-center gap-1">
-                  Contexto
-                  {renderSortIcon('player')}
-                </div>
-              </TableHead>
-              <TableHead>Diseñador</TableHead>
-              <TableHead
-                className="cursor-pointer hover:text-primary transition-colors select-none"
-                onClick={() => onSort('status')}
-              >
-                <div className="flex items-center gap-1">
-                  Estado
-                  {renderSortIcon('status')}
-                </div>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:text-primary transition-colors select-none"
-                onClick={() => onSort('deadline')}
-              >
-                <div className="flex items-center gap-1">
-                  Fecha de entrega
-                  {renderSortIcon('deadline')}
-                </div>
-              </TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedItems.map((design) => {
-              const designer = designers.find((d) => d.id === design.designer_id);
-
-              const now = new Date();
-              const deadline = new Date(design.deadline_at);
-              const hoursUntilDeadline = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-              const isUrgent = hoursUntilDeadline < 48 && hoursUntilDeadline > 0 && design.status !== 'DELIVERED';
-              const isCritical = hoursUntilDeadline < 24 && hoursUntilDeadline > 0 && design.status !== 'DELIVERED';
-
-              return (
-                <TableRow key={design.id}>
-                  <TableCell className="font-medium">
+        {/* Móvil: lista de cards (la tabla de 6 columnas no se encoge, se adapta) */}
+        <div className="space-y-2 md:hidden">
+          {paginatedItems.map((design) => (
+            <Card key={design.id} density="compact">
+              <CardContent className="pt-md">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
                     <button
                       onClick={() => onOpenDetail(design.id)}
-                      className="hover:text-primary transition-colors text-left"
+                      className="truncate text-left font-medium transition-colors hover:text-primary"
                     >
                       {design.title}
                     </button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{design.player}</span>
-                        {design.player_status && <PlayerStatusTag status={design.player_status} variant="compact" />}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {design.match_home} vs {design.match_away}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {designer ? (
-                      <div className="flex items-center gap-2" title={designer.name}>
-                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                          {designer.name.charAt(0)}
+                    <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+                      {design.player}
+                      {design.player_status && (
+                        <PlayerStatusTag status={design.player_status} variant="compact" />
+                      )}
+                      <span>· {design.match_home} vs {design.match_away}</span>
+                    </p>
+                  </div>
+                  <RowActions
+                    design={design}
+                    isAdmin={isAdmin}
+                    deletingId={deletingId}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                  />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <StatusSelect
+                      design={design}
+                      onStatusChange={onStatusChange}
+                      disabled={updatingId === design.id}
+                    />
+                    <UrgencyBadges design={design} />
+                  </div>
+                  <span className="mono tabular flex items-center gap-1 text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3" aria-hidden />
+                    {format(new Date(design.deadline_at), 'dd MMM HH:mm', { locale: es })}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Desktop: tabla */}
+        <div className="hidden md:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{sortableHead('title', 'Título')}</TableHead>
+                <TableHead>{sortableHead('player', 'Contexto')}</TableHead>
+                <TableHead>Diseñador</TableHead>
+                <TableHead>{sortableHead('status', 'Estado')}</TableHead>
+                <TableHead>{sortableHead('deadline', 'Fecha de entrega')}</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedItems.map((design) => {
+                const designer = designers.find((d) => d.id === design.designer_id);
+
+                return (
+                  <TableRow key={design.id}>
+                    <TableCell className="font-medium">
+                      <button
+                        onClick={() => onOpenDetail(design.id)}
+                        className="text-left transition-colors hover:text-primary"
+                      >
+                        {design.title}
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{design.player}</span>
+                          {design.player_status && (
+                            <PlayerStatusTag status={design.player_status} variant="compact" />
+                          )}
                         </div>
-                        <span className="text-sm truncate max-w-[100px]">{designer.name.split(' ')[0]}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {design.match_home} vs {design.match_away}
+                        </span>
                       </div>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge status={design.status} className="h-6">
-                        {STATUS_LABELS[design.status]}
-                      </Badge>
-                      {isCritical && (
-                        <Badge variant="destructive" className="h-6 gap-1 shrink-0">
-                          <Flame className="h-3 w-3" />
-                          {Math.floor(hoursUntilDeadline)}h
-                        </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {designer ? (
+                        <div className="flex items-center gap-2" title={designer.name}>
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                            {designer.name.charAt(0)}
+                          </div>
+                          <span className="max-w-[100px] truncate text-sm">
+                            {designer.name.split(' ')[0]}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-status-warning">Sin asignar</span>
                       )}
-                      {isUrgent && !isCritical && (
-                        <Badge variant="warning" className="h-6 gap-1 shrink-0">
-                          <AlertTriangle className="h-3 w-3" />
-                          {Math.floor(hoursUntilDeadline)}h
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col text-sm">
-                      <span>{format(new Date(design.deadline_at), 'dd MMM', { locale: es })}</span>
-                      <span className="text-xs text-muted-foreground">{format(new Date(design.deadline_at), 'HH:mm')}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {design.folder_url && (
-                        <Button variant="ghost" size="sm" asChild>
-                          <a
-                            href={design.folder_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Abrir carpeta Drive"
-                            aria-label="Abrir carpeta Drive"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(design)}
-                        title="Editar diseño"
-                        aria-label="Editar diseño"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(design)}
-                        disabled={!isAdmin || deletingId === design.id}
-                        title={
-                          isAdmin
-                            ? 'Eliminar diseño'
-                            : 'Solo administradores pueden eliminar diseños'
-                        }
-                        aria-label="Eliminar diseño"
-                        className="text-destructive hover:text-destructive/80"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <StatusSelect
+                          design={design}
+                          onStatusChange={onStatusChange}
+                          disabled={updatingId === design.id}
+                        />
+                        <UrgencyBadges design={design} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col text-sm">
+                        <span>{format(new Date(design.deadline_at), 'dd MMM', { locale: es })}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(design.deadline_at), 'HH:mm')}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end">
+                        <RowActions
+                          design={design}
+                          isAdmin={isAdmin}
+                          deletingId={deletingId}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
 
         {/* Controles de paginación */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
             <p className="text-sm text-muted-foreground">
               Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
             </p>
@@ -298,7 +412,7 @@ export function DesignsTable({
                 onClick={() => onPageChange((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
+                <ChevronLeft className="mr-1 h-4 w-4" />
                 Anterior
               </Button>
               <span className="flex items-center px-3 text-sm text-muted-foreground">
@@ -311,7 +425,7 @@ export function DesignsTable({
                 disabled={currentPage === totalPages}
               >
                 Siguiente
-                <ChevronRight className="h-4 w-4 ml-1" />
+                <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
           </div>

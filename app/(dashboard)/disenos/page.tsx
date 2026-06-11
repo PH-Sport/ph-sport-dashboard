@@ -12,7 +12,9 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { DesignsSkeleton } from '@/components/skeletons/designs-skeleton';
 import { useDesigners } from '@/lib/hooks/use-designers';
-import type { Design } from '@/lib/types/design';
+import { useConfirm } from '@/lib/hooks/use-confirm';
+import type { Design, DesignStatus } from '@/lib/types/design';
+import { STATUS_LABELS, DESIGN_STATUS_ORDER } from '@/lib/types/design';
 import { toast } from 'sonner';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -175,6 +177,54 @@ function DesignsPageContent() {
     setDetailSheetOpen(true);
   };
 
+  // Cambio de estado inline — optimista con rollback, confirm si es regresivo
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const {
+    confirm,
+    isOpen: confirmOpen,
+    options: confirmOptions,
+    handleConfirm,
+    handleCancel,
+  } = useConfirm();
+
+  const handleStatusChange = async (design: Design, newStatus: DesignStatus) => {
+    const isRegressive =
+      DESIGN_STATUS_ORDER.indexOf(newStatus) < DESIGN_STATUS_ORDER.indexOf(design.status);
+    if (isRegressive) {
+      const confirmed = await confirm({
+        title: '¿Volver atrás?',
+        description: `¿Estás seguro de cambiar "${design.title}" de ${STATUS_LABELS[design.status]} a ${STATUS_LABELS[newStatus]}?`,
+        confirmText: 'Sí, cambiar',
+        cancelText: 'Cancelar',
+      });
+      if (!confirmed) return;
+    }
+
+    const applyStatus = (list: Design[] | undefined) =>
+      (list ?? []).map((d) => (d.id === design.id ? { ...d, status: newStatus } : d));
+
+    setUpdatingId(design.id);
+    try {
+      await mutate(
+        async (current) => {
+          const response = await fetch(`/api/designs/${design.id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+          });
+          if (!response.ok) throw new Error('Error al actualizar estado');
+          return applyStatus(current);
+        },
+        { optimisticData: applyStatus, rollbackOnError: true, revalidate: true }
+      );
+      toast.success('Estado actualizado');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Error al actualizar estado');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   // Error state se maneja fuera del PageTransition cuando no hay datos cacheados
   if (error && items.length === 0) {
     return (
@@ -285,8 +335,23 @@ function DesignsPageContent() {
           onOpenDetail={handleOpenDetail}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
+          updatingId={updatingId}
           isAdmin={isAdmin}
           deletingId={deletingId}
+        />
+      )}
+
+      {confirmOptions && (
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={handleCancel}
+          onConfirm={handleConfirm}
+          title={confirmOptions.title}
+          description={confirmOptions.description}
+          confirmLabel={confirmOptions.confirmText || 'Confirmar'}
+          cancelLabel={confirmOptions.cancelText || 'Cancelar'}
+          variant={confirmOptions.variant || 'warning'}
         />
       )}
 
