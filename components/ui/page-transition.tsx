@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, Transition } from 'framer-motion';
 import { ReactNode } from 'react';
-import { animations, TRANSITIONS } from './animations';
+import { animations, SPRINGS, TRANSITIONS, TWEENS } from './animations';
 
 // ============================================
 // PageTransition Component
@@ -58,7 +58,12 @@ export function PageTransition({
     slow: TRANSITIONS.layout,
   };
   
-  const resolvedTransition = transition ?? speedToTransition[speed];
+  // fadeSlide "se asienta": posición con muelle gentle, opacidad con tween
+  const resolvedTransition =
+    transition ??
+    (variant === 'fadeSlide'
+      ? ({ opacity: TWEENS.base, y: SPRINGS.gentle } as Transition)
+      : speedToTransition[speed]);
 
   return (
     <AnimatePresence mode="wait">

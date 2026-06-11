@@ -26,6 +26,8 @@ import {
 } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { SPRINGS } from '@/components/ui/animations';
 import {
   Calendar,
   Home,
@@ -322,16 +324,25 @@ function NavLink({
       aria-current={active ? 'page' : undefined}
       title={!expanded ? item.label : undefined}
       className={cn(
-        'flex h-10 items-center rounded-lg outline-none transition-colors',
+        'relative flex h-10 items-center rounded-lg outline-none transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
         expanded ? 'gap-3 px-3' : 'mx-auto w-10 justify-center',
         active
-          ? 'bg-panel-active font-medium text-panel-active-foreground'
+          ? 'font-medium text-panel-active-foreground'
           : 'text-panel-foreground/80 hover:bg-panel-hover hover:text-panel-foreground'
       )}
     >
-      <Icon className="h-5 w-5 shrink-0" aria-hidden />
-      {expanded && <span className="truncate text-sm">{item.label}</span>}
+      {/* Pill activa compartida — se desliza entre items con muelle (momento firma) */}
+      {active && (
+        <motion.span
+          layoutId="nav-active-pill"
+          transition={SPRINGS.smooth}
+          className="absolute inset-0 rounded-lg bg-panel-active"
+          aria-hidden
+        />
+      )}
+      <Icon className="relative z-10 h-5 w-5 shrink-0" aria-hidden />
+      {expanded && <span className="relative z-10 truncate text-sm">{item.label}</span>}
     </Link>
   );
 }

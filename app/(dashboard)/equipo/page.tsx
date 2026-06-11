@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardPage } from '@/components/ui/dashboard-page';
@@ -83,7 +84,15 @@ export default function TeamPage() {
         {designers.length === 0 ? (
           <Card>
             <CardContent className="flex h-64 items-center justify-center">
-              <p className="text-muted-foreground">No hay diseñadores registrados</p>
+              <div className="space-y-3 text-center">
+                <p className="font-medium text-foreground">Aún no hay diseñadores en el equipo</p>
+                <p className="text-sm text-muted-foreground">
+                  Invítalos y aparecerán aquí con su carga semanal.
+                </p>
+                <Button asChild variant="outline">
+                  <Link href="/ajustes/usuarios">Invitar al equipo</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (

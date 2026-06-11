@@ -38,7 +38,7 @@ export function DashboardPage({
   maxWidth = '7xl',
 }: DashboardPageProps) {
   return (
-    <PageTransition loading={loading} skeleton={skeleton}>
+    <PageTransition loading={loading} skeleton={skeleton} variant="fadeSlide">
       <PageContainer maxWidth={maxWidth}>
         <PageHeader
           title={title}
