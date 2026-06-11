@@ -41,9 +41,10 @@ export default function ConceptsIndex() {
           Tres direcciones para el nuevo look
         </h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
-          La misma pantalla (Inicio · Manager) con los mismos datos, en tres lenguajes visuales
-          genuinamente distintos. Ábrelos, navega entre ellos con el conmutador flotante, y elige —
-          o mezcla: «el shell de la A con la densidad de la C» también vale.
+          Tres mini-apps navegables completas — Inicio, Semana, Diseños, Miembros y Ajustes — con
+          los mismos datos, en tres lenguajes visuales genuinamente distintos. Navega cada una con
+          su propio menú; el conmutador flotante te lleva a la misma página del otro concepto. Elige
+          una — o mezcla: «el shell de la A con la densidad de la C» también vale.
         </p>
 
         <div className="mt-2xl space-y-lg">

@@ -6,9 +6,16 @@ import { cn } from '@/lib/utils';
 
 const CONCEPTS = ['a', 'b', 'c'] as const;
 
-/** Conmutador flotante para comparar conceptos sin volver al índice. */
+/**
+ * Conmutador flotante. Mantiene la subpágina al cambiar de concepto:
+ * /concepts/a/disenos + «C» → /concepts/c/disenos.
+ */
 export function ConceptSwitcher() {
   const pathname = usePathname() ?? '';
+  const match = pathname.match(/^\/concepts\/([abc])(\/.*)?$/);
+  const current = match?.[1];
+  const subpath = match?.[2] ?? '';
+
   return (
     <div className="glass-panel fixed bottom-4 right-4 z-[60] flex items-center gap-1 rounded-full px-2 py-1.5 shadow-overlay">
       <span className="px-1.5 font-mono text-eyebrow uppercase text-panel-foreground/50">
@@ -17,10 +24,10 @@ export function ConceptSwitcher() {
       {CONCEPTS.map((id) => (
         <Link
           key={id}
-          href={`/concepts/${id}`}
+          href={`/concepts/${id}${subpath}`}
           className={cn(
             'flex h-7 w-7 items-center justify-center rounded-full font-mono text-xs font-semibold uppercase transition-colors',
-            pathname.endsWith(`/${id}`)
+            current === id
               ? 'bg-primary text-primary-foreground'
               : 'text-panel-foreground/70 hover:bg-panel-hover'
           )}
