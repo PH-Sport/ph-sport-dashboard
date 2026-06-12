@@ -103,7 +103,17 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
 **Ajustes del usuario aplicados (2026-06-12, ronda 1):**
 - ✅ Sidebar **flotante estilo macOS 26**: placa glass-panel despegada de los bordes (inset 12px, rounded-2xl, shadow-overlay), **plegable** a solo-iconos (208↔64px con SPRINGS.smooth; el lienzo se desplaza con el mismo muelle). Pill activa deslizante `layoutId="d-nav-pill"`. Botón Contraer/Expandir abajo.
 - ✅ Ajustes: **una sola vista con subapartados al scrollear** (Cuenta · Apariencia · Notificaciones, rótulo eyebrow + placa). Pestañas reducidas a **General · Miembros** — solo Miembros vive aparte (cards clicables → popup intactos).
-- Pendiente: siguiente ronda de ajustes del usuario ("cuando termines, te digo más cosas").
+**Ajustes del usuario aplicados (2026-06-12, ronda 2 — cerrar el gap concept↔app real):**
+- ✅ **Conmutador de rol** (pill "dev" en topbar): ver toda la app como Mánager o como Diseñador (persona: Marta). En la app real será una **cuenta developer con flag** que no ocupa puesto ni aparece como miembro → FEATURE NUEVA de backend al portar.
+- ✅ **Cara Diseñador completa**: Inicio (hero de urgencia con cuenta atrás "4 h", KPIs propios, cola, compañeros en secundario), Semana = Mi semana (entrega optimista en un toque, entregadas plegables por semana, volver atrás con confirmación), Diseños (solo lo suyo, sin crear/editar/borrar), Ajustes sin Miembros.
+- ✅ **Shell vivo**: campana con dropdown (no leídas, marcar todas), menú de usuario (persona, Ajustes, logout con confirmación), tema claro/oscuro funcional.
+- ✅ **Semana-céntrico**: navegación ◀ semana ▶ en Semana y Diseños (mock 3 semanas) con estados vacíos diseñados.
+- ✅ **Lenguaje de urgencia**: punto pulsante sutil (ámbar <48 h, rojo <24 h, rojo fijo + "Atrasada") en vez de iconos de fuego — decisión del usuario. Tags de estado del jugador (Duda, Última hora…) — se revisarán más adelante.
+- ✅ **KPI "Bloqueados" eliminado** (no tiene lógica real) → "Atrasados" (vencidos sin entregar).
+- ✅ **Filtros funcionales** en Diseños (búsqueda, estado, diseñador, limpiar) + confirmaciones (estado regresivo, eliminar, logout).
+- ✅ **Crear diseños repensado** (decisión del usuario: el lote es EL modo, no un extra): por tipos (Matchday/Presentación/Cumpleaños/Firma/Otro — ya no solo matchday), añades piezas a un lote y creas todas de una; diseñador = "Reparto automático" por defecto; pestaña **Asistente**: pegas el calendario/texto del club → genera borrador de filas para revisar (mock del intake IA pendiente, ver memoria project_pending_ai_design_intake).
+- **Popup de Miembros** (renombrar, cambiar rol, eliminar usuario): el usuario CONFIRMA que lo quiere → FEATURE NUEVA con API al portar (hoy la app real solo lista usuarios, sin acciones).
+- Pendiente: siguiente ronda de ajustes del usuario.
 
 **Backlog opcional post-Fase 7** (no bloqueante): skeletons de equipo/usuarios afinados al detalle; bulk-create en móvil (hoy scroll horizontal, uso real es desktop); migrar player-status-tag/invitations-card a variantes Badge; editar inline dentro del sheet (hoy modal-sobre-sheet); soft-delete con undo (necesita soporte API); command palette ⌘K (frosted glass listo).
 
