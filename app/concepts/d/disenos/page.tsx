@@ -79,6 +79,7 @@ export default function ConceptDDisenos() {
   const [designerFilter, setDesignerFilter] = useState('Todos');
   const [designerOpen, setDesignerOpen] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
+  const [assignOpen, setAssignOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [confirmRevert, setConfirmRevert] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -111,6 +112,14 @@ export default function ConceptDDisenos() {
     setRows((rs) =>
       rs.map((r) => (r.id === id ? { ...r, delivered, urgency: delivered ? null : r.urgency } : r))
     );
+
+  const setAssignee = (id: number, designer: string) =>
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, designer } : r)));
+
+  const closeDetail = () => {
+    setDetailId(null);
+    setAssignOpen(false);
+  };
 
   return (
     <motion.div
@@ -296,7 +305,10 @@ export default function ConceptDDisenos() {
                 {visible.map((d) => (
                   <motion.li key={d.id} layout transition={SPRINGS.smooth}>
                     <button
-                      onClick={() => setDetailId(d.id)}
+                      onClick={() => {
+                        setDetailId(d.id);
+                        setAssignOpen(false);
+                      }}
                       className="flex w-full items-center gap-4 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-panel-hover/40"
                     >
                       <div
@@ -421,7 +433,7 @@ export default function ConceptDDisenos() {
         </motion.section>
       )}
 
-      {/* ───── Modal: detalle de diseño (sheet derecha sobre velo de cristal) ───── */}
+      {/* ───── Modal: detalle de diseño (contenedor centrado, simétrico) ───── */}
       <AnimatePresence>
         {detail && (
           <>
@@ -430,125 +442,186 @@ export default function ConceptDDisenos() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={TWEENS.base}
-              onClick={() => setDetailId(null)}
+              onClick={closeDetail}
               className="glass-scrim fixed inset-0 z-50"
             />
-            <motion.aside
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={SPRINGS.smooth}
-              className="fixed inset-y-3 right-3 z-50 flex w-[min(420px,calc(100vw-24px))] flex-col rounded-2xl border border-border bg-card shadow-overlay"
-            >
-              <div className="flex items-start justify-between gap-4 border-b border-border/60 p-lg">
-                <div className="min-w-0">
-                  <p className="font-mono text-eyebrow uppercase text-muted-foreground">Diseño</p>
-                  <h2 className="mt-1 truncate font-heading text-xl font-semibold tracking-tight">
-                    {detail.title}
-                  </h2>
-                  <p className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
-                    {detail.player}
-                    <PlayerStatusTag status={detail.playerStatus} />
-                  </p>
-                </div>
-                <button
-                  onClick={() => setDetailId(null)}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="flex-1 space-y-5 overflow-y-auto p-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Estado</span>
-                  <span
-                    className={cn(
-                      'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
-                      detail.delivered
-                        ? 'bg-status-success/15 text-status-success'
-                        : 'bg-panel-hover text-foreground'
-                    )}
+            <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={SPRINGS.smooth}
+                className="pointer-events-auto flex max-h-[calc(100dvh-32px)] w-full max-w-md flex-col rounded-2xl border border-border bg-card shadow-overlay"
+              >
+                <div className="flex items-start justify-between gap-4 border-b border-border/60 p-lg">
+                  <div className="min-w-0">
+                    <p className="font-mono text-eyebrow uppercase text-muted-foreground">Diseño</p>
+                    <h2 className="mt-1 truncate font-heading text-xl font-semibold tracking-tight">
+                      {detail.title}
+                    </h2>
+                    <p className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
+                      {detail.player}
+                      <PlayerStatusTag status={detail.playerStatus} />
+                    </p>
+                  </div>
+                  <button
+                    onClick={closeDetail}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground"
                   >
-                    {detail.delivered ? 'Entregado' : 'Pendiente'}
-                  </span>
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Diseñador</span>
-                  {detail.designer ? (
-                    <span className="flex items-center gap-2 text-sm font-medium">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
-                        {detail.designer.charAt(0)}
-                      </span>
-                      {detail.designer}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-status-warning">Sin asignar</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Entrega</span>
-                  <span className="flex items-center gap-2">
-                    {!detail.delivered && <UrgencyDot urgency={detail.urgency} />}
+
+                <div className="flex-1 space-y-5 overflow-y-auto p-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Estado</span>
                     <span
                       className={cn(
-                        'font-mono tabular text-sm',
-                        !detail.delivered && (detail.urgency === 'h24' || detail.urgency === 'overdue')
-                          ? 'font-semibold text-destructive'
-                          : 'text-foreground'
+                        'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
+                        detail.delivered
+                          ? 'bg-status-success/15 text-status-success'
+                          : 'bg-panel-hover text-foreground'
                       )}
                     >
-                      {!detail.delivered && detail.urgency === 'overdue'
-                        ? `Atrasada · ${detail.deadline}`
-                        : detail.deadline}
+                      {detail.delivered ? 'Entregado' : 'Pendiente'}
                     </span>
-                  </span>
-                </div>
+                  </div>
 
-                {detail.delivered ? (
-                  <button
-                    onClick={() => setConfirmRevert(true)}
-                    className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-panel-hover/40 hover:text-foreground"
-                  >
-                    <Undo2 className="h-4 w-4" />
-                    Volver a pendiente
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setDelivered(detail.id, true)}
-                    className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    Marcar como entregado
-                  </button>
-                )}
+                  {/* Diseñador — reasignable en un clic para el mánager */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Diseñador</span>
+                      {isManager ? (
+                        <button
+                          onClick={() => setAssignOpen((v) => !v)}
+                          className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-panel-hover/40"
+                        >
+                          {detail.designer ? (
+                            <>
+                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
+                                {detail.designer.charAt(0)}
+                              </span>
+                              {detail.designer}
+                            </>
+                          ) : (
+                            <span className="text-status-warning">Sin asignar</span>
+                          )}
+                          <motion.span
+                            initial={false}
+                            animate={{ rotate: assignOpen ? 180 : 0 }}
+                            transition={SPRINGS.snappy}
+                          >
+                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                          </motion.span>
+                        </button>
+                      ) : detail.designer ? (
+                        <span className="flex items-center gap-2 text-sm font-medium">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
+                            {detail.designer.charAt(0)}
+                          </span>
+                          {detail.designer}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-status-warning">Sin asignar</span>
+                      )}
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {assignOpen && isManager && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={SPRINGS.smooth}
+                          className="overflow-hidden"
+                        >
+                          <div className="flex flex-wrap gap-1.5 pt-3">
+                            {TEAM.map((m) => (
+                              <button
+                                key={m.name}
+                                onClick={() => {
+                                  setAssignee(detail.id, m.name);
+                                  setAssignOpen(false);
+                                }}
+                                className={cn(
+                                  'h-8 rounded-full border px-3 text-xs font-medium transition-colors',
+                                  detail.designer === m.name
+                                    ? 'border-primary/40 bg-primary/10 text-foreground'
+                                    : 'border-border bg-background text-muted-foreground hover:text-foreground'
+                                )}
+                              >
+                                {m.name}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-                <div className={cn('grid gap-2', isManager ? 'grid-cols-2' : 'grid-cols-1')}>
-                  {isManager && (
-                    <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-panel-hover/40">
-                      <Pencil className="h-3.5 w-3.5" />
-                      Editar
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Entrega</span>
+                    <span className="flex items-center gap-2">
+                      {!detail.delivered && <UrgencyDot urgency={detail.urgency} />}
+                      <span
+                        className={cn(
+                          'font-mono tabular text-sm',
+                          !detail.delivered && (detail.urgency === 'h24' || detail.urgency === 'overdue')
+                            ? 'font-semibold text-destructive'
+                            : 'text-foreground'
+                        )}
+                      >
+                        {!detail.delivered && detail.urgency === 'overdue'
+                          ? `Atrasada · ${detail.deadline}`
+                          : detail.deadline}
+                      </span>
+                    </span>
+                  </div>
+
+                  {detail.delivered ? (
+                    <button
+                      onClick={() => setConfirmRevert(true)}
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-panel-hover/40 hover:text-foreground"
+                    >
+                      <Undo2 className="h-4 w-4" />
+                      Volver a pendiente
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setDelivered(detail.id, true)}
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Marcar como entregado
                     </button>
                   )}
-                  <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-panel-hover/40">
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Drive
-                  </button>
-                </div>
-              </div>
 
-              {isManager && (
-                <div className="border-t border-border/60 p-lg pt-md">
-                  <button
-                    onClick={() => setConfirmDelete(true)}
-                    className="flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Eliminar diseño
-                  </button>
+                  <div className={cn('grid gap-2', isManager ? 'grid-cols-2' : 'grid-cols-1')}>
+                    {isManager && (
+                      <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-panel-hover/40">
+                        <Pencil className="h-3.5 w-3.5" />
+                        Editar
+                      </button>
+                    )}
+                    <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-panel-hover/40">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Drive
+                    </button>
+                  </div>
                 </div>
-              )}
-            </motion.aside>
+
+                {isManager && (
+                  <div className="border-t border-border/60 p-lg pt-md">
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      className="flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Eliminar diseño
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
@@ -574,7 +647,7 @@ export default function ConceptDDisenos() {
         onConfirm={() => {
           if (detail) {
             setRows((rs) => rs.filter((r) => r.id !== detail.id));
-            setDetailId(null);
+            closeDetail();
           }
           setConfirmDelete(false);
         }}

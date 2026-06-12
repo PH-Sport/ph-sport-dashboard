@@ -23,7 +23,10 @@ type BatchRow = {
   away: string;
   title: string;
   deadline: string;
+  designer: string;
 };
+
+const AUTO = 'Reparto automático';
 
 const TITLE_PLACEHOLDER: Record<DesignType, string> = {
   Matchday: '',
@@ -46,7 +49,8 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
   const [batch, setBatch] = useState<BatchRow[]>([]);
   const [nextId, setNextId] = useState(1);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [designer, setDesigner] = useState('Reparto automático');
+  const [designer, setDesigner] = useState(AUTO);
+  const [editRowId, setEditRowId] = useState<number | null>(null);
   const [assistantText, setAssistantText] = useState('');
 
   const draftValid = draft.player.trim() !== '' && draft.deadline.trim() !== '';
@@ -57,13 +61,13 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
 
   const addToBatch = () => {
     if (!draftValid) return;
-    setBatch((b) => [...b, { id: nextId, type, ...draft }]);
+    setBatch((b) => [...b, { id: nextId, type, designer, ...draft }]);
     setNextId((n) => n + 1);
     setDraft(EMPTY_DRAFT);
   };
 
   const generateDraft = () => {
-    setBatch(ASSISTANT_DRAFT.map((r, i) => ({ id: 100 + i, ...r })));
+    setBatch(ASSISTANT_DRAFT.map((r, i) => ({ id: 100 + i, designer: AUTO, ...r })));
     setNextId(200);
     setMode('manual');
     setAssistantText('');
@@ -75,7 +79,12 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
     setBatch([]);
     setMode('manual');
     setMoreOpen(false);
+    setEditRowId(null);
+    setDesigner(AUTO);
   };
+
+  const hasAuto =
+    batch.some((r) => r.designer === AUTO) || (draftValid && designer === AUTO);
 
   return (
     <AnimatePresence>
@@ -246,7 +255,30 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                       />
                     </div>
 
-                    {/* Más opciones (asignación, estado, Drive) */}
+                    {/* Diseñador — a la vista: auto por defecto, asignar en un clic */}
+                    <div>
+                      <span className={labelCls}>Diseñador</span>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {[AUTO, ...TEAM.map((m) => m.name)].map((n) => (
+                          <button
+                            key={n}
+                            onClick={() => setDesigner(n)}
+                            className={cn(
+                              'h-8 rounded-full px-3 text-xs font-medium transition-colors',
+                              designer === n
+                                ? n === AUTO
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'border border-primary/40 bg-primary/10 text-foreground'
+                                : 'border border-border bg-background text-muted-foreground hover:text-foreground'
+                            )}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Más opciones (Drive) */}
                     <div>
                       <button
                         onClick={() => setMoreOpen((v) => !v)}
@@ -270,30 +302,9 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                             transition={SPRINGS.smooth}
                             className="overflow-hidden"
                           >
-                            <div className="space-y-4 pt-4">
-                              <div>
-                                <span className={labelCls}>Diseñador</span>
-                                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                  {['Reparto automático', ...TEAM.map((m) => m.name)].map((n) => (
-                                    <button
-                                      key={n}
-                                      onClick={() => setDesigner(n)}
-                                      className={cn(
-                                        'h-8 rounded-full px-3 text-xs font-medium transition-colors',
-                                        designer === n
-                                          ? 'border border-primary/40 bg-primary/10 text-foreground'
-                                          : 'border border-border bg-background text-muted-foreground hover:text-foreground'
-                                      )}
-                                    >
-                                      {n}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <label className={labelCls}>Carpeta Drive (opcional)</label>
-                                <input placeholder="https://drive.google.com/…" className={inputCls} />
-                              </div>
+                            <div className="pt-4">
+                              <label className={labelCls}>Carpeta Drive (opcional)</label>
+                              <input placeholder="https://drive.google.com/…" className={inputCls} />
                             </div>
                           </motion.div>
                         )}
@@ -324,26 +335,77 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, x: 16 }}
                                 transition={SPRINGS.snappy}
-                                className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background px-3 py-2"
+                                className="rounded-xl border border-border/60 bg-background px-3 py-2"
                               >
-                                <span className="shrink-0 rounded-full bg-panel-hover px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                  {r.type}
-                                </span>
-                                <span className="min-w-0 flex-1 truncate text-sm">
-                                  {r.type === 'Matchday'
-                                    ? `${r.home || '—'} vs ${r.away || '—'}`
-                                    : r.title || TITLE_PLACEHOLDER[r.type]}
-                                  <span className="text-muted-foreground"> · {r.player}</span>
-                                </span>
-                                <span className="shrink-0 font-mono tabular text-xs text-muted-foreground">
-                                  {r.deadline}
-                                </span>
-                                <button
-                                  onClick={() => setBatch((b) => b.filter((x) => x.id !== r.id))}
-                                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
+                                <div className="group flex items-center gap-3">
+                                  <span className="shrink-0 rounded-full bg-panel-hover px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                    {r.type}
+                                  </span>
+                                  <span className="min-w-0 flex-1 truncate text-sm">
+                                    {r.type === 'Matchday'
+                                      ? `${r.home || '—'} vs ${r.away || '—'}`
+                                      : r.title || TITLE_PLACEHOLDER[r.type]}
+                                    <span className="text-muted-foreground"> · {r.player}</span>
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      setEditRowId((id) => (id === r.id ? null : r.id))
+                                    }
+                                    title="Cambiar diseñador"
+                                    className={cn(
+                                      'flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-[11px] font-medium transition-colors',
+                                      r.designer === AUTO
+                                        ? 'bg-primary/15 text-primary hover:bg-primary/25'
+                                        : 'bg-panel-hover text-foreground hover:bg-panel-hover/70'
+                                    )}
+                                  >
+                                    {r.designer === AUTO ? '⚡ Auto' : r.designer}
+                                  </button>
+                                  <span className="shrink-0 font-mono tabular text-xs text-muted-foreground">
+                                    {r.deadline}
+                                  </span>
+                                  <button
+                                    onClick={() => setBatch((b) => b.filter((x) => x.id !== r.id))}
+                                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                                <AnimatePresence initial={false}>
+                                  {editRowId === r.id && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={SPRINGS.smooth}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="flex flex-wrap gap-1.5 pt-2.5">
+                                        {[AUTO, ...TEAM.map((m) => m.name)].map((n) => (
+                                          <button
+                                            key={n}
+                                            onClick={() => {
+                                              setBatch((b) =>
+                                                b.map((x) =>
+                                                  x.id === r.id ? { ...x, designer: n } : x
+                                                )
+                                              );
+                                              setEditRowId(null);
+                                            }}
+                                            className={cn(
+                                              'h-7 rounded-full border px-2.5 text-[11px] font-medium transition-colors',
+                                              r.designer === n
+                                                ? 'border-primary/40 bg-primary/10 text-foreground'
+                                                : 'border-border bg-card text-muted-foreground hover:text-foreground'
+                                            )}
+                                          >
+                                            {n === AUTO ? '⚡ Auto' : n}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </motion.li>
                             ))}
                           </AnimatePresence>
@@ -357,9 +419,11 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
               {/* Footer */}
               <div className="flex items-center justify-between gap-2 border-t border-border/60 p-lg pt-md">
                 <span className="font-mono text-xs text-muted-foreground">
-                  {designer === 'Reparto automático'
-                    ? 'Se reparten por carga al crear'
-                    : `Asignados a ${designer}`}
+                  {count === 0
+                    ? ''
+                    : hasAuto
+                      ? 'Las piezas en ⚡ Auto se reparten por carga'
+                      : 'Asignación manual'}
                 </span>
                 <div className="flex gap-2">
                   <button

@@ -113,6 +113,10 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
 - ✅ **Filtros funcionales** en Diseños (búsqueda, estado, diseñador, limpiar) + confirmaciones (estado regresivo, eliminar, logout).
 - ✅ **Crear diseños repensado** (decisión del usuario: el lote es EL modo, no un extra): por tipos (Matchday/Presentación/Cumpleaños/Firma/Otro — ya no solo matchday), añades piezas a un lote y creas todas de una; diseñador = "Reparto automático" por defecto; pestaña **Asistente**: pegas el calendario/texto del club → genera borrador de filas para revisar (mock del intake IA pendiente, ver memoria project_pending_ai_design_intake).
 - **Popup de Miembros** (renombrar, cambiar rol, eliminar usuario): el usuario CONFIRMA que lo quiere → FEATURE NUEVA con API al portar (hoy la app real solo lista usuarios, sin acciones).
+**Ajustes del usuario aplicados (2026-06-12, ronda 3):**
+- ✅ **Overlays centrados y simétricos** (decisión del usuario: nada de sheets desde el borde): el detalle de diseño pasa de sheet lateral a **modal centrado**; todos los popups del concepto comparten el mismo patrón (scale 0.96→1 sobre glass-scrim).
+- ✅ **Asignación fácil por diseño**: el campo Diseñador es interactivo — en el detalle, clic sobre el diseñador → chips del equipo para reasignar al instante (optimista, la lista de detrás se actualiza); en Crear, el selector está a la vista (ya no en "Más opciones") con "⚡ Reparto automático" por defecto, y cada pieza del lote lleva su badge de diseñador clicable para cambiarla individualmente.
+- ✅ Deep-links: aprobado por el usuario, se implementa al portar (el detalle centrado debe abrirse desde URL `?open=id`).
 - Pendiente: siguiente ronda de ajustes del usuario.
 
 **Backlog opcional post-Fase 7** (no bloqueante): skeletons de equipo/usuarios afinados al detalle; bulk-create en móvil (hoy scroll horizontal, uso real es desktop); migrar player-status-tag/invitations-card a variantes Badge; editar inline dentro del sheet (hoy modal-sobre-sheet); soft-delete con undo (necesita soporte API); command palette ⌘K (frosted glass listo).
