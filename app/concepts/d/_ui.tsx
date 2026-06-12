@@ -9,9 +9,10 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SPRINGS, TWEENS } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
-import type { Urgency, PlayerStatus } from '../_data';
+import { WEEKS, type Urgency, type PlayerStatus } from '../_data';
 
 const URGENCY_META: Record<Exclude<Urgency, null>, { color: string; label: string; pulse: boolean }> = {
   h48: { color: 'bg-status-warning', label: 'Vence en menos de 48 h', pulse: true },
@@ -55,6 +56,29 @@ export function PlayerStatusTag({ status }: { status: PlayerStatus }) {
     >
       {status}
     </span>
+  );
+}
+
+/** Navegador de semanas (mock: 3 semanas, la del medio es la actual). */
+export function WeekNav({ week, setWeek }: { week: number; setWeek: (w: number) => void }) {
+  return (
+    <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-raised">
+      <button
+        onClick={() => setWeek(Math.max(0, week - 1))}
+        disabled={week === 0}
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground disabled:opacity-30"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <span className="px-2 font-mono tabular text-xs">{WEEKS[week]}</span>
+      <button
+        onClick={() => setWeek(Math.min(WEEKS.length - 1, week + 1))}
+        disabled={week === WEEKS.length - 1}
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground disabled:opacity-30"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 

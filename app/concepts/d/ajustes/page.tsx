@@ -11,12 +11,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Plus, X, Trash2 } from 'lucide-react';
 import { SPRINGS, TWEENS, STAGGER } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
-import { MEMBERS, PENDING_INVITE, NOTIF_PREFS } from '../../_data';
+import { MEMBERS, PENDING_INVITE, NOTIF_PREFS, PERSONAS } from '../../_data';
+import { useRole } from '../_role';
 
 type Member = (typeof MEMBERS)[number];
 
-const TABS = ['General', 'Miembros'] as const;
-type Tab = (typeof TABS)[number];
+type Tab = 'General' | 'Miembros';
 
 const rise = {
   hidden: { opacity: 0, y: 12 },
@@ -60,8 +60,14 @@ function Section({
 }
 
 export default function ConceptDAjustes() {
-  const [tab, setTab] = useState<Tab>('General');
+  const { role } = useRole();
+  const persona = PERSONAS[role];
+  const [rawTab, setTab] = useState<Tab>('General');
   const [member, setMember] = useState<Member | null>(null);
+
+  // Miembros es gestión: solo existe para el mánager
+  const tabs: Tab[] = role === 'manager' ? ['General', 'Miembros'] : ['General'];
+  const tab: Tab = role === 'manager' ? rawTab : 'General';
 
   return (
     <motion.div
@@ -82,7 +88,7 @@ export default function ConceptDAjustes() {
         variants={rise}
         className="inline-flex items-center gap-0.5 rounded-xl border border-border bg-card p-1 shadow-raised"
       >
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -103,16 +109,17 @@ export default function ConceptDAjustes() {
           <Section label="Cuenta" hint="Tu nombre y datos de acceso">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-lg font-semibold text-primary">
-                M
+                {persona.initial}
               </div>
               <div className="min-w-0 flex-1 space-y-2">
                 <input
-                  defaultValue="Mario Rodríguez"
+                  key={persona.name}
+                  defaultValue={persona.name}
                   className="h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
                 <p className="font-mono text-xs text-muted-foreground">
-                  mario@phsport.es ·{' '}
-                  <span className="uppercase tracking-wider text-primary">Mánager</span>
+                  {persona.email} ·{' '}
+                  <span className="uppercase tracking-wider text-primary">{persona.role}</span>
                 </p>
               </div>
             </div>
