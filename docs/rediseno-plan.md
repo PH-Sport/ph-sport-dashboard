@@ -117,7 +117,24 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
 - ✅ **Overlays centrados y simétricos** (decisión del usuario: nada de sheets desde el borde): el detalle de diseño pasa de sheet lateral a **modal centrado**; todos los popups del concepto comparten el mismo patrón (scale 0.96→1 sobre glass-scrim).
 - ✅ **Asignación fácil por diseño**: el campo Diseñador es interactivo — en el detalle, clic sobre el diseñador → chips del equipo para reasignar al instante (optimista, la lista de detrás se actualiza); en Crear, el selector está a la vista (ya no en "Más opciones") con "⚡ Reparto automático" por defecto, y cada pieza del lote lleva su badge de diseñador clicable para cambiarla individualmente.
 - ✅ Deep-links: aprobado por el usuario, se implementa al portar (el detalle centrado debe abrirse desde URL `?open=id`).
-- Pendiente: siguiente ronda de ajustes del usuario.
+**Ajustes del usuario aplicados (2026-06-13, ronda 4 — gaps restantes + modo claro + auditorías):**
+- ✅ **Editar diseño** (gap detectado por el usuario): modal centrado pre-rellenado; sustituye al detalle y vuelve a él al guardar/cancelar (intercambio secuencial, nunca apilado). Guardado optimista.
+- ✅ **Invitar miembro**: popup con rol + "Generar enlace" + copiar (mock del flujo real de invitaciones). Invitación pendiente con Copiar/Revocar (revocar confirma).
+- ✅ **Eliminar usuario con confirmación** (decisión del usuario: solo Mánager/dev y SIEMPRE con confirmación).
+- ✅ **Calendario**: eventos clicables → abren el detalle (como la app real).
+- ✅ **Vista por defecto de Diseños** (Lista/Calendario) en Ajustes → Apariencia.
+- ✅ **Campana**: borrar notificación individual + estado vacío.
+- ✅ **Modo claro adaptado** (decisión: dark-first + claro YA): toggle real vía next-themes (clase en `<html>`, como la app real, persiste). Fix de contraste: sidebar/dropdowns con tokens `panel-*` (el panel sigue charcoal en claro — decisión de marca), superficies de contenido con `muted` en vez de `panel-hover`. Incidente: un reemplazo masivo con PS 5.1 corrompió encoding (mojibake) — revertido con re-encode 1252→UTF-8, verificado.
+- ✅ **Auditorías de seguridad y rendimiento** ejecutadas → `docs/auditoria-seguridad-rendimiento.md`. Seguridad: 2 críticos condicionales en invitaciones (creación client-side con rol arbitrario + lectura anónima de tokens), `designs` legible por anon (`OR true`), deriva de esquema (invitations no está en migrations). Rendimiento: top 5 = useDesigners→SWR, optimista en mi-semana, limpieza deps, getClaims+rol en JWT, LazyMotion.
+
+**Decisiones del usuario (2026-06-13) para el porteo:**
+- Estados de jugador: se quedan como están; en la app publicada no se usan — valorar quitarlos al portar y re-añadir si los piden.
+- Sidebar flotante: aprobada ("mucho mejor que la publicada").
+- Móvil: se adapta AL PORTAR (no en el concept).
+- Cuenta developer: confirmada — login normal con flag `is_dev` en DB (no ocupa puesto, no aparece en listas/reparto, conmutador de rol en UI).
+- Acciones sobre miembros: solo Mánager/dev + confirmación siempre (especialmente eliminar).
+- Asistente IA: se portea DESHABILITADO (gris + "Próximamente") hasta que el usuario conecte API/modelo/créditos.
+- Pendiente: respuesta del usuario a las auditorías (¿fase de fixes de seguridad antes del porteo?) → luego congelar dirección y portar.
 
 **Backlog opcional post-Fase 7** (no bloqueante): skeletons de equipo/usuarios afinados al detalle; bulk-create en móvil (hoy scroll horizontal, uso real es desktop); migrar player-status-tag/invitations-card a variantes Badge; editar inline dentro del sheet (hoy modal-sobre-sheet); soft-delete con undo (necesita soporte API); command palette ⌘K (frosted glass listo).
 

@@ -73,7 +73,7 @@ function ManagerInicio() {
             <Users className="h-3.5 w-3.5" />
             Repartir sin asignar
           </button>
-          <button className="flex h-9 items-center gap-2 rounded-xl border border-border px-4 text-xs font-medium transition-colors hover:bg-panel-hover/40">
+          <button className="flex h-9 items-center gap-2 rounded-xl border border-border px-4 text-xs font-medium transition-colors hover:bg-muted/40">
             Ver semana
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
@@ -108,13 +108,13 @@ function ManagerInicio() {
             {UPCOMING.map((d) => (
               <li
                 key={d.title}
-                className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-panel-hover/40"
+                className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
               >
                 <div
                   className={cn(
                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-semibold',
                     d.designer
-                      ? 'bg-panel-hover text-foreground'
+                      ? 'bg-muted text-foreground'
                       : 'bg-status-warning/15 text-status-warning'
                   )}
                 >
@@ -166,7 +166,7 @@ function ManagerInicio() {
                     {m.overloaded && <span className="ml-1.5 text-status-warning">▲</span>}
                   </span>
                 </div>
-                <div className="h-1 w-full rounded-full bg-panel-hover">
+                <div className="h-1 w-full rounded-full bg-muted">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, (m.active / 8) * 100)}%` }}
@@ -242,7 +242,7 @@ function DesignerInicio() {
             {MY_WEEK.pending.map((d) => (
               <li
                 key={d.title}
-                className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-panel-hover/40"
+                className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
               >
                 <UrgencyDot urgency={d.urgency} />
                 <div className="min-w-0 flex-1">
@@ -276,7 +276,7 @@ function DesignerInicio() {
             {TEAM.filter((m) => m.name !== PERSONAS.designer.first).map((m) => (
               <li key={m.name} className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-panel-hover font-mono text-[10px] font-semibold">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted font-mono text-[10px] font-semibold">
                     {m.name.charAt(0)}
                   </span>
                   {m.name}

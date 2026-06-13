@@ -121,7 +121,7 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                       className={cn(
                         'h-8 rounded-lg px-3 text-xs font-medium transition-colors',
                         mode === 'manual'
-                          ? 'bg-panel-hover text-foreground'
+                          ? 'bg-muted text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       )}
                     >
@@ -142,7 +142,7 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                   </div>
                   <button
                     onClick={close}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -338,7 +338,7 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                                 className="rounded-xl border border-border/60 bg-background px-3 py-2"
                               >
                                 <div className="group flex items-center gap-3">
-                                  <span className="shrink-0 rounded-full bg-panel-hover px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                  <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                                     {r.type}
                                   </span>
                                   <span className="min-w-0 flex-1 truncate text-sm">
@@ -356,7 +356,7 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                                       'flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-[11px] font-medium transition-colors',
                                       r.designer === AUTO
                                         ? 'bg-primary/15 text-primary hover:bg-primary/25'
-                                        : 'bg-panel-hover text-foreground hover:bg-panel-hover/70'
+                                        : 'bg-muted text-foreground hover:bg-muted/70'
                                     )}
                                   >
                                     {r.designer === AUTO ? '⚡ Auto' : r.designer}
@@ -428,7 +428,7 @@ export function CreateDesignsModal({ open, onClose }: { open: boolean; onClose: 
                 <div className="flex gap-2">
                   <button
                     onClick={close}
-                    className="flex h-10 items-center rounded-xl px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-panel-hover/40 hover:text-foreground"
+                    className="flex h-10 items-center rounded-xl px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                   >
                     Cancelar
                   </button>

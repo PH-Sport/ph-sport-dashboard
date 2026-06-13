@@ -30,35 +30,36 @@ import { DESIGNS_DB, TEAM, PERSONAS, CURRENT_WEEK } from '../../_data';
 import { useRole } from '../_role';
 import { UrgencyDot, PlayerStatusTag, ConfirmDialog, WeekNav } from '../_ui';
 import { CreateDesignsModal } from './_create';
+import { EditDesignModal, type EditValues } from './_edit';
 
 type Row = (typeof DESIGNS_DB)[number] & { id: number };
 
-/* Junio 2026 — empieza en lunes; hoy es jueves 11 */
+/* Junio 2026 — empieza en lunes; hoy es jueves 11. `id` = índice en DESIGNS_DB. */
 const TODAY = 11;
-const CAL_EVENTS: Record<number, { t: string; tone: 'crit' | 'pend' | 'done' }[]> = {
+const CAL_EVENTS: Record<number, { t: string; tone: 'crit' | 'pend' | 'done'; id: number }[]> = {
   9: [
-    { t: 'Doblete · post', tone: 'done' },
-    { t: 'Asistencia · reel', tone: 'done' },
+    { t: 'Doblete · post', tone: 'done', id: 8 },
+    { t: 'Asistencia · reel', tone: 'done', id: 9 },
   ],
-  10: [{ t: 'Stories previa', tone: 'crit' }],
+  10: [{ t: 'Stories previa', tone: 'crit', id: 2 }],
   11: [
-    { t: 'Matchday RM', tone: 'crit' },
-    { t: 'Gol post', tone: 'crit' },
+    { t: 'Matchday RM', tone: 'crit', id: 0 },
+    { t: 'Gol post', tone: 'crit', id: 1 },
   ],
   12: [
-    { t: 'Stats LaLiga', tone: 'pend' },
-    { t: 'Cumpleaños', tone: 'pend' },
-    { t: 'MVP del mes', tone: 'pend' },
+    { t: 'Stats LaLiga', tone: 'pend', id: 3 },
+    { t: 'Cumpleaños', tone: 'pend', id: 4 },
+    { t: 'MVP del mes', tone: 'pend', id: 7 },
   ],
   13: [
-    { t: 'Renovación', tone: 'pend' },
-    { t: 'Convocatoria', tone: 'pend' },
+    { t: 'Renovación', tone: 'pend', id: 5 },
+    { t: 'Convocatoria', tone: 'pend', id: 6 },
   ],
 };
 
 const EVENT_TONE: Record<string, string> = {
   crit: 'bg-destructive/15 text-destructive',
-  pend: 'bg-panel-hover text-foreground/80',
+  pend: 'bg-muted text-foreground/80',
   done: 'bg-status-success/15 text-status-success line-through',
 };
 
@@ -80,6 +81,7 @@ export default function ConceptDDisenos() {
   const [designerOpen, setDesignerOpen] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [confirmRevert, setConfirmRevert] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -119,6 +121,25 @@ export default function ConceptDDisenos() {
   const closeDetail = () => {
     setDetailId(null);
     setAssignOpen(false);
+  };
+
+  const editingRow = rows.find((r) => r.id === editingId) ?? null;
+
+  /* Editar sustituye al detalle (intercambio secuencial, nunca apilado) */
+  const openEdit = () => {
+    if (detail) {
+      setEditingId(detail.id);
+      closeDetail();
+    }
+  };
+  const finishEdit = (values?: EditValues) => {
+    if (editingId !== null) {
+      if (values) {
+        setRows((rs) => rs.map((r) => (r.id === editingId ? { ...r, ...values } : r)));
+      }
+      setDetailId(editingId);
+    }
+    setEditingId(null);
   };
 
   return (
@@ -232,7 +253,7 @@ export default function ConceptDDisenos() {
                 className={cn(
                   'flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors',
                   view === v.id
-                    ? 'bg-panel-hover text-foreground'
+                    ? 'bg-muted text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
@@ -290,7 +311,7 @@ export default function ConceptDDisenos() {
             </p>
             <button
               onClick={resetFilters}
-              className="mt-4 flex h-9 items-center rounded-xl border border-border px-4 text-xs font-medium transition-colors hover:bg-panel-hover/40"
+              className="mt-4 flex h-9 items-center rounded-xl border border-border px-4 text-xs font-medium transition-colors hover:bg-muted/40"
             >
               Limpiar filtros
             </button>
@@ -309,13 +330,13 @@ export default function ConceptDDisenos() {
                         setDetailId(d.id);
                         setAssignOpen(false);
                       }}
-                      className="flex w-full items-center gap-4 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-panel-hover/40"
+                      className="flex w-full items-center gap-4 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted/40"
                     >
                       <div
                         className={cn(
                           'flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-semibold',
                           d.designer
-                            ? 'bg-panel-hover text-foreground'
+                            ? 'bg-muted text-foreground'
                             : 'bg-status-warning/15 text-status-warning'
                         )}
                       >
@@ -347,7 +368,7 @@ export default function ConceptDDisenos() {
                           'hidden shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider sm:inline',
                           d.delivered
                             ? 'bg-status-success/15 text-status-success'
-                            : 'bg-panel-hover text-muted-foreground'
+                            : 'bg-muted text-muted-foreground'
                         )}
                       >
                         {d.delivered ? 'Entregado' : 'Pendiente'}
@@ -415,15 +436,19 @@ export default function ConceptDDisenos() {
                   </span>
                   <div className="mt-1 space-y-0.5">
                     {events.map((e) => (
-                      <div
+                      <button
                         key={e.t}
+                        onClick={() => {
+                          setDetailId(e.id);
+                          setAssignOpen(false);
+                        }}
                         className={cn(
-                          'cursor-pointer truncate rounded px-1 py-0.5 text-[10px] font-medium',
+                          'block w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-medium transition-opacity hover:opacity-75',
                           EVENT_TONE[e.tone]
                         )}
                       >
                         {e.t}
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -466,7 +491,7 @@ export default function ConceptDDisenos() {
                   </div>
                   <button
                     onClick={closeDetail}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -480,7 +505,7 @@ export default function ConceptDDisenos() {
                         'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
                         detail.delivered
                           ? 'bg-status-success/15 text-status-success'
-                          : 'bg-panel-hover text-foreground'
+                          : 'bg-muted text-foreground'
                       )}
                     >
                       {detail.delivered ? 'Entregado' : 'Pendiente'}
@@ -494,7 +519,7 @@ export default function ConceptDDisenos() {
                       {isManager ? (
                         <button
                           onClick={() => setAssignOpen((v) => !v)}
-                          className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-panel-hover/40"
+                          className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40"
                         >
                           {detail.designer ? (
                             <>
@@ -580,7 +605,7 @@ export default function ConceptDDisenos() {
                   {detail.delivered ? (
                     <button
                       onClick={() => setConfirmRevert(true)}
-                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-panel-hover/40 hover:text-foreground"
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                     >
                       <Undo2 className="h-4 w-4" />
                       Volver a pendiente
@@ -597,12 +622,15 @@ export default function ConceptDDisenos() {
 
                   <div className={cn('grid gap-2', isManager ? 'grid-cols-2' : 'grid-cols-1')}>
                     {isManager && (
-                      <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-panel-hover/40">
+                      <button
+                        onClick={openEdit}
+                        className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
+                      >
                         <Pencil className="h-3.5 w-3.5" />
                         Editar
                       </button>
                     )}
-                    <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-panel-hover/40">
+                    <button className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40">
                       <ExternalLink className="h-3.5 w-3.5" />
                       Drive
                     </button>
@@ -652,6 +680,18 @@ export default function ConceptDDisenos() {
           setConfirmDelete(false);
         }}
         onCancel={() => setConfirmDelete(false)}
+      />
+
+      {/* ───── Modal: editar diseño (sustituye al detalle, vuelve a él) ───── */}
+      <EditDesignModal
+        open={editingId !== null}
+        initial={
+          editingRow
+            ? { title: editingRow.title, player: editingRow.player, deadline: editingRow.deadline }
+            : null
+        }
+        onSave={(v) => finishEdit(v)}
+        onCancel={() => finishEdit()}
       />
 
       {/* ───── Modal: crear diseños (lote, tipos, asistente) ───── */}

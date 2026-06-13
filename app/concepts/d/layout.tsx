@@ -7,9 +7,10 @@
  * usuario con logout. Nav principal SIN Miembros (vive dentro de Ajustes).
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
@@ -26,6 +27,7 @@ import {
   Sun,
   PanelLeftClose,
   PanelLeftOpen,
+  Trash2,
 } from 'lucide-react';
 import { SPRINGS, TWEENS } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
@@ -77,7 +79,9 @@ function NavRow({
       title={label}
       className={cn(
         'relative flex h-10 items-center overflow-hidden rounded-xl px-[10px] transition-colors',
-        active ? 'text-primary' : 'text-muted-foreground hover:bg-panel-hover/60 hover:text-foreground'
+        active
+          ? 'text-primary'
+          : 'text-panel-foreground/60 hover:bg-panel-hover/60 hover:text-panel-foreground'
       )}
     >
       {active && (
@@ -109,7 +113,10 @@ function Shell({ children }: { children: React.ReactNode }) {
   const persona = PERSONAS[role];
 
   const [collapsed, setCollapsed] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = !mounted || resolvedTheme === 'dark';
   const [panel, setPanel] = useState<'bell' | 'user' | null>(null);
   const [notifs, setNotifs] = useState(NOTIFICATIONS);
   const [confirmLogout, setConfirmLogout] = useState(false);
@@ -119,12 +126,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
-    <div
-      className={cn(
-        theme === 'dark' && 'dark',
-        'min-h-dvh bg-background text-foreground antialiased'
-      )}
-    >
+    <div className="min-h-dvh bg-background text-foreground antialiased">
       <ConceptSwitcher />
 
       {/* Sidebar flotante — placa de cristal despegada de los bordes, plegable */}
@@ -161,7 +163,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="flex flex-col gap-1.5 border-t border-border/60 pt-3">
+        <div className="flex flex-col gap-1.5 border-t border-panel-border/70 pt-3">
           <NavRow
             href="/concepts/d/ajustes"
             label="Ajustes"
@@ -172,7 +174,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <button
             onClick={() => setCollapsed((v) => !v)}
             title={collapsed ? 'Expandir' : 'Contraer'}
-            className="flex h-10 items-center overflow-hidden rounded-xl px-[10px] text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground"
+            className="flex h-10 items-center overflow-hidden rounded-xl px-[10px] text-panel-foreground/60 transition-colors hover:bg-panel-hover/60 hover:text-panel-foreground"
           >
             {collapsed ? (
               <PanelLeftOpen className="h-5 w-5 shrink-0" />
@@ -229,7 +231,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                   className={cn(
                     'h-6 rounded-full px-2.5 text-[11px] font-medium transition-colors',
                     role === r.id
-                      ? 'bg-panel-hover text-foreground'
+                      ? 'bg-muted text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -250,11 +252,11 @@ function Shell({ children }: { children: React.ReactNode }) {
             )}
 
             <button
-              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-              title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              title={isDark ? 'Tema claro' : 'Tema oscuro'}
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             {/* Campana */}
@@ -299,17 +301,22 @@ function Shell({ children }: { children: React.ReactNode }) {
                       )}
                     </div>
                     <ul className="space-y-0.5">
+                      {notifs.length === 0 && (
+                        <li className="px-2 py-6 text-center text-sm text-panel-foreground/50">
+                          No tienes notificaciones
+                        </li>
+                      )}
                       {notifs.map((n) => {
                         const Icon = NOTIF_ICONS[n.kind];
                         return (
                           <li key={n.id}>
-                            <button
+                            <div
                               onClick={() =>
                                 setNotifs((ns) =>
                                   ns.map((x) => (x.id === n.id ? { ...x, unread: false } : x))
                                 )
                               }
-                              className="flex w-full items-start gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-panel-hover"
+                              className="group flex cursor-pointer items-start gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-panel-hover"
                             >
                               <span
                                 className={cn(
@@ -337,12 +344,22 @@ function Shell({ children }: { children: React.ReactNode }) {
                                 </span>
                               </span>
                               <span className="flex shrink-0 flex-col items-end gap-1">
-                                <span className="font-mono text-[10px] text-panel-foreground/40">
+                                <span className="font-mono text-[10px] text-panel-foreground/40 group-hover:hidden">
                                   {n.time}
                                 </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setNotifs((ns) => ns.filter((x) => x.id !== n.id));
+                                  }}
+                                  title="Borrar notificación"
+                                  className="hidden h-5 w-5 items-center justify-center rounded text-panel-foreground/50 transition-colors hover:text-destructive group-hover:flex"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
                                 {n.unread && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
                               </span>
-                            </button>
+                            </div>
                           </li>
                         );
                       })}

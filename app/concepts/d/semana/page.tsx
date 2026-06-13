@@ -79,7 +79,7 @@ function ManagerSemana() {
             {group.designs.map((d) => (
               <li
                 key={d.title}
-                className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-panel-hover/40"
+                className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
               >
                 {d.delivered ? (
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />
@@ -150,7 +150,7 @@ function DesignerSemana() {
       >
         <div className="mb-2 flex items-center gap-2">
           <h2 className="text-base font-semibold">Pendientes</h2>
-          <span className="rounded-full bg-panel-hover px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
+          <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
             {pending.length}
           </span>
         </div>
@@ -167,7 +167,7 @@ function DesignerSemana() {
                   layout
                   exit={{ opacity: 0, x: 24, transition: TWEENS.base }}
                   transition={SPRINGS.smooth}
-                  className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-panel-hover/40"
+                  className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
                 >
                   <UrgencyDot urgency={d.urgency} />
                   <div className="min-w-0 flex-1">
@@ -216,7 +216,7 @@ function DesignerSemana() {
                       open ? ws.filter((x) => x !== w.label) : [...ws, w.label]
                     )
                   }
-                  className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-panel-hover/40"
+                  className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40"
                 >
                   <motion.span
                     initial={false}
@@ -248,7 +248,7 @@ function DesignerSemana() {
                         <motion.li
                           key={d.title}
                           layout
-                          className="group flex items-center gap-3 rounded-xl py-2 pl-9 pr-2 transition-colors hover:bg-panel-hover/40"
+                          className="group flex items-center gap-3 rounded-xl py-2 pl-9 pr-2 transition-colors hover:bg-muted/40"
                         >
                           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />
                           <div className="min-w-0 flex-1">
@@ -262,7 +262,7 @@ function DesignerSemana() {
                           <button
                             onClick={() => setRevertTarget(d)}
                             title="Volver a pendiente"
-                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-all hover:bg-panel-hover hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
                           >
                             <Undo2 className="h-3.5 w-3.5" />
                           </button>

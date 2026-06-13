@@ -40,7 +40,7 @@ export function UrgencyDot({ urgency, className }: { urgency: Urgency; className
 
 const PLAYER_STATUS_STYLES: Record<Exclude<PlayerStatus, null>, string> = {
   Lesionado: 'bg-destructive/10 text-destructive',
-  Sancionado: 'bg-panel-hover text-muted-foreground',
+  Sancionado: 'bg-muted text-muted-foreground',
   Duda: 'bg-status-warning/15 text-status-warning',
   'Última hora': 'bg-primary/15 text-primary',
 };
@@ -66,7 +66,7 @@ export function WeekNav({ week, setWeek }: { week: number; setWeek: (w: number) 
       <button
         onClick={() => setWeek(Math.max(0, week - 1))}
         disabled={week === 0}
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground disabled:opacity-30"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-30"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -74,7 +74,7 @@ export function WeekNav({ week, setWeek }: { week: number; setWeek: (w: number) 
       <button
         onClick={() => setWeek(Math.min(WEEKS.length - 1, week + 1))}
         disabled={week === WEEKS.length - 1}
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-panel-hover/60 hover:text-foreground disabled:opacity-30"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-30"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
@@ -124,7 +124,7 @@ export function ConfirmDialog({
               <div className="mt-5 flex justify-end gap-2">
                 <button
                   onClick={onCancel}
-                  className="flex h-9 items-center rounded-xl px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-panel-hover/40 hover:text-foreground"
+                  className="flex h-9 items-center rounded-xl px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                 >
                   Cancelar
                 </button>
