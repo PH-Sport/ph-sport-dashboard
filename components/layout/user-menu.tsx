@@ -11,10 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, ChevronDown, Users } from 'lucide-react';
+import { LogOut, Settings, Users } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useAuth } from '@/lib/auth/auth-context';
-import { cn } from '@/lib/utils';
 
 function getInitials(name: string) {
   return name
@@ -54,7 +53,6 @@ export function UserMenu() {
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
   const displayRole = profile?.role === 'ADMIN' ? 'Mánager' : 'Diseñador';
-  const roleColor = profile?.role === 'ADMIN' ? 'text-primary' : 'text-muted-foreground';
 
   return (
     <DropdownMenu>
@@ -62,18 +60,13 @@ export function UserMenu() {
         <button
           type="button"
           aria-label={`Menú de usuario — ${displayName}`}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent"
+          className="rounded-full outline-none ring-primary/40 transition-shadow hover:ring-2 focus-visible:ring-2"
         >
-          <Avatar className="h-10 w-10 border-2 border-primary/30">
-            <AvatarFallback className="bg-primary/10 font-medium text-primary">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-primary/15 text-xs font-semibold text-primary">
               {getInitials(displayName)}
             </AvatarFallback>
           </Avatar>
-          <div className="hidden text-left md:block">
-            <p className="text-sm font-medium text-foreground">{displayName}</p>
-            <p className={cn('text-xs', roleColor)}>{displayRole}</p>
-          </div>
-          <ChevronDown className="hidden h-4 w-4 text-muted-foreground md:block" aria-hidden />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 border border-border bg-popover text-popover-foreground shadow-xl">
@@ -81,6 +74,9 @@ export function UserMenu() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{displayName}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <span className="mt-1 inline-block w-fit rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+              {displayRole}
+            </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border" />

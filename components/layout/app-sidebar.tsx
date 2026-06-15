@@ -29,12 +29,12 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { SPRINGS } from '@/components/ui/animations';
 import {
-  Calendar,
+  CalendarRange,
   Home,
   Palette,
   PanelLeftClose,
   PanelLeftOpen,
-  Users,
+  Settings,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -157,9 +157,10 @@ type NavItem = {
 function buildNavItems(role: 'ADMIN' | 'DESIGNER' | undefined): NavItem[] {
   return [
     { href: '/inicio', label: 'Inicio', icon: Home },
+    // Vista semanal de trabajo: el equipo (mánager) o la cola propia (diseñador).
     role === 'ADMIN'
-      ? { href: '/equipo', label: 'Equipo', icon: Users }
-      : { href: '/mi-semana', label: 'Mi Semana', icon: Calendar },
+      ? { href: '/equipo', label: 'Semana', icon: CalendarRange }
+      : { href: '/mi-semana', label: 'Semana', icon: CalendarRange },
     { href: '/disenos', label: 'Diseños', icon: Palette },
   ];
 }
@@ -218,8 +219,7 @@ function SidebarDesktop({ items, pathname }: { items: NavItem[]; pathname: strin
       }}
       className={cn(
         'fixed z-30 hidden flex-col',
-        'rounded-xl border border-panel-border bg-panel text-panel-foreground',
-        'shadow-[0_2px_24px_-12px_rgb(0_0_0_/_0.22)]',
+        'glass-panel rounded-2xl shadow-overlay',
         'transition-[width] duration-200 ease-out',
         'md:flex'
       )}
@@ -264,7 +264,15 @@ function SidebarBody({
           ))}
         </ul>
       </nav>
-      {showFooterToggle && <SidebarFooterToggle expanded={expanded} />}
+      <div className="flex flex-col gap-1 border-t border-panel-border/60 p-2">
+        <NavLink
+          item={{ href: '/ajustes', label: 'Ajustes', icon: Settings }}
+          active={isItemActive(pathname, '/ajustes')}
+          expanded={expanded}
+          onClick={onItemClick}
+        />
+        {showFooterToggle && <SidebarToggleButton expanded={expanded} />}
+      </div>
     </div>
   );
 }
@@ -349,36 +357,27 @@ function NavLink({
 
 // ─── Footer toggle ──────────────────────────────────────────
 
-function SidebarFooterToggle({ expanded }: { expanded: boolean }) {
+function SidebarToggleButton({ expanded }: { expanded: boolean }) {
   const { toggle } = useSidebar();
   const Icon = expanded ? PanelLeftClose : PanelLeftOpen;
   const label = expanded ? 'Colapsar' : 'Expandir';
   return (
-    <div
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={`${label} barra lateral`}
+      title={`${label} (⌘B)`}
       className={cn(
-        'flex items-center border-t border-panel-border/60 p-2',
-        expanded ? 'justify-between' : 'justify-center'
+        'flex h-9 items-center rounded-lg outline-none transition-colors',
+        'text-panel-foreground/70 hover:bg-panel-hover hover:text-panel-foreground',
+        'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
+        expanded ? 'gap-2 px-3 text-sm' : 'mx-auto w-9 justify-center'
       )}
     >
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label={`${label} barra lateral`}
-        title={`${label} (⌘B)`}
-        className={cn(
-          'flex h-9 items-center rounded-lg outline-none transition-colors',
-          'text-panel-foreground/70 hover:bg-panel-hover hover:text-panel-foreground',
-          'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
-          expanded ? 'gap-2 px-3 text-sm' : 'w-9 justify-center'
-        )}
-      >
-        <Icon className="h-4 w-4 shrink-0" aria-hidden />
-        {expanded && (
-          <span className="font-mono text-eyebrow uppercase text-panel-foreground/50">
-            ⌘B
-          </span>
-        )}
-      </button>
-    </div>
+      <Icon className="h-4 w-4 shrink-0" aria-hidden />
+      {expanded && (
+        <span className="font-mono text-eyebrow uppercase text-panel-foreground/50">⌘B</span>
+      )}
+    </button>
   );
 }
