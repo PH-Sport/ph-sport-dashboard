@@ -1,41 +1,42 @@
 'use client';
 
+/**
+ * Detalle de un diseño — modal CENTRADO (lenguaje del concepto D), no el sheet
+ * lateral anterior. Usa el primitivo Dialog (Radix: focus-trap, escape, scrim
+ * de cristal, scale animado). Incluye asignación de diseñador en un clic.
+ * Datos vía useDesign (SWR), mutaciones optimistas con rollback.
+ */
+
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { SPRINGS, TRANSITIONS, animations } from '@/components/ui/animations';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+import { SPRINGS } from '@/components/ui/animations';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DesignDetailSkeleton } from '@/components/skeletons/design-detail-skeleton';
 import {
-  Edit2,
+  Pencil,
   ExternalLink,
-  Calendar,
-  User,
-  X,
+  ChevronDown,
   AlertCircle,
   SearchX,
   RefreshCw,
   CheckCircle2,
   Undo2,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 import { useDesigners } from '@/lib/hooks/use-designers';
 import { useDesign } from '@/lib/hooks/use-design';
 import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ApiError } from '@/lib/utils/api-fetcher';
-import type { DesignStatus } from '@/lib/types/design';
+import { cn } from '@/lib/utils';
+import type { Design, DesignStatus } from '@/lib/types/design';
 import { STATUS_LABELS, DESIGN_STATUS_ORDER } from '@/lib/types/design';
+import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 
@@ -44,6 +45,9 @@ interface DesignDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDesignUpdated?: () => void;
+  isAdmin?: boolean;
+  /** Conecta con el flujo de borrado de la página (cierra el modal y confirma allí). */
+  onRequestDelete?: (design: Design) => void;
 }
 
 export function DesignDetailSheet({
@@ -51,9 +55,12 @@ export function DesignDetailSheet({
   open,
   onOpenChange,
   onDesignUpdated,
+  isAdmin = false,
+  onRequestDelete,
 }: DesignDetailSheetProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const { design, error, isLoading, mutate } = useDesign(designId, open);
   const { designers } = useDesigners();
@@ -62,8 +69,8 @@ export function DesignDetailSheet({
   const designer = design?.designer_id
     ? designers.find((u) => u.id === design.designer_id)
     : null;
-
   const notFound = error instanceof ApiError && error.status === 404;
+  const urgency = design ? getUrgency(design.deadline_at, design.status === 'DELIVERED') : null;
 
   const handleEditComplete = () => {
     mutate();
@@ -72,7 +79,6 @@ export function DesignDetailSheet({
 
   const handleStatusChange = async (newStatus: DesignStatus) => {
     if (!design) return;
-
     const isRegressive =
       DESIGN_STATUS_ORDER.indexOf(newStatus) < DESIGN_STATUS_ORDER.indexOf(design.status);
     if (isRegressive) {
@@ -87,7 +93,6 @@ export function DesignDetailSheet({
 
     setUpdating(true);
     try {
-      // Optimista: pinta el nuevo estado al instante, sincroniza por detrás
       await mutate(
         async () => {
           const response = await fetch(`/api/designs/${design.id}/status`, {
@@ -98,11 +103,7 @@ export function DesignDetailSheet({
           if (!response.ok) throw new Error('Error al actualizar estado');
           return { ...design, status: newStatus };
         },
-        {
-          optimisticData: { ...design, status: newStatus },
-          rollbackOnError: true,
-          revalidate: true,
-        }
+        { optimisticData: { ...design, status: newStatus }, rollbackOnError: true, revalidate: true }
       );
       toast.success('Estado actualizado');
       onDesignUpdated?.();
@@ -113,202 +114,272 @@ export function DesignDetailSheet({
     }
   };
 
+  const handleAssign = async (designerId: string) => {
+    if (!design) return;
+    setAssignOpen(false);
+    if (design.designer_id === designerId) return;
+    try {
+      await mutate(
+        async () => {
+          const response = await fetch(`/api/designs/${design.id}/assignee`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ designer_id: designerId }),
+          });
+          if (!response.ok) throw new Error('Error al asignar');
+          return { ...design, designer_id: designerId };
+        },
+        {
+          optimisticData: { ...design, designer_id: designerId },
+          rollbackOnError: true,
+          revalidate: true,
+        }
+      );
+      toast.success('Diseño reasignado');
+      onDesignUpdated?.();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Error al asignar');
+    }
+  };
+
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col p-0" hideCloseButton>
-          <AnimatePresence mode="wait">
-            {isLoading ? (
-              <motion.div
-                key="skeleton"
-                initial={animations.fadeSlide.initial}
-                animate={animations.fadeSlide.animate}
-                exit={animations.fadeSlide.exit}
-                transition={TRANSITIONS.fade}
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md gap-0 overflow-hidden rounded-2xl p-0 sm:rounded-2xl">
+          {isLoading ? (
+            <>
+              <DialogTitle className="sr-only">Cargando diseño</DialogTitle>
+              <DesignDetailSkeleton />
+            </>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center gap-5 px-6 py-12 text-center">
+              <DialogTitle className="sr-only">
+                {notFound ? 'Diseño no encontrado' : 'Error al cargar'}
+              </DialogTitle>
+              <div
+                className={cn(
+                  'flex h-14 w-14 items-center justify-center rounded-full',
+                  notFound ? 'bg-status-warning/10' : 'bg-destructive/10'
+                )}
               >
-                <DesignDetailSkeleton />
-              </motion.div>
-            ) : error ? (
-              <motion.div
-                key="error"
-                initial={animations.fadeSlide.initial}
-                animate={animations.fadeSlide.animate}
-                exit={animations.fadeSlide.exit}
-                transition={TRANSITIONS.fade}
-                className="flex flex-col items-center justify-center h-full gap-6 px-6"
-              >
-                {/* Icono según tipo de error */}
-                <div
-                  className={`flex h-16 w-16 items-center justify-center rounded-full ${
-                    notFound ? 'bg-status-warning/10' : 'bg-destructive/10'
-                  }`}
+                {notFound ? (
+                  <SearchX className="h-7 w-7 text-status-warning" />
+                ) : (
+                  <AlertCircle className="h-7 w-7 text-destructive" />
+                )}
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-heading text-lg font-semibold">
+                  {notFound ? 'Diseño no encontrado' : 'Error al cargar'}
+                </h3>
+                <p className="mx-auto max-w-xs text-sm text-muted-foreground">
+                  {notFound
+                    ? 'Este diseño puede haber sido eliminado o el enlace es incorrecto.'
+                    : 'No se pudo cargar la información. Comprueba tu conexión e inténtalo de nuevo.'}
+                </p>
+              </div>
+              {!notFound && (
+                <button
+                  onClick={() => mutate()}
+                  className="flex h-9 items-center gap-2 rounded-xl border border-border px-4 text-sm font-medium transition-colors hover:bg-muted/40"
                 >
-                  {notFound ? (
-                    <SearchX className="h-8 w-8 text-status-warning" />
-                  ) : (
-                    <AlertCircle className="h-8 w-8 text-destructive" />
-                  )}
+                  <RefreshCw className="h-4 w-4" />
+                  Reintentar
+                </button>
+              )}
+            </div>
+          ) : design ? (
+            <>
+              {/* Cabecera */}
+              <div className="border-b border-border/60 p-lg">
+                <p className="font-mono text-eyebrow uppercase text-muted-foreground">Diseño</p>
+                <DialogTitle className="mt-1 truncate font-heading text-xl font-semibold tracking-tight">
+                  {design.title}
+                </DialogTitle>
+                <p className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="truncate">
+                    {design.player} · {design.match_home} vs {design.match_away}
+                  </span>
+                  <PlayerStatusTag status={design.player_status} />
+                </p>
+              </div>
+
+              {/* Cuerpo */}
+              <div className="space-y-5 p-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Estado</span>
+                  <motion.div
+                    key={design.status}
+                    initial={{ scale: 0.9, opacity: 0.5 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={SPRINGS.snappy}
+                  >
+                    <Badge status={design.status}>{STATUS_LABELS[design.status]}</Badge>
+                  </motion.div>
                 </div>
 
-                {/* Mensaje */}
-                <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {notFound ? 'Diseño no encontrado' : 'Error al cargar'}
-                  </h3>
-                  <p className="text-sm text-muted-foreground max-w-xs">
-                    {notFound
-                      ? 'Este diseño puede haber sido eliminado o el enlace es incorrecto.'
-                      : 'No se pudo cargar la información del diseño. Comprueba tu conexión e inténtalo de nuevo.'}
-                  </p>
-                </div>
-
-                {/* Botones */}
-                <div className="flex gap-3">
-                  {!notFound && (
-                    <Button variant="outline" onClick={() => mutate()}>
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Reintentar
-                    </Button>
-                  )}
-                  <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                    Cerrar
-                  </Button>
-                </div>
-              </motion.div>
-            ) : design ? (
-              <motion.div
-                key="content"
-                initial={animations.fadeSlide.initial}
-                animate={animations.fadeSlide.animate}
-                exit={animations.fadeSlide.exit}
-                transition={TRANSITIONS.modal}
-                className="flex flex-col h-full"
-              >
-                {/* Scrollable design info section */}
-                <div className="overflow-y-auto p-6 pb-0">
-                  <SheetHeader className="pb-4 border-b border-border">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <SheetTitle className="text-xl font-bold text-foreground truncate">
-                          {design.title}
-                        </SheetTitle>
-                        <SheetDescription className="mt-1">
-                          {design.player} · {design.match_home} vs {design.match_away}
-                        </SheetDescription>
-                      </div>
-                      <div className="flex gap-1 shrink-0 ml-4">
-                        {design.folder_url && (
-                          <a
-                            href={design.folder_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-lg hover:bg-primary/10 transition-colors group"
-                            title="Abrir carpeta en Drive"
-                          >
-                            <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                          </a>
-                        )}
-                        <button
-                          onClick={() => setIsEditDialogOpen(true)}
-                          className="p-2 rounded-lg hover:bg-primary/10 transition-colors group"
-                          title="Editar"
-                        >
-                          <Edit2 className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        </button>
-                        <button
-                          onClick={() => onOpenChange(false)}
-                          className="p-2 rounded-lg hover:bg-primary/10 transition-colors group"
-                          title="Cerrar"
-                        >
-                          <X className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        </button>
-                      </div>
-                    </div>
-                  </SheetHeader>
-
-                  <div className="py-6 space-y-6">
-                    {/* Status — acción principal del detalle */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-muted-foreground">Estado</span>
-                      <motion.div
-                        key={design.status}
-                        initial={{ scale: 0.9, opacity: 0.5 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={SPRINGS.snappy}
+                {/* Diseñador — reasignable en un clic para el mánager */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Diseñador</span>
+                    {isAdmin ? (
+                      <button
+                        onClick={() => setAssignOpen((v) => !v)}
+                        className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40"
                       >
-                        <Badge status={design.status}>{STATUS_LABELS[design.status]}</Badge>
-                      </motion.div>
-                    </div>
-
-                    {design.status === 'BACKLOG' ? (
-                      <Button
-                        onClick={() => handleStatusChange('DELIVERED')}
-                        disabled={updating}
-                        className="w-full"
-                      >
-                        {updating ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {designer ? (
+                          <>
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
+                              {designer.name.charAt(0)}
+                            </span>
+                            {designer.name}
+                          </>
                         ) : (
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          <span className="text-status-warning">Sin asignar</span>
                         )}
-                        Marcar como entregado
-                      </Button>
+                        <motion.span
+                          initial={false}
+                          animate={{ rotate: assignOpen ? 180 : 0 }}
+                          transition={SPRINGS.snappy}
+                        >
+                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                        </motion.span>
+                      </button>
+                    ) : designer ? (
+                      <span className="flex items-center gap-2 text-sm font-medium">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
+                          {designer.name.charAt(0)}
+                        </span>
+                        {designer.name}
+                      </span>
                     ) : (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleStatusChange('BACKLOG')}
-                        disabled={updating}
-                        className="w-full"
-                      >
-                        {updating ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Undo2 className="mr-2 h-4 w-4" />
-                        )}
-                        Volver a pendiente
-                      </Button>
-                    )}
-
-                    {/* Player Status */}
-                    {design.player_status && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Estado del Jugador
-                        </span>
-                        <PlayerStatusTag status={design.player_status} />
-                      </div>
-                    )}
-
-                    {/* Deadline */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Fecha de entrega
-                      </span>
-                      <span className="text-sm text-foreground">
-                        {format(new Date(design.deadline_at), 'dd MMM yyyy, HH:mm', { locale: es })}
-                      </span>
-                    </div>
-
-                    {/* Designer */}
-                    {designer && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          Diseñador
-                        </span>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-foreground">{designer.name}</p>
-                        </div>
-                      </div>
+                      <span className="text-sm text-status-warning">Sin asignar</span>
                     )}
                   </div>
+                  <AnimatePresence initial={false}>
+                    {assignOpen && isAdmin && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={SPRINGS.smooth}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-wrap gap-1.5 pt-3">
+                          {designers.map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => handleAssign(m.id)}
+                              className={cn(
+                                'h-8 rounded-full border px-3 text-xs font-medium transition-colors',
+                                design.designer_id === m.id
+                                  ? 'border-primary/40 bg-primary/10 text-foreground'
+                                  : 'border-border bg-background text-muted-foreground hover:text-foreground'
+                              )}
+                            >
+                              {m.name}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </SheetContent>
-      </Sheet>
+
+                {/* Entrega */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Entrega</span>
+                  <span className="flex items-center gap-2">
+                    <UrgencyDot level={urgency} />
+                    <span
+                      className={cn(
+                        'font-mono tabular text-sm',
+                        urgency === 'h24' || urgency === 'overdue'
+                          ? 'font-semibold text-destructive'
+                          : 'text-foreground'
+                      )}
+                    >
+                      {format(new Date(design.deadline_at), "d MMM yyyy, HH:mm", { locale: es })}
+                    </span>
+                  </span>
+                </div>
+
+                {/* Acción principal de estado */}
+                {design.status === 'BACKLOG' ? (
+                  <button
+                    onClick={() => handleStatusChange('DELIVERED')}
+                    disabled={updating}
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                  >
+                    {updating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
+                    Marcar como entregado
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleStatusChange('BACKLOG')}
+                    disabled={updating}
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60"
+                  >
+                    {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+                    Volver a pendiente
+                  </button>
+                )}
+
+                {/* Editar / Drive */}
+                <div className={cn('grid gap-2', isAdmin ? 'grid-cols-2' : 'grid-cols-1')}>
+                  {isAdmin && (
+                    <button
+                      onClick={() => setIsEditDialogOpen(true)}
+                      className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Editar
+                    </button>
+                  )}
+                  {design.folder_url ? (
+                    <a
+                      href={design.folder_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Drive
+                    </a>
+                  ) : (
+                    <span className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/60 text-sm font-medium text-muted-foreground/50">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Sin Drive
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Eliminar (admin) */}
+              {isAdmin && onRequestDelete && (
+                <div className="border-t border-border/60 p-lg pt-md">
+                  <button
+                    onClick={() => {
+                      onOpenChange(false);
+                      onRequestDelete(design);
+                    }}
+                    className="flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Eliminar diseño
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <DialogTitle className="sr-only">Diseño</DialogTitle>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {options && (
         <ConfirmDialog

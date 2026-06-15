@@ -369,6 +369,8 @@ function DesignsPageContent() {
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}
         onDesignUpdated={() => mutate()}
+        isAdmin={isAdmin}
+        onRequestDelete={handleDelete}
       />
 
       <ConfirmDialog
