@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Design, DesignStatus } from '@/lib/types/design';
-import { STATUS_LABELS } from '@/lib/types/design';
+import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
@@ -308,7 +308,7 @@ export function DesignsTable({
                         <PlayerStatusTag status={design.player_status} variant="compact" />
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {design.match_home} vs {design.match_away}
+                        {getDesignContext(design)}
                       </span>
                     </div>
                   </TableCell>

@@ -23,7 +23,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { useTeamData } from '@/lib/hooks/use-team-data';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
-import { STATUS_LABELS } from '@/lib/types/design';
+import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import type { Design } from '@/lib/types/design';
 
 function parseWeekParam(value: string | null): Date {
@@ -100,9 +100,7 @@ function DesignerDetailPage() {
               {design.player}
               {design.player_status && <PlayerStatusTag status={design.player_status} />}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {design.match_home} vs {design.match_away}
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">{getDesignContext(design)}</p>
           </div>
           {design.folder_url && (
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>

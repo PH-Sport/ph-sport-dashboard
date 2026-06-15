@@ -35,7 +35,7 @@ import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ApiError } from '@/lib/utils/api-fetcher';
 import { cn } from '@/lib/utils';
 import type { Design, DesignStatus } from '@/lib/types/design';
-import { STATUS_LABELS, DESIGN_STATUS_ORDER } from '@/lib/types/design';
+import { STATUS_LABELS, DESIGN_STATUS_ORDER, getDesignContext } from '@/lib/types/design';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
@@ -198,7 +198,7 @@ export function DesignDetailSheet({
                 </DialogTitle>
                 <p className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="truncate">
-                    {design.player} · {design.match_home} vs {design.match_away}
+                    {[design.player, getDesignContext(design)].filter(Boolean).join(' · ')}
                   </span>
                   <PlayerStatusTag status={design.player_status} />
                 </p>

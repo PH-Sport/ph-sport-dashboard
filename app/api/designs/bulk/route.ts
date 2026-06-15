@@ -110,13 +110,15 @@ export async function POST(request: Request) {
       }
 
       const title = d.title?.trim() || d.player;
+      const isMatchday = (d.type ?? 'matchday') === 'matchday';
 
       return {
         title,
+        type: d.type ?? 'matchday',
         player: d.player,
         player_status: d.player_status ?? null,
-        match_home: d.match_home,
-        match_away: d.match_away,
+        match_home: isMatchday ? d.match_home : null,
+        match_away: isMatchday ? d.match_away : null,
         deadline_at: d.deadline_at,
         folder_url: d.folder_url || null,
         designer_id: designerId,

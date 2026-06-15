@@ -121,8 +121,8 @@ function DesignsPageContent() {
     return items.filter((design) =>
       design.title.toLowerCase().includes(query) ||
       design.player.toLowerCase().includes(query) ||
-      design.match_home.toLowerCase().includes(query) ||
-      design.match_away.toLowerCase().includes(query)
+      (design.match_home?.toLowerCase().includes(query) ?? false) ||
+      (design.match_away?.toLowerCase().includes(query) ?? false)
     );
   }, [items, filters.debouncedSearchQuery]);
 

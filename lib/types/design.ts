@@ -9,6 +9,39 @@ export type { DesignStatus } from './filters';
 // Orden único de estados para toda la aplicación
 export const DESIGN_STATUS_ORDER = ['BACKLOG', 'DELIVERED'] as const;
 
+// ─── Tipos de pieza ──────────────────────────────────────────
+// Conjunto único y EXTENSIBLE: añadir un tipo = añadir su slug aquí + su label.
+// Solo 'matchday' tiene partido (match_home/match_away); el resto, no.
+export const DESIGN_TYPES = ['matchday', 'presentacion', 'cumpleanos'] as const;
+export type DesignType = (typeof DESIGN_TYPES)[number];
+export const DEFAULT_DESIGN_TYPE: DesignType = 'matchday';
+
+export const DESIGN_TYPE_LABELS: Record<DesignType, string> = {
+  matchday: 'Matchday',
+  presentacion: 'Presentación',
+  cumpleanos: 'Cumpleaños',
+};
+
+/** Tipos con partido (muestran/exigen equipos). De momento solo matchday. */
+export function typeHasMatch(type: DesignType | undefined): boolean {
+  return (type ?? DEFAULT_DESIGN_TYPE) === 'matchday';
+}
+
+/**
+ * Texto de contexto de un diseño según su tipo: el partido si es matchday,
+ * o la etiqueta del tipo (Cumpleaños, Presentación) en caso contrario.
+ */
+export function getDesignContext(d: {
+  type?: DesignType;
+  match_home?: string | null;
+  match_away?: string | null;
+}): string {
+  if (typeHasMatch(d.type)) {
+    return d.match_home && d.match_away ? `${d.match_home} vs ${d.match_away}` : '';
+  }
+  return DESIGN_TYPE_LABELS[(d.type ?? DEFAULT_DESIGN_TYPE)] ?? '';
+}
+
 // Etiquetas legibles por estado
 export const STATUS_LABELS: Record<DesignStatus, string> = {
   BACKLOG: 'Pendiente',
@@ -42,9 +75,10 @@ export const STATUS_FLOW: Record<DesignStatus, DesignStatus[]> = {
 export interface Design {
   id: string;
   title: string;
+  type?: DesignType; // Tipo de pieza (matchday por defecto si falta)
   player: string;
-  match_home: string;
-  match_away: string;
+  match_home?: string; // Solo matchday
+  match_away?: string; // Solo matchday
   player_status?: 'injured' | 'suspended' | 'doubt' | 'last_minute'; // Estado del jugador
   folder_url?: string;
   deadline_at: string; // ISO 8601 string

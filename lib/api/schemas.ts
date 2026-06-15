@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DESIGN_TYPES } from '@/lib/types/design';
 
 const PLAYER_STATUS_VALUES = ['injured', 'suspended', 'doubt', 'last_minute'] as const;
 const DESIGN_STATUS_VALUES = ['BACKLOG', 'DELIVERED'] as const;
@@ -24,16 +25,28 @@ export const weekFiltersSchema = z.object({
 export type WeekFiltersInput = z.infer<typeof weekFiltersSchema>;
 
 /** POST /api/designs/bulk — input por diseño dentro del array */
-const bulkDesignItemSchema = z.object({
-  title: z.string().trim().max(200).optional(),
-  player: z.string().trim().min(1, 'player requerido').max(100),
-  match_home: z.string().trim().min(1, 'match_home requerido').max(100),
-  match_away: z.string().trim().min(1, 'match_away requerido').max(100),
-  deadline_at: isoDateTime,
-  designer_id: z.union([uuid, z.literal('auto')]).nullish(),
-  player_status: z.enum(PLAYER_STATUS_VALUES).nullish(),
-  folder_url: z.string().url().max(2000).optional().or(z.literal('')),
-}).strict();
+const bulkDesignItemSchema = z
+  .object({
+    type: z.enum(DESIGN_TYPES).default('matchday'),
+    title: z.string().trim().max(200).optional(),
+    player: z.string().trim().min(1, 'player requerido').max(100),
+    match_home: z.string().trim().max(100).optional(),
+    match_away: z.string().trim().max(100).optional(),
+    deadline_at: isoDateTime,
+    designer_id: z.union([uuid, z.literal('auto')]).nullish(),
+    player_status: z.enum(PLAYER_STATUS_VALUES).nullish(),
+    folder_url: z.string().url().max(2000).optional().or(z.literal('')),
+  })
+  .strict()
+  .superRefine((d, ctx) => {
+    // El partido solo es obligatorio en matchday.
+    if (d.type === 'matchday') {
+      if (!d.match_home?.trim())
+        ctx.addIssue({ code: 'custom', path: ['match_home'], message: 'match_home requerido en matchday' });
+      if (!d.match_away?.trim())
+        ctx.addIssue({ code: 'custom', path: ['match_away'], message: 'match_away requerido en matchday' });
+    }
+  });
 
 export const bulkCreateDesignsSchema = z.object({
   designs: z.array(bulkDesignItemSchema).min(1, 'Debe incluir al menos un diseño').max(100),
@@ -43,10 +56,12 @@ export type BulkCreateDesignsInput = z.infer<typeof bulkCreateDesignsSchema>;
 /** PUT /api/designs/:id — whitelist explícita de campos modificables */
 export const updateDesignSchema = z
   .object({
+    type: z.enum(DESIGN_TYPES).optional(),
     title: z.string().trim().min(1).max(200).optional(),
     player: z.string().trim().min(1).max(100).optional(),
-    match_home: z.string().trim().min(1).max(100).optional(),
-    match_away: z.string().trim().min(1).max(100).optional(),
+    // match_* nullable: al cambiar a un tipo sin partido se limpian.
+    match_home: z.string().trim().max(100).nullable().optional(),
+    match_away: z.string().trim().max(100).nullable().optional(),
     deadline_at: isoDateTime.optional(),
     folder_url: z.string().url().max(2000).nullable().optional(),
     player_status: z.enum(PLAYER_STATUS_VALUES).nullable().optional(),

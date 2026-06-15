@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { UrgencyBadge } from './urgency-badge';
-import { STATUS_LABELS } from '@/lib/types/design';
+import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import type { Design, DesignStatus } from '@/lib/types/design';
 import { cn } from '@/lib/utils';
 
@@ -53,7 +53,7 @@ export function DesignCard({ design, onSelect, onStatusChange, updating, muted }
               )}
             </div>
             <p className="mt-0.5 truncate text-sm text-muted-foreground">
-              {design.player} · {design.match_home} vs {design.match_away}
+              {[design.player, getDesignContext(design)].filter(Boolean).join(' · ')}
             </p>
           </div>
 
