@@ -2,10 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { SPRINGS } from '@/components/ui/animations';
 import { useAuth } from '@/lib/auth/auth-context';
 import { AppSidebar, SidebarProvider, useSidebar } from './app-sidebar';
 import { Header } from './header';
-import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -45,20 +46,18 @@ export function AppLayout({ children }: AppLayoutProps) {
 }
 
 function MainArea({ children }: { children: React.ReactNode }) {
-  const { isMobile, layout, setMobileOpen } = useSidebar();
+  const { contentPadLeft, setMobileOpen } = useSidebar();
   return (
-    <div
-      style={{
-        paddingLeft: isMobile ? 0 : `${layout.contentPadLeftRem}rem`,
-      }}
-      className={cn(
-        'min-h-svh transition-[padding] duration-200 ease-out'
-      )}
+    <motion.div
+      initial={false}
+      animate={{ paddingLeft: contentPadLeft }}
+      transition={SPRINGS.smooth}
+      className="min-h-svh"
     >
       <Header onMenuClick={() => setMobileOpen(true)} />
       <main id="main-content" className="animate-page-enter">
         {children}
       </main>
-    </div>
+    </motion.div>
   );
 }

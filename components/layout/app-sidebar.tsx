@@ -1,15 +1,18 @@
 'use client';
 
 /**
- * AppSidebar — sidebar flotante PHSPORT
+ * AppSidebar — sidebar flotante PHSPORT (lenguaje del concepto D).
  *
- * Componente self-contained (provider + hook + render + sub-piezas).
- * No depende de primitiva externa. Diseñado a medida para 3 rutas + monograma.
+ * Movimiento estilo Apple: el ancho de la placa se anima con MUELLE
+ * (SPRINGS.smooth), el contenido principal se desplaza con el mismo muelle
+ * (ver MainArea en app-layout), y las etiquetas hacen FADE de opacidad —
+ * nunca aparecen/desaparecen de golpe. La pill activa se desliza entre items
+ * (layoutId compartido).
  *
  * Uso:
  *   <SidebarProvider>
  *     <AppSidebar />
- *     ...resto del layout (consume `useSidebar()` para padding reactivo)
+ *     ...resto del layout (consume `useSidebar()` para el padding reactivo)
  *   </SidebarProvider>
  */
 
@@ -27,26 +30,19 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { SPRINGS } from '@/components/ui/animations';
-import {
-  CalendarRange,
-  Home,
-  Palette,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Settings,
-} from 'lucide-react';
+import { SPRINGS, TWEENS } from '@/components/ui/animations';
+import { CalendarRange, Home, Palette, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth/auth-context';
 import { PhSportMark } from '@/components/layout/ph-sport-mark';
 import { cn } from '@/lib/utils';
 
-// ─── Constantes ───────────────────────────────────────────────
-
-const W_EXPANDED = 14;        // rem — ancho del panel expandido
-const W_COLLAPSED = 3.5;      // rem — ancho del panel colapsado
-const SIDE_INSET = 0.5;       // rem — margen del panel a los bordes del viewport
-const MOBILE_MAX = 767;       // px — breakpoint móvil
+// ─── Constantes (px, como el concepto D) ─────────────────────
+const W_EXPANDED = 224;   // placa expandida
+const W_COLLAPSED = 64;   // placa colapsada (solo iconos)
+const SIDE_INSET = 12;    // margen de la placa a los bordes (left/top/bottom-3)
+const GAP = 12;           // hueco entre placa y contenido
+const MOBILE_MAX = 767;   // breakpoint móvil
 const COOKIE_KEY = 'phsp-sb';
 
 // ─── Context API ──────────────────────────────────────────────
@@ -57,13 +53,8 @@ type SidebarApi = {
   isMobile: boolean;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
-  /** Anchos calculados para que el contenido principal reserve hueco. */
-  layout: {
-    sideInsetRem: number;
-    panelWidthRem: number;
-    /** Padding-left que el contenido debe aplicar para esquivar el panel + gap */
-    contentPadLeftRem: number;
-  };
+  /** Padding-left (px) que el contenido reserva para esquivar la placa + gap. */
+  contentPadLeft: number;
 };
 
 const SidebarCtx = createContext<SidebarApi | null>(null);
@@ -128,18 +119,14 @@ export function SidebarProvider({
   }, [toggle]);
 
   const api = useMemo<SidebarApi>(() => {
-    const panelWidthRem = expanded ? W_EXPANDED : W_COLLAPSED;
+    const w = expanded ? W_EXPANDED : W_COLLAPSED;
     return {
       expanded,
       toggle,
       isMobile,
       mobileOpen,
       setMobileOpen,
-      layout: {
-        sideInsetRem: SIDE_INSET,
-        panelWidthRem,
-        contentPadLeftRem: panelWidthRem + SIDE_INSET * 2,
-      },
+      contentPadLeft: isMobile ? 0 : w + SIDE_INSET + GAP,
     };
   }, [expanded, toggle, isMobile, mobileOpen]);
 
@@ -172,7 +159,7 @@ function isItemActive(pathname: string, href: string): boolean {
 // ─── AppSidebar (entry point) ────────────────────────────────
 
 export function AppSidebar() {
-  const { isMobile, mobileOpen, setMobileOpen } = useSidebar();
+  const { isMobile, mobileOpen, setMobileOpen, expanded } = useSidebar();
   const { profile } = useAuth();
   const pathname = usePathname() ?? '';
   const items = buildNavItems(profile?.role);
@@ -182,50 +169,36 @@ export function AppSidebar() {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="w-[16rem] border-panel-border bg-panel p-0 text-panel-foreground"
+          className="glass-panel w-[16rem] p-0"
         >
           <SheetTitle className="sr-only">Navegación PHSPORT</SheetTitle>
-          <SheetDescription className="sr-only">
-            Menú principal del producto
-          </SheetDescription>
+          <SheetDescription className="sr-only">Menú principal del producto</SheetDescription>
           <SidebarBody
             items={items}
             pathname={pathname}
             expanded
             onItemClick={() => setMobileOpen(false)}
-            showFooterToggle={false}
+            showToggle={false}
           />
         </SheetContent>
       </Sheet>
     );
   }
 
-  return <SidebarDesktop items={items} pathname={pathname} />;
-}
-
-// ─── Desktop floating panel ──────────────────────────────────
-
-function SidebarDesktop({ items, pathname }: { items: NavItem[]; pathname: string }) {
-  const { expanded, layout } = useSidebar();
   return (
-    <aside
+    <motion.aside
+      initial={false}
+      animate={{ width: expanded ? W_EXPANDED : W_COLLAPSED }}
+      transition={SPRINGS.smooth}
       data-state={expanded ? 'expanded' : 'collapsed'}
       aria-label="Navegación principal"
-      style={{
-        width: `${layout.panelWidthRem}rem`,
-        top: `${layout.sideInsetRem}rem`,
-        bottom: `${layout.sideInsetRem}rem`,
-        left: `${layout.sideInsetRem}rem`,
-      }}
       className={cn(
-        'fixed z-30 hidden flex-col',
-        'glass-panel rounded-2xl shadow-overlay',
-        'transition-[width] duration-200 ease-out',
-        'md:flex'
+        'glass-panel fixed bottom-3 left-3 top-3 z-30 hidden flex-col overflow-hidden',
+        'rounded-2xl shadow-overlay md:flex'
       )}
     >
-      <SidebarBody items={items} pathname={pathname} expanded={expanded} showFooterToggle />
-    </aside>
+      <SidebarBody items={items} pathname={pathname} expanded={expanded} showToggle />
+    </motion.aside>
   );
 }
 
@@ -236,84 +209,71 @@ function SidebarBody({
   pathname,
   expanded,
   onItemClick,
-  showFooterToggle,
+  showToggle,
 }: {
   items: NavItem[];
   pathname: string;
   expanded: boolean;
   onItemClick?: () => void;
-  showFooterToggle: boolean;
+  showToggle: boolean;
 }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col p-3">
       <SidebarBrand expanded={expanded} onLinkClick={onItemClick} />
-      <nav
-        className="flex-1 overflow-y-auto px-2 py-3"
-        aria-label="Secciones"
-      >
-        <ul className="flex flex-col gap-1">
-          {items.map((item) => (
-            <li key={item.href}>
-              <NavLink
-                item={item}
-                active={isItemActive(pathname, item.href)}
-                expanded={expanded}
-                onClick={onItemClick}
-              />
-            </li>
-          ))}
-        </ul>
+
+      <nav className="mt-5 flex flex-1 flex-col gap-1.5" aria-label="Secciones">
+        {items.map((item) => (
+          <NavRow
+            key={item.href}
+            item={item}
+            active={isItemActive(pathname, item.href)}
+            expanded={expanded}
+            onClick={onItemClick}
+          />
+        ))}
       </nav>
-      <div className="flex flex-col gap-1 border-t border-panel-border/60 p-2">
-        <NavLink
+
+      <div className="flex flex-col gap-1.5 border-t border-panel-border/60 pt-3">
+        <NavRow
           item={{ href: '/ajustes', label: 'Ajustes', icon: Settings }}
           active={isItemActive(pathname, '/ajustes')}
           expanded={expanded}
           onClick={onItemClick}
         />
-        {showFooterToggle && <SidebarToggleButton expanded={expanded} />}
+        {showToggle && <ToggleRow expanded={expanded} />}
       </div>
     </div>
   );
 }
 
-// ─── Logo zone ───────────────────────────────────────────────
+// ─── Marca ───────────────────────────────────────────────────
 
-function SidebarBrand({
-  expanded,
-  onLinkClick,
-}: {
-  expanded: boolean;
-  onLinkClick?: () => void;
-}) {
+function SidebarBrand({ expanded, onLinkClick }: { expanded: boolean; onLinkClick?: () => void }) {
   return (
     <Link
       href="/inicio"
       onClick={onLinkClick}
       aria-label="PHSPORT — Inicio"
-      className={cn(
-        'flex items-center border-b border-panel-border/60 px-3 py-4 outline-none transition-colors',
-        'hover:bg-panel-hover/40',
-        'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
-        expanded ? 'gap-3' : 'justify-center'
-      )}
+      className="flex h-10 items-center overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset"
     >
-      <PhSportMark
-        decorative
-        className={cn('shrink-0 text-panel-foreground', expanded ? 'h-7' : 'h-6')}
-      />
-      {expanded && (
-        <span className="font-heading text-base font-semibold tracking-tight text-panel-foreground">
-          PHSPORT
-        </span>
-      )}
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+        <PhSportMark decorative className="h-6 text-panel-foreground" />
+      </span>
+      <motion.span
+        initial={false}
+        animate={{ opacity: expanded ? 1 : 0 }}
+        transition={TWEENS.fast}
+        className="whitespace-nowrap font-heading text-sm font-semibold tracking-tight text-panel-foreground"
+      >
+        PHSPORT
+      </motion.span>
     </Link>
   );
 }
 
 // ─── Item ────────────────────────────────────────────────────
 
-function NavLink({
+function NavRow({
   item,
   active,
   expanded,
@@ -332,35 +292,40 @@ function NavLink({
       aria-current={active ? 'page' : undefined}
       title={!expanded ? item.label : undefined}
       className={cn(
-        'relative flex h-10 items-center rounded-lg outline-none transition-colors',
+        'relative flex h-10 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
-        expanded ? 'gap-3 px-3' : 'mx-auto w-10 justify-center',
         active
-          ? 'font-medium text-panel-active-foreground'
-          : 'text-panel-foreground/80 hover:bg-panel-hover hover:text-panel-foreground'
+          ? 'text-primary'
+          : 'text-panel-foreground/70 hover:bg-panel-hover/60 hover:text-panel-foreground'
       )}
     >
-      {/* Pill activa compartida — se desliza entre items con muelle (momento firma) */}
       {active && (
         <motion.span
           layoutId="nav-active-pill"
           transition={SPRINGS.smooth}
-          className="absolute inset-0 rounded-lg bg-panel-active"
+          className="absolute inset-0 rounded-xl bg-primary/15"
           aria-hidden
         />
       )}
       <Icon className="relative z-10 h-5 w-5 shrink-0" aria-hidden />
-      {expanded && <span className="relative z-10 truncate text-sm">{item.label}</span>}
+      <motion.span
+        initial={false}
+        animate={{ opacity: expanded ? 1 : 0 }}
+        transition={TWEENS.fast}
+        className="relative z-10 ml-3 truncate whitespace-nowrap text-sm font-medium"
+      >
+        {item.label}
+      </motion.span>
     </Link>
   );
 }
 
-// ─── Footer toggle ──────────────────────────────────────────
+// ─── Toggle (footer) ─────────────────────────────────────────
 
-function SidebarToggleButton({ expanded }: { expanded: boolean }) {
+function ToggleRow({ expanded }: { expanded: boolean }) {
   const { toggle } = useSidebar();
   const Icon = expanded ? PanelLeftClose : PanelLeftOpen;
-  const label = expanded ? 'Colapsar' : 'Expandir';
+  const label = expanded ? 'Contraer' : 'Expandir';
   return (
     <button
       type="button"
@@ -368,16 +333,20 @@ function SidebarToggleButton({ expanded }: { expanded: boolean }) {
       aria-label={`${label} barra lateral`}
       title={`${label} (⌘B)`}
       className={cn(
-        'flex h-9 items-center rounded-lg outline-none transition-colors',
-        'text-panel-foreground/70 hover:bg-panel-hover hover:text-panel-foreground',
-        'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
-        expanded ? 'gap-2 px-3 text-sm' : 'mx-auto w-9 justify-center'
+        'flex h-10 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors',
+        'text-panel-foreground/70 hover:bg-panel-hover/60 hover:text-panel-foreground',
+        'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset'
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" aria-hidden />
-      {expanded && (
-        <span className="font-mono text-eyebrow uppercase text-panel-foreground/50">⌘B</span>
-      )}
+      <Icon className="h-5 w-5 shrink-0" aria-hidden />
+      <motion.span
+        initial={false}
+        animate={{ opacity: expanded ? 1 : 0 }}
+        transition={TWEENS.fast}
+        className="ml-3 whitespace-nowrap text-sm font-medium"
+      >
+        Contraer
+      </motion.span>
     </button>
   );
 }
