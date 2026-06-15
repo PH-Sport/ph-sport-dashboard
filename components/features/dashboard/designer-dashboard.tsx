@@ -1,16 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { format, isToday, isTomorrow, formatDistanceToNowStrict } from 'date-fns';
+import { useMemo } from 'react';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { KpiCard } from '@/components/ui/kpi-card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { TWEENS } from '@/components/ui/animations';
-import { TrendingUp, Clock, CheckCircle2, ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { cn } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
 import { useDesigners } from '@/lib/hooks/use-designers';
@@ -23,10 +18,32 @@ interface DesignerDashboardProps {
 const UPCOMING_LIMIT = 5;
 const TEAMMATE_LIMIT = 4;
 
-function getDeadlineLabel(deadline: Date): string {
-  if (isToday(deadline)) return `Hoy, ${format(deadline, 'HH:mm')}`;
-  if (isTomorrow(deadline)) return `Mañana, ${format(deadline, 'HH:mm')}`;
-  return format(deadline, "d MMM 'a las' HH:mm", { locale: es });
+const TONE_TEXT = {
+  default: 'text-foreground',
+  success: 'text-status-success',
+  primary: 'text-primary',
+} as const;
+
+function KpiPlate({
+  label,
+  value,
+  note,
+  tone = 'default',
+}: {
+  label: string;
+  value: string | number;
+  note: string;
+  tone?: keyof typeof TONE_TEXT;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+      <p className="font-mono text-eyebrow uppercase text-muted-foreground">{label}</p>
+      <p className={cn('mt-2 font-mono tabular text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
+        {value}
+      </p>
+      <p className="mt-2 text-xs text-muted-foreground">{note}</p>
+    </div>
+  );
 }
 
 export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
@@ -36,6 +53,8 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
 
   const activeDesigns = myDesigns.filter((d) => d.status === 'BACKLOG').length;
   const completedThisWeek = myDesigns.filter((d) => d.status === 'DELIVERED').length;
+  const total = activeDesigns + completedThisWeek;
+  const completionPct = total > 0 ? Math.round((completedThisWeek / total) * 100) : 0;
 
   const upcoming = useMemo(() => {
     return myDesigns
@@ -45,11 +64,9 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
   }, [myDesigns]);
 
   const nextDeadline = upcoming[0];
-
   const hoursUntilNext = nextDeadline
-    ? (new Date(nextDeadline.deadline_at).getTime() - new Date().getTime()) / (1000 * 60 * 60)
+    ? (new Date(nextDeadline.deadline_at).getTime() - Date.now()) / (1000 * 60 * 60)
     : null;
-
   const isUrgent = hoursUntilNext !== null && hoursUntilNext > 0 && hoursUntilNext < 24;
 
   const teammates = useMemo(() => {
@@ -61,237 +78,136 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           id: designer.id,
           name: designer.name,
           active: designerDesigns.filter((d) => d.status !== 'DELIVERED').length,
-          delivered: designerDesigns.filter((d) => d.status === 'DELIVERED').length,
         };
       })
       .sort((a, b) => b.active - a.active)
       .slice(0, TEAMMATE_LIMIT);
   }, [items, designers, userId]);
 
-  const [teamOpen, setTeamOpen] = useState(false);
-
   return (
-    <div className="flex flex-col gap-6">
-      {/* Hero — entrega urgente cuando hay <24 h. Countdown como ancla visual editorial. */}
+    <div className="flex flex-col gap-4">
+      {/* Hero de urgencia — la entrega más próxima manda cuando vence en <24 h */}
       {isUrgent && nextDeadline && (
-        <Card className="border-destructive/40 bg-destructive/[0.04]">
-          <CardContent className="flex flex-col gap-5 p-6 md:flex-row md:items-stretch md:gap-8">
-            {/* Countdown grande — funcional + visual, no se repite en otro sitio */}
-            <div className="flex shrink-0 flex-row items-end gap-3 md:flex-col md:items-start md:gap-2 md:border-r md:border-destructive/20 md:pr-8">
-              <span className="mono tabular text-5xl font-semibold leading-none text-destructive">
-                {Math.floor(hoursUntilNext!)}h
-              </span>
-              <span className="font-mono pb-1 text-eyebrow uppercase text-destructive md:pb-0">
-                Vence en
-              </span>
-            </div>
-
-            <div className="flex-1 space-y-1.5">
-              <p className="font-mono text-eyebrow uppercase text-destructive">
-                Entrega urgente
-              </p>
-              <h2 className="font-heading text-lg font-semibold text-foreground">
-                {nextDeadline.title}
-              </h2>
-              <p className="text-sm text-muted-foreground">
+        <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-lg shadow-raised md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-5">
+            <span className="font-mono tabular text-5xl font-semibold leading-none text-destructive">
+              {Math.floor(hoursUntilNext!)} h
+            </span>
+            <div>
+              <p className="font-mono text-eyebrow uppercase text-destructive">Entrega más próxima</p>
+              <p className="mt-0.5 text-sm font-medium">{nextDeadline.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {nextDeadline.player} ·{' '}
                 {format(new Date(nextDeadline.deadline_at), "d 'de' MMM 'a las' HH:mm", { locale: es })}
               </p>
             </div>
-            <Button asChild className="shrink-0 self-end md:self-center">
-              <Link href="/mi-semana">
-                Ver detalles
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+          <Link
+            href="/mi-semana"
+            className="flex h-9 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Ver mi semana
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </section>
       )}
 
-      {/* KPIs — tres datos distintos, siempre los mismos tres (nada de ramas que dupliquen) */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <KpiCard
-          title="Tareas activas"
+      {/* KPIs personales */}
+      <section className="grid grid-cols-3 gap-4">
+        <KpiPlate
+          label="Pendientes"
           value={activeDesigns}
-          description="Pendientes en tu cola"
-          variant={activeDesigns > 0 ? 'primary' : 'default'}
+          note="En tu cola esta semana"
+          tone={activeDesigns > 0 ? 'primary' : 'default'}
         />
-
-        <KpiCard
-          title="Próxima entrega"
-          value={
-            nextDeadline
-              ? `${Math.max(0, Math.floor(hoursUntilNext ?? 0))}h`
-              : '—'
-          }
-          description={nextDeadline ? nextDeadline.title : 'Sin entregas pendientes'}
-          variant={
-            !nextDeadline
-              ? 'success'
-              : hoursUntilNext !== null && hoursUntilNext < 24
-                ? 'danger'
-                : hoursUntilNext !== null && hoursUntilNext < 48
-                  ? 'warning'
-                  : 'default'
-          }
-          icon={nextDeadline ? Clock : CheckCircle2}
-        />
-
-        <KpiCard
-          title="Entregadas"
+        <KpiPlate
+          label="Entregadas"
           value={completedThisWeek}
-          description="Esta semana"
-          variant={completedThisWeek > 0 ? 'success' : 'default'}
-          icon={TrendingUp}
+          note="Esta semana"
+          tone={completedThisWeek > 0 ? 'success' : 'default'}
         />
-      </div>
+        <KpiPlate label="Completado" value={`${completionPct}%`} note="De tu semana" tone="primary" />
+      </section>
 
-      {/* Próximas entregas — contenido principal, ancho completo */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="mb-4 flex items-end justify-between gap-4">
-              <div>
-                <p className="font-mono text-eyebrow uppercase text-muted-foreground">
-                  Próximas entregas
-                </p>
-                <h2 className="font-heading text-base font-semibold text-foreground">
-                  Tu cola por deadline
-                </h2>
-              </div>
-              <Button variant="ghost" size="sm" asChild className="shrink-0">
-                <Link href="/mi-semana">
-                  Ver todas
-                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </Link>
-              </Button>
+      {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}
+      <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
+        <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-eyebrow uppercase text-muted-foreground">Tu cola</p>
+              <h2 className="text-base font-semibold">Pendientes</h2>
             </div>
-
-            {upcoming.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-                <CheckCircle2 className="h-8 w-8 text-status-success" />
-                <p className="text-sm text-muted-foreground">Sin entregas pendientes. Buen trabajo.</p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-border">
-                {upcoming.map((design) => {
-                  const deadline = new Date(design.deadline_at);
-                  const hoursLeft = (deadline.getTime() - Date.now()) / (1000 * 60 * 60);
-                  const isOverdue = hoursLeft < 0;
-                  const isSoon = hoursLeft >= 0 && hoursLeft < 24;
-
-                  return (
-                    <li key={design.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-foreground">{design.title}</p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {design.player} · {design.match_home} vs {design.match_away}
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p
-                          className={cn(
-                            'mono tabular text-xs font-medium',
-                            isOverdue
-                              ? 'text-destructive'
-                              : isSoon
-                                ? 'text-status-warning'
-                                : 'text-foreground'
-                          )}
-                        >
-                          {isOverdue
-                            ? `Vencido · ${formatDistanceToNowStrict(deadline, { locale: es })}`
-                            : getDeadlineLabel(deadline)}
-                        </p>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-      {/* Compañeros — secundario e intencional: se abre a propósito, no es un KPI */}
-      {teammates.length > 0 && (
-        <Card density="compact">
-          <CardContent className="pt-md">
-            <button
-              type="button"
-              onClick={() => setTeamOpen((v) => !v)}
-              aria-expanded={teamOpen}
-              className="flex w-full items-center justify-between rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+            <Link
+              href="/mi-semana"
+              className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
             >
-              <span className="flex items-center gap-2">
-                <span className="font-mono text-eyebrow uppercase text-muted-foreground">
-                  Compañeros
-                </span>
-                <Badge variant="secondary" className="font-normal">
-                  {teammates.length}
-                </Badge>
-              </span>
-              <ChevronDown
-                className={cn(
-                  'h-4 w-4 text-muted-foreground transition-transform duration-200',
-                  teamOpen && 'rotate-180'
-                )}
-              />
-            </button>
+              Ver mi semana →
+            </Link>
+          </div>
 
-            {teamOpen && (
-              <motion.ul
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={TWEENS.base}
-                className="mt-4 space-y-3"
-              >
-                {teammates.map((mate) => (
-                  <li key={mate.id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="truncate font-medium text-foreground">{mate.name}</span>
-                    <span className="mono tabular shrink-0 text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground">{mate.active}</span> activos
+          {upcoming.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Sin entregas pendientes. Buen trabajo.
+            </p>
+          ) : (
+            <ul className="-mx-2">
+              {upcoming.map((design) => {
+                const urgency = getUrgency(design.deadline_at, false);
+                const deadline = new Date(design.deadline_at);
+                const label =
+                  urgency === 'overdue'
+                    ? 'Atrasada'
+                    : `${format(deadline, 'd MMM', { locale: es })} · ${format(deadline, 'HH:mm')}`;
+                return (
+                  <li
+                    key={design.id}
+                    className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
+                  >
+                    <UrgencyDot level={urgency} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{design.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">{design.player}</p>
+                    </div>
+                    <span
+                      className={cn(
+                        'shrink-0 font-mono tabular text-xs',
+                        urgency === 'h24' || urgency === 'overdue'
+                          ? 'font-semibold text-destructive'
+                          : 'text-muted-foreground'
+                      )}
+                    >
+                      {label}
                     </span>
                   </li>
-                ))}
-              </motion.ul>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                );
+              })}
+            </ul>
+          )}
+        </section>
 
-      {/* Accesos rápidos — sin icono-box, cada link con peso visual diferenciado */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Link href="/mi-semana" className="group">
-          <Card className="h-full transition-colors hover:border-primary/40">
-            <CardContent className="flex items-center justify-between gap-6 p-5">
-              <div className="space-y-1">
-                <p className="font-mono text-eyebrow uppercase text-muted-foreground">
-                  Mi Semana
-                </p>
-                <p className="font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary">
-                  Lista completa de tu trabajo
-                </p>
-              </div>
-              <Badge variant="secondary" className="mono tabular shrink-0 text-base font-semibold">
-                {activeDesigns}
-              </Badge>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/disenos" className="group">
-          <Card className="h-full transition-colors hover:border-primary/40">
-            <CardContent className="flex items-center justify-between gap-6 p-5">
-              <div className="space-y-1">
-                <p className="font-mono text-eyebrow uppercase text-muted-foreground">
-                  Diseños
-                </p>
-                <p className="font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary">
-                  Backlog completo del equipo
-                </p>
-              </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
-            </CardContent>
-          </Card>
-        </Link>
+        <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+          <p className="font-mono text-eyebrow uppercase text-muted-foreground">Compañeros</p>
+          <h2 className="text-base font-semibold">El resto del equipo</h2>
+          {teammates.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">Sin compañeros con trabajo activo.</p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {teammates.map((mate) => (
+                <li key={mate.id} className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted font-mono text-[10px] font-semibold">
+                      {mate.name.charAt(0)}
+                    </span>
+                    {mate.name}
+                  </span>
+                  <span className="font-mono tabular text-xs text-muted-foreground">
+                    {mate.active} activas
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     </div>
   );
