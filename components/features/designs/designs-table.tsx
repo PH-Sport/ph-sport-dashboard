@@ -2,7 +2,6 @@
 
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -35,14 +34,13 @@ import {
   ArrowDown,
   ChevronLeft,
   ChevronRight,
-  Flame,
-  AlertTriangle,
   MoreHorizontal,
-  Calendar,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { Design, DesignStatus } from '@/lib/types/design';
 import { STATUS_LABELS } from '@/lib/types/design';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
+import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
 
 interface Designer {
@@ -75,35 +73,10 @@ interface DesignsTableProps {
   deletingId: string | null;
 }
 
-function getUrgency(design: Design) {
-  const hoursLeft = (new Date(design.deadline_at).getTime() - Date.now()) / (1000 * 60 * 60);
-  const pending = design.status !== 'DELIVERED';
-  return {
-    hoursLeft,
-    isCritical: pending && hoursLeft > 0 && hoursLeft < 24,
-    isUrgent: pending && hoursLeft >= 24 && hoursLeft < 48,
-  };
-}
-
-function UrgencyBadges({ design }: { design: Design }) {
-  const { hoursLeft, isCritical, isUrgent } = getUrgency(design);
-  if (isCritical) {
-    return (
-      <Badge variant="destructive" className="h-6 shrink-0 gap-1">
-        <Flame className="h-3 w-3" />
-        {Math.floor(hoursLeft)}h
-      </Badge>
-    );
-  }
-  if (isUrgent) {
-    return (
-      <Badge variant="warning" className="h-6 shrink-0 gap-1">
-        <AlertTriangle className="h-3 w-3" />
-        {Math.floor(hoursLeft)}h
-      </Badge>
-    );
-  }
-  return null;
+/** Texto del deadline con énfasis si es crítico/vencido. */
+function deadlineTone(design: Design): string {
+  const u = getUrgency(design.deadline_at, design.status === 'DELIVERED');
+  return u === 'h24' || u === 'overdue' ? 'font-semibold text-destructive' : 'text-foreground';
 }
 
 /** Acciones de fila tras menú ⋯ — borrar deja de ser un objetivo siempre visible. */
@@ -175,7 +148,7 @@ function StatusSelect({
       onValueChange={(v) => onStatusChange(design, v as DesignStatus)}
       disabled={disabled}
     >
-      <SelectTrigger className="h-8 w-[130px] text-xs" aria-label="Cambiar estado">
+      <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs" aria-label="Cambiar estado">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -213,9 +186,9 @@ export function DesignsTable({
   const renderSortIcon = (column: DesignSortColumn) => {
     if (sortColumn !== column) return null;
     return sortDirection === 'asc' ? (
-      <ArrowUp className="h-4 w-4" />
+      <ArrowUp className="h-3.5 w-3.5" />
     ) : (
-      <ArrowDown className="h-4 w-4" />
+      <ArrowDown className="h-3.5 w-3.5" />
     );
   };
 
@@ -231,206 +204,199 @@ export function DesignsTable({
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <CardTitle>Lista de Diseños</CardTitle>
-            <CardDescription>
-              {totalItems} diseño{totalItems !== 1 ? 's' : ''} encontrado{totalItems !== 1 ? 's' : ''}
-              {searchQueryActive && ` (filtrado de ${totalUnfilteredCount} total${totalUnfilteredCount !== 1 ? 'es' : ''})`}
-            </CardDescription>
-          </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <Label className="text-sm text-muted-foreground">Mostrar</Label>
-            <Select
-              value={itemsPerPage.toString()}
-              onValueChange={(v) => onItemsPerPageChange(Number(v))}
-            >
-              <SelectTrigger className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+      {/* Barra superior discreta: recuento + items por página */}
+      <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
+        <p className="text-xs text-muted-foreground">
+          {totalItems} diseño{totalItems !== 1 ? 's' : ''}
+          {searchQueryActive &&
+            ` · filtrado de ${totalUnfilteredCount} total${totalUnfilteredCount !== 1 ? 'es' : ''}`}
+        </p>
+        <div className="hidden items-center gap-2 sm:flex">
+          <Label className="text-xs text-muted-foreground">Mostrar</Label>
+          <Select
+            value={itemsPerPage.toString()}
+            onValueChange={(v) => onItemsPerPageChange(Number(v))}
+          >
+            <SelectTrigger className="h-8 w-[4.5rem] rounded-lg text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </CardHeader>
-      <CardContent>
-        {/* Móvil: lista de cards (la tabla de 6 columnas no se encoge, se adapta) */}
-        <div className="space-y-2 md:hidden">
-          {paginatedItems.map((design) => (
-            <Card key={design.id} density="compact">
-              <CardContent className="pt-md">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
+      </div>
+
+      {/* Móvil: lista de filas (la tabla de 6 columnas no se encoge) */}
+      <ul className="space-y-0.5 md:hidden">
+        {paginatedItems.map((design) => {
+          const designer = designers.find((d) => d.id === design.designer_id);
+          return (
+            <li key={design.id} className="rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/40">
+              <div className="flex items-start justify-between gap-2">
+                <button
+                  onClick={() => onOpenDetail(design.id)}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <p className="truncate text-sm font-medium">{design.title}</p>
+                  <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+                    {design.player}
+                    <PlayerStatusTag status={design.player_status} variant="compact" />
+                    <span>· {designer ? designer.name : 'Sin asignar'}</span>
+                  </p>
+                </button>
+                <RowActions
+                  design={design}
+                  isAdmin={isAdmin}
+                  deletingId={deletingId}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              </div>
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <StatusSelect
+                  design={design}
+                  onStatusChange={onStatusChange}
+                  disabled={updatingId === design.id}
+                />
+                <span className="flex items-center gap-2">
+                  <UrgencyDot level={getUrgency(design.deadline_at, design.status === 'DELIVERED')} />
+                  <span className={cn('font-mono tabular text-xs', deadlineTone(design))}>
+                    {format(new Date(design.deadline_at), 'dd MMM HH:mm', { locale: es })}
+                  </span>
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Desktop: tabla */}
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{sortableHead('title', 'Título')}</TableHead>
+              <TableHead>{sortableHead('player', 'Contexto')}</TableHead>
+              <TableHead>Diseñador</TableHead>
+              <TableHead>{sortableHead('status', 'Estado')}</TableHead>
+              <TableHead>{sortableHead('deadline', 'Fecha de entrega')}</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedItems.map((design) => {
+              const designer = designers.find((d) => d.id === design.designer_id);
+              return (
+                <TableRow key={design.id}>
+                  <TableCell className="font-medium">
                     <button
                       onClick={() => onOpenDetail(design.id)}
-                      className="truncate text-left font-medium transition-colors hover:text-primary"
+                      className="text-left transition-colors hover:text-primary"
                     >
                       {design.title}
                     </button>
-                    <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
-                      {design.player}
-                      {design.player_status && (
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{design.player}</span>
                         <PlayerStatusTag status={design.player_status} variant="compact" />
-                      )}
-                      <span>· {design.match_home} vs {design.match_away}</span>
-                    </p>
-                  </div>
-                  <RowActions
-                    design={design}
-                    isAdmin={isAdmin}
-                    deletingId={deletingId}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                </div>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {design.match_home} vs {design.match_away}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {designer ? (
+                      <div className="flex items-center gap-2" title={designer.name}>
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                          {designer.name.charAt(0)}
+                        </div>
+                        <span className="max-w-[100px] truncate text-sm">
+                          {designer.name.split(' ')[0]}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-status-warning">Sin asignar</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <StatusSelect
                       design={design}
                       onStatusChange={onStatusChange}
                       disabled={updatingId === design.id}
                     />
-                    <UrgencyBadges design={design} />
-                  </div>
-                  <span className="mono tabular flex items-center gap-1 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" aria-hidden />
-                    {format(new Date(design.deadline_at), 'dd MMM HH:mm', { locale: es })}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Desktop: tabla */}
-        <div className="hidden md:block">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{sortableHead('title', 'Título')}</TableHead>
-                <TableHead>{sortableHead('player', 'Contexto')}</TableHead>
-                <TableHead>Diseñador</TableHead>
-                <TableHead>{sortableHead('status', 'Estado')}</TableHead>
-                <TableHead>{sortableHead('deadline', 'Fecha de entrega')}</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedItems.map((design) => {
-                const designer = designers.find((d) => d.id === design.designer_id);
-
-                return (
-                  <TableRow key={design.id}>
-                    <TableCell className="font-medium">
-                      <button
-                        onClick={() => onOpenDetail(design.id)}
-                        className="text-left transition-colors hover:text-primary"
-                      >
-                        {design.title}
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{design.player}</span>
-                          {design.player_status && (
-                            <PlayerStatusTag status={design.player_status} variant="compact" />
-                          )}
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {design.match_home} vs {design.match_away}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {designer ? (
-                        <div className="flex items-center gap-2" title={designer.name}>
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                            {designer.name.charAt(0)}
-                          </div>
-                          <span className="max-w-[100px] truncate text-sm">
-                            {designer.name.split(' ')[0]}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-status-warning">Sin asignar</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusSelect
-                          design={design}
-                          onStatusChange={onStatusChange}
-                          disabled={updatingId === design.id}
-                        />
-                        <UrgencyBadges design={design} />
-                      </div>
-                    </TableCell>
-                    <TableCell>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <UrgencyDot
+                        level={getUrgency(design.deadline_at, design.status === 'DELIVERED')}
+                      />
                       <div className="flex flex-col text-sm">
-                        <span>{format(new Date(design.deadline_at), 'dd MMM', { locale: es })}</span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className={cn('font-mono tabular', deadlineTone(design))}>
+                          {format(new Date(design.deadline_at), 'dd MMM', { locale: es })}
+                        </span>
+                        <span className="font-mono tabular text-xs text-muted-foreground">
                           {format(new Date(design.deadline_at), 'HH:mm')}
                         </span>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end">
-                        <RowActions
-                          design={design}
-                          isAdmin={isAdmin}
-                          deletingId={deletingId}
-                          onEdit={onEdit}
-                          onDelete={onDelete}
-                        />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end">
+                      <RowActions
+                        design={design}
+                        isAdmin={isAdmin}
+                        deletingId={deletingId}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
-        {/* Controles de paginación */}
-        {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-            <p className="text-sm text-muted-foreground">
-              Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Anterior
-              </Button>
-              <span className="flex items-center px-3 text-sm text-muted-foreground">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Siguiente
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Anterior
+            </Button>
+            <span className="flex items-center px-3 text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }

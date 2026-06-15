@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,9 +55,8 @@ export function DesignsFilters({
   onReset,
 }: DesignsFiltersProps) {
   return (
-    <Card density="compact">
-      <CardContent className="pt-md">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+    <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
           {/* Búsqueda */}
           <div className="relative min-w-0 flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -123,7 +121,6 @@ export function DesignsFilters({
             </Button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
   );
 }
