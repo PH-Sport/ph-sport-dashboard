@@ -140,8 +140,13 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
 
 **PORTEO DEL CONCEPTO D INICIADO (2026-06-15)** — dirección congelada. Plan por fases (tareas PORT-1…6):
 - ✅ **PORT-1 Shell** (commit d6effc3): el shell real ya era sidebar flotante plegable (fase 7); llevado al material D (glass-panel, rounded-2xl, Ajustes en footer, label "Semana", header h-12 con section label, user-menu avatar-only). Sin tocar lógica. Build verde. **Primera vez que el usuario ve la dirección D en la app real — pendiente su validación visual (necesita su login).**
-- Siguiente: PORT-2 primitivas (UrgencyDot/PlayerStatusTag/WeekNav sobre tipos reales) → PORT-3 Inicio → PORT-4 Diseños (detalle centrado + asignación 1 clic) → PORT-5 Crear (lote+tipos, asistente deshabilitado) → PORT-6 Semana/Ajustes + borrar /concepts.
-- Regla del porteo: NO reescribir lo que ya es viga; ajustar presentación sobre hooks reales. Las páginas se repintan in-situ en main local (no afecta a prod hasta push).
+- ✅ **PORT-1 Shell** (d6effc3 + 474d238): sidebar reescrita con el MOVIMIENTO del concepto D (corrección del usuario: ancho con muelle, contenido en sincronía, etiquetas con fade — no transiciones CSS bruscas). Header h-12 + section label. user-menu avatar-only.
+- ✅ **PORT-3 Inicio** (ecdf3f2): admin + designer dashboards en placas D; UrgencyDot real (punto pulsante desde deadline_at); KPI "Bloqueados"→"Atrasados".
+- ✅ **PORT-4 Diseños** (9e0ad64 + e93530c): detalle de Sheet lateral → **modal centrado** (Dialog primitivo, accesible) con **asignación en un clic** (PATCH /assignee optimista); lista y toolbar en placas D; fueguitos → UrgencyDot. Conserva sort/paginación/estado-inline/acciones. Calendario hereda tokens (sin reescribir).
+- ⏳ **PORT-5 Crear** — BIFURCACIÓN DE PRODUCTO pendiente del usuario: el modal real es matchday-céntrico (match_home/away obligatorios en schema + BD). Los "tipos de pieza" del concepto (Presentación/Cumpleaños/Firma/Otro) son FEATURE DE BACKEND (migración + schema + API), no repintado. El asistente IA va deshabilitado ("Próximamente") — eso sí es solo UI. Decidir con el usuario antes de tocar.
+- ⏳ **PORT-6 Semana/Ajustes** — repintado seguro (como Inicio), sin backend. + borrar /concepts al final.
+- Regla del porteo: NO reescribir lo que ya es viga; ajustar presentación sobre hooks reales. NO inventar features de backend (tipos de pieza) sin decisión del usuario. Las páginas se repintan in-situ en main local (no afecta a prod hasta push).
+- PlayerStatusTag ya existía en la app (reutilizado). UrgencyDot creado en components/ui/urgency-dot.tsx. WeekNav pendiente (lo necesita Semana).
 
 **Backlog opcional post-Fase 7** (no bloqueante): skeletons de equipo/usuarios afinados al detalle; bulk-create en móvil (hoy scroll horizontal, uso real es desktop); migrar player-status-tag/invitations-card a variantes Badge; editar inline dentro del sheet (hoy modal-sobre-sheet); soft-delete con undo (necesita soporte API); command palette ⌘K (frosted glass listo).
 
