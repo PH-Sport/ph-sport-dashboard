@@ -6,6 +6,36 @@
 
 ---
 
+## ACTUALIZACIÓN — verificación en BD viva + ejecución (2026-06-15)
+
+Conectado el MCP de Supabase y verificado el estado REAL contra producción (`get_advisors` + `pg_policies`). **La auditoría estática se equivocó en varios puntos** (leyó las migraciones del repo, pero la BD tiene parches a mano que el repo no refleja):
+
+**Falsos positivos / ya arreglado:**
+- `designs` legible por anon (era ALTO A1): FALSO. La policy real es `designs_read_all USING (auth.uid() IS NOT NULL)` — el `OR true` ya no existe (lo arregló 026).
+- Creación de invitaciones con rol arbitrario (era CRÍTICO C1): NO es escalada. La policy INSERT ya exige `is_admin(auth.uid())`; que un admin elija rol es legítimo.
+- Falta policy DELETE en notifications (era B3): FALSO, sí existe (`Users can delete own notifications`).
+
+**APLICADO y verificado contra producción (commits d57a609, 218229a, ba48f44):**
+- 🔴→✅ **Enumeración de invitaciones** (el agujero real, no detectado tal cual por el código): la policy `Anon can read valid invitations` dejaba a anon leer token+rol de toda invitación válida (+ su subquery de usos mal correlacionada). Sustituida por RPC `get_invitation_by_token` (SECURITY DEFINER, devuelve solo {id,role,valid}); policy anon eliminada; cliente `invite/[token]` adaptado. Verificado: anon ya no lee la tabla (0 filas) pero sí valida por token. Mig. 033.
+- 🟠→✅ **RPCs SECURITY DEFINER abiertos** (vector nuevo, vía advisors): 9 funciones eran ejecutables por anon/authenticated por herencia de PUBLIC (spam de emails/notis). `REVOKE EXECUTE` de PUBLIC; service_role conserva; triggers/cron (postgres) intactos. `use_invitation`/`validate_invitation` se mantienen (alta). Mig. 030.
+- 🟡→✅ **comments + message_read_status** (0 filas): DROP + trigger + función. Mig. 031.
+- 🟡→✅ **avatares**: límite 2 MB + solo imágenes; INSERT atado al uid y a `authenticated` (quita `auth.role()` deprecado). Mig. 032.
+- ✅ Token de invitación con `crypto.getRandomValues` (B4). zod `.strict()` en schemas de creación (B2). `useDesigners`→SWR (4 queries→1 en /disenos). Redirect server-side en `/`. Quitadas deps `@dnd-kit` muertas.
+
+**ACCIÓN PENDIENTE DEL USUARIO (1 clic, no es SQL):**
+- ⚠️ **Activar "Leaked Password Protection"** en el dashboard: Auth → Policies (comprueba contraseñas contra HaveIBeenPwned). Detectado por advisors, no se puede togglear vía MCP.
+
+**DIFERIDO al porteo (se reescribe el código, o es infra delicada sin staging — no malgastar esfuerzo / no arriesgar):**
+- Gating server-side de páginas admin (B5) + meter el rol en JWT claims (custom access token hook) — habilita gating barato en middleware y quita 2-3 round-trips de auth por request; es un cambio de Auth que toca todos los logins → con staging.
+- Optimista en `/mi-semana` y LazyMotion (esas pantallas/imports se reescriben en el porteo; nacen ya optimistas/ligeras).
+- Plugins FullCalendar sobrantes (`timegrid`, `interaction`) — al reescribir el calendario.
+- Baseline del esquema real (`db pull` de invitations/invitation_uses/funciones a migraciones) — reproducibilidad; requiere CLI (no instalada).
+- B1 (RLS de `designs` a nivel fila permite a un designer escribir columnas no editables en SUS filas vía PostgREST) — bajo riesgo, mitigado por trigger en designer_id; trigger de columnas congeladas si se quiere endurecer.
+
+**Perf de policies (advisors):** `auth_rls_initplan` (auth.uid() sin envolver en `select`) y `multiple_permissive_policies` en designs son ruido a esta escala (~10 usuarios, cientos de filas); se limpian al rehacer policies en el porteo. Índices: los existentes bastan, no crear más.
+
+---
+
 ## SEGURIDAD
 
 ### Hallazgo transversal: deriva de esquema (migrations ≠ producción)
