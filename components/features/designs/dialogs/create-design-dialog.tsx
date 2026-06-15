@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Edit, Save, Layers, Loader2 } from 'lucide-react';
+import { Plus, Edit, Save, Layers, Loader2, Sparkles } from 'lucide-react';
 import { useDesigners } from '@/lib/hooks/use-designers';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,6 +54,7 @@ export function CreateDesignDialog({
 
   // Datos del formulario individual
   const [formData, setFormData] = useState<SingleDesignFormData>({
+    type: 'matchday',
     title: '',
     player: '',
     match_home: '',
@@ -70,6 +71,7 @@ export function CreateDesignDialog({
   useEffect(() => {
     if (design) {
       setFormData({
+        type: design.type || 'matchday',
         title: design.title || '',
         player: design.player || '',
         match_home: design.match_home || '',
@@ -81,6 +83,7 @@ export function CreateDesignDialog({
       });
     } else {
       setFormData({
+        type: 'matchday',
         title: '',
         player: '',
         match_home: '',
@@ -94,12 +97,13 @@ export function CreateDesignDialog({
     }
   }, [design, open]);
 
+  // Las filas nuevas heredan el tipo del lote (todas comparten tipo).
   const addBulkRow = () => {
-    setBulkRows([...bulkRows, createEmptyRow()]);
+    setBulkRows([...bulkRows, createEmptyRow(bulkRows[0]?.type)]);
   };
 
   const addMultipleBulkRows = (count: number) => {
-    const newRows = Array.from({ length: count }, () => createEmptyRow());
+    const newRows = Array.from({ length: count }, () => createEmptyRow(bulkRows[0]?.type));
     setBulkRows([...bulkRows, ...newRows]);
   };
 
@@ -109,6 +113,7 @@ export function CreateDesignDialog({
     bulkRows,
     onSuccess: () => {
       setFormData({
+        type: 'matchday',
         title: '',
         player: '',
         match_home: '',
@@ -158,6 +163,26 @@ export function CreateDesignDialog({
               {isEditMode ? 'Modifica los datos del diseño.' : 'Añade uno o varios diseños al equipo.'}
             </DialogDescription>
           </DialogHeader>
+
+          {/* Modo de entrada: Manual (activo) · Asistente IA (próximamente) */}
+          {!isEditMode && (
+            <div className="mt-2 flex w-fit items-center gap-0.5 rounded-xl border border-border bg-background p-1">
+              <span className="flex h-8 items-center rounded-lg bg-panel-hover px-3 text-xs font-medium">
+                Manual
+              </span>
+              <span
+                title="Asistente con IA — próximamente"
+                aria-disabled
+                className="flex h-8 cursor-not-allowed items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground/50"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Asistente
+                <span className="ml-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[9px] uppercase tracking-wider">
+                  Pronto
+                </span>
+              </span>
+            </div>
+          )}
 
           <form
             onSubmit={submit}

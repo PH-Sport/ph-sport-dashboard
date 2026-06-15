@@ -42,11 +42,18 @@ export function useDesignSubmit({
 
         const deadline = formData.deadline_at;
 
+        const isMatchday = formData.type === 'matchday';
         const response = await fetch(`/api/designs/${design.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...formData,
+            type: formData.type,
+            title: formData.title,
+            player: formData.player,
+            match_home: isMatchday ? formData.match_home : null,
+            match_away: isMatchday ? formData.match_away : null,
+            player_status: formData.player_status,
+            folder_url: formData.folder_url || null,
             deadline_at: deadline.toISOString(),
             designer_id: formData.designer_id || null,
           }),
@@ -80,10 +87,11 @@ export function useDesignSubmit({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             designs: validRows.map((r) => ({
+              type: r.type,
               title: r.title || undefined,
               player: r.player,
-              match_home: r.match_home,
-              match_away: r.match_away,
+              match_home: r.type === 'matchday' ? r.match_home : undefined,
+              match_away: r.type === 'matchday' ? r.match_away : undefined,
               deadline_at: r.deadline_at!.toISOString(),
               designer_id: r.designer_id || undefined,
               folder_url: r.folder_url || undefined,

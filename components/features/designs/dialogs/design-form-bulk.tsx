@@ -31,6 +31,7 @@ import {
   isRowEmpty,
   isOutsideWeek,
 } from '@/lib/utils/design-form';
+import { DESIGN_TYPES, DESIGN_TYPE_LABELS, typeHasMatch } from '@/lib/types/design';
 
 interface Designer {
   id: string;
@@ -70,6 +71,12 @@ export function DesignFormBulk({
   const collapseAllRows = () => setExpandedRowIds(new Set());
   const allExpanded = bulkRows.length > 0 && expandedRowIds.size === bulkRows.length;
 
+  // Tipo del lote (todas las filas comparten tipo).
+  const currentType = bulkRows[0]?.type ?? 'matchday';
+  const hasMatch = typeHasMatch(currentType);
+  const setLotType = (type: (typeof DESIGN_TYPES)[number]) =>
+    onChange(bulkRows.map((r) => ({ ...r, type })));
+
   const outsideWeekCount = useMemo(() => {
     if (!activeWeekStart || !activeWeekEnd) return 0;
     return bulkRows.filter(
@@ -94,9 +101,30 @@ export function DesignFormBulk({
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="flex-1 min-h-0 flex flex-col pt-4">
+        {/* Tipo de pieza — aplica a todo el lote */}
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-sm text-muted-foreground">Tipo:</span>
+          {DESIGN_TYPES.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setLotType(t)}
+              className={cn(
+                'h-8 rounded-full px-3 text-xs font-medium transition-colors',
+                currentType === t
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {DESIGN_TYPE_LABELS[t]}
+            </button>
+          ))}
+        </div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
-            Campos obligatorios: Jugador, Local, Visitante y Deadline.
+            {hasMatch
+              ? 'Campos obligatorios: Jugador, Local, Visitante y Deadline.'
+              : 'Campos obligatorios: Jugador y Deadline.'}
           </p>
           <Button
             type="button"
@@ -123,8 +151,8 @@ export function DesignFormBulk({
                 <TableHead className="w-10" aria-label="Expandir" />
                 <TableHead className="w-10">#</TableHead>
                 <TableHead className="min-w-[100px]">Jugador</TableHead>
-                <TableHead className="min-w-[90px]">Local</TableHead>
-                <TableHead className="min-w-[90px]">Visitante</TableHead>
+                {hasMatch && <TableHead className="min-w-[90px]">Local</TableHead>}
+                {hasMatch && <TableHead className="min-w-[90px]">Visitante</TableHead>}
                 <TableHead className="min-w-[120px]">Diseñador</TableHead>
                 <TableHead className="min-w-[140px]">Deadline</TableHead>
                 <TableHead className="w-10 text-right" aria-label="Quitar fila" />
@@ -180,22 +208,26 @@ export function DesignFormBulk({
                           className="h-9"
                         />
                       </TableCell>
-                      <TableCell>
-                        <Input
-                          placeholder="Local"
-                          value={row.match_home}
-                          onChange={(e) => updateBulkRow(row.id, 'match_home', e.target.value)}
-                          className="h-9"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          placeholder="Visitante"
-                          value={row.match_away}
-                          onChange={(e) => updateBulkRow(row.id, 'match_away', e.target.value)}
-                          className="h-9"
-                        />
-                      </TableCell>
+                      {hasMatch && (
+                        <>
+                          <TableCell>
+                            <Input
+                              placeholder="Local"
+                              value={row.match_home}
+                              onChange={(e) => updateBulkRow(row.id, 'match_home', e.target.value)}
+                              className="h-9"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              placeholder="Visitante"
+                              value={row.match_away}
+                              onChange={(e) => updateBulkRow(row.id, 'match_away', e.target.value)}
+                              className="h-9"
+                            />
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell>
                         <Select
                           value={row.designer_id || 'auto'}
@@ -255,7 +287,7 @@ export function DesignFormBulk({
                       transition={{ duration: 0.15 }}
                       className="border-b border-border/50 bg-muted/30"
                     >
-                      <td colSpan={8} className="p-0 align-top">
+                      <td colSpan={hasMatch ? 8 : 6} className="p-0 align-top">
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}

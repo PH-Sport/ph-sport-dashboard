@@ -1,6 +1,9 @@
+import { type DesignType, DEFAULT_DESIGN_TYPE } from '@/lib/types/design';
+
 export type PlayerStatus = 'injured' | 'suspended' | 'doubt' | 'last_minute';
 
 export interface SingleDesignFormData {
+  type: DesignType;
   title: string;
   player: string;
   match_home: string;
@@ -13,6 +16,7 @@ export interface SingleDesignFormData {
 
 export interface BulkDesignRow {
   id: string;
+  type: DesignType;
   title: string;
   player: string;
   match_home: string;
@@ -27,9 +31,10 @@ export function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
 }
 
-export function createEmptyRow(): BulkDesignRow {
+export function createEmptyRow(type: DesignType = DEFAULT_DESIGN_TYPE): BulkDesignRow {
   return {
     id: generateId(),
+    type,
     title: '',
     player: '',
     match_home: '',
@@ -42,12 +47,12 @@ export function createEmptyRow(): BulkDesignRow {
 }
 
 export function isRowValid(row: BulkDesignRow): boolean {
-  return !!(
-    row.player.trim() &&
-    row.match_home.trim() &&
-    row.match_away.trim() &&
-    row.deadline_at
-  );
+  if (!row.player.trim() || !row.deadline_at) return false;
+  // El partido solo es obligatorio en matchday; el resto de tipos no lo tienen.
+  if (row.type === 'matchday') {
+    return !!(row.match_home.trim() && row.match_away.trim());
+  }
+  return true;
 }
 
 export function isRowEmpty(row: BulkDesignRow): boolean {
