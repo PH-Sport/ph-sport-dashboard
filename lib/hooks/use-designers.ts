@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { createClient } from '@/lib/supabase/client';
-import { logger } from '@/lib/utils/logger';
 
 export interface Designer {
   id: string;
@@ -10,40 +9,32 @@ export interface Designer {
   avatar_url?: string;
 }
 
+async function fetchDesigners(): Promise<Designer[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, role')
+    .eq('role', 'DESIGNER');
+
+  if (error) throw error;
+
+  return (data || []).map((p) => ({
+    id: p.id,
+    name: p.full_name || 'Sin nombre',
+  }));
+}
+
+/**
+ * Lista de diseñadores. Key SWR compartida ('designers') → una sola query por
+ * sesión aunque el hook se monte varias veces en la misma página (toolbar,
+ * detail sheet, diálogo de crear). Antes era useEffect+fetch sin caché → N queries.
+ */
 export function useDesigners() {
-  const [designers, setDesigners] = useState<Designer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, error, isLoading } = useSWR<Designer[]>('designers', fetchDesigners);
 
-  useEffect(() => {
-    const loadDesigners = async () => {
-      try {
-        const supabase = createClient();
-        
-        // Obtener perfiles con rol 'designer'
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, role')
-          .eq('role', 'DESIGNER');
-
-        if (error) throw error;
-
-        const mappedDesigners: Designer[] = (data || []).map(p => ({
-          id: p.id,
-          name: p.full_name || 'Sin nombre',
-        }));
-
-        setDesigners(mappedDesigners);
-      } catch (err) {
-        logger.error('Error loading designers:', err);
-        setError('Error al cargar diseñadores');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDesigners();
-  }, []);
-
-  return { designers, loading, error };
+  return {
+    designers: data ?? [],
+    loading: isLoading,
+    error: error ? 'Error al cargar diseñadores' : null,
+  };
 }

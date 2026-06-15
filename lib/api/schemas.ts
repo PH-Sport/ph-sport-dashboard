@@ -33,11 +33,11 @@ const bulkDesignItemSchema = z.object({
   designer_id: z.union([uuid, z.literal('auto')]).nullish(),
   player_status: z.enum(PLAYER_STATUS_VALUES).nullish(),
   folder_url: z.string().url().max(2000).optional().or(z.literal('')),
-});
+}).strict();
 
 export const bulkCreateDesignsSchema = z.object({
   designs: z.array(bulkDesignItemSchema).min(1, 'Debe incluir al menos un diseño').max(100),
-});
+}).strict();
 export type BulkCreateDesignsInput = z.infer<typeof bulkCreateDesignsSchema>;
 
 /** PUT /api/designs/:id — whitelist explícita de campos modificables */
