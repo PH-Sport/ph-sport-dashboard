@@ -17,11 +17,7 @@ import { PasswordInput } from '@/components/features/auth/password-input';
 
 interface Invitation {
   id: string;
-  token: string;
   role: 'ADMIN' | 'DESIGNER';
-  max_uses: number;
-  uses: number;
-  expires_at: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -48,31 +44,27 @@ export default function InvitePage() {
     const validateToken = async () => {
       const supabase = createClient();
 
-      const { data, error: fetchError } = await supabase
-        .from('invitations')
-        .select('*')
-        .eq('token', token)
-        .single();
+      // Validación por token vía RPC SECURITY DEFINER: no expone la tabla
+      // invitations a anon (evita enumeración de tokens/roles).
+      const { data, error: fetchError } = await supabase.rpc('get_invitation_by_token', {
+        p_token: token,
+      });
 
-      if (fetchError || !data) {
+      const row = Array.isArray(data) ? data[0] : null;
+
+      if (fetchError || !row) {
         setError('Esta invitación no existe o ha sido eliminada.');
         setLoading(false);
         return;
       }
 
-      if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        setError('Esta invitación ha expirado.');
+      if (!row.valid) {
+        setError('Esta invitación ha expirado o ya ha sido utilizada.');
         setLoading(false);
         return;
       }
 
-      if (data.uses >= data.max_uses) {
-        setError('Esta invitación ya ha alcanzado el límite de usos.');
-        setLoading(false);
-        return;
-      }
-
-      setInvitation(data);
+      setInvitation({ id: row.id, role: row.role });
       setLoading(false);
     };
 

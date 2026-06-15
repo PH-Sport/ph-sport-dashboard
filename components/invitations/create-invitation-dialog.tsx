@@ -42,9 +42,11 @@ export function CreateInvitationDialog({
 
   const generateToken = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
     let token = '';
     for (let i = 0; i < 16; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
+      token += chars.charAt(bytes[i] % chars.length);
     }
     return token;
   };
