@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { UserMenu } from './user-menu';
 import { NotificationsDropdown } from './notifications-dropdown';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { RolePill } from './role-pill';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -41,7 +42,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           </span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          <RolePill />
           <ThemeToggle />
           <NotificationsDropdown />
           <UserMenu />
