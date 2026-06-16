@@ -68,11 +68,11 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Persistir cambios.
+  // Persistir cambios — solo para cuentas dev (no ensuciar el storage del resto).
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isDev) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+  }, [state, isDev]);
 
   const enterDesignerView = useCallback((designerId: string, designerName: string) => {
     setState({ mode: 'designer', designerId, designerName });
