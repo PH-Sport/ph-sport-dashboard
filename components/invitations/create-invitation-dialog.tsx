@@ -58,9 +58,9 @@ export function CreateInvitationDialog({
       const supabase = createClient();
       const token = generateToken();
       
-      // Fixed: 7 days expiration, 1 use
+      // Caducidad corta: 24h, 1 uso (evita invitaciones "flotando")
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      expiresAt.setHours(expiresAt.getHours() + 24);
 
       const { error } = await supabase
         .from('invitations')
@@ -136,7 +136,7 @@ export function CreateInvitationDialog({
           <DialogDescription>
             {createdToken 
               ? 'El link ha sido copiado al portapapeles.'
-              : 'La invitación expira en 7 días y es de un solo uso.'}
+              : 'La invitación expira en 24 horas y es de un solo uso.'}
           </DialogDescription>
         </DialogHeader>
 
