@@ -11,7 +11,7 @@ import { logger } from '@/lib/utils/logger';
 // Types & Interfaces
 // ============================================================================
 
-interface Profile {
+export interface Profile {
   id: string;
   full_name: string;
   role: 'ADMIN' | 'DESIGNER';
@@ -36,7 +36,7 @@ interface AuthContextType extends AuthState {
 // Context Definition
 // ============================================================================
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   status: 'INITIALIZING',
   user: null,
   profile: null,
