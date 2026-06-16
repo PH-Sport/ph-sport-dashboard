@@ -76,22 +76,26 @@ export function DesignsFilters({
               value={statusFilter}
               onValueChange={(v) => onStatusFilterChange(v as DesignStatus | 'all')}
             >
-              <SelectTrigger className="xl:w-[160px]" aria-label="Filtrar por estado">
-                <SelectValue />
+              <SelectTrigger className="shrink-0 xl:w-[150px]" aria-label="Filtrar por estado">
+                <span>
+                  <span className="text-muted-foreground">Estado:</span> <SelectValue />
+                </span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="BACKLOG">Pendiente</SelectItem>
                 <SelectItem value="DELIVERED">Entregado</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={designerFilter} onValueChange={(v) => onDesignerFilterChange(v)}>
-              <SelectTrigger className="xl:w-[180px]" aria-label="Filtrar por diseñador">
-                <SelectValue />
+              <SelectTrigger className="shrink-0 xl:w-[185px]" aria-label="Filtrar por diseñador">
+                <span>
+                  <span className="text-muted-foreground">Diseñador:</span> <SelectValue />
+                </span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los diseñadores</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 {designers.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name}

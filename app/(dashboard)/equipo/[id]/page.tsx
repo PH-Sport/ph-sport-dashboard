@@ -8,14 +8,13 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WeekNav } from '@/components/ui/week-nav';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { TeamSkeleton } from '@/components/skeletons/team-skeleton';
 import {
   ArrowLeft,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   User,
 } from 'lucide-react';
@@ -163,29 +162,13 @@ function DesignerDetailPage() {
               Equipo
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => changeWeek(subWeeks(selectedWeek, 1))}
-            aria-label="Semana anterior"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={isCurrentWeek ? 'default' : 'outline'}
-            onClick={() => changeWeek(new Date())}
-            className="min-w-[180px]"
-          >
-            {weekLabel}
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => changeWeek(addWeeks(selectedWeek, 1))}
-            aria-label="Semana siguiente"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          <WeekNav
+            label={weekLabel}
+            isCurrent={isCurrentWeek}
+            onPrev={() => changeWeek(subWeeks(selectedWeek, 1))}
+            onNext={() => changeWeek(addWeeks(selectedWeek, 1))}
+            onCurrent={() => changeWeek(new Date())}
+          />
         </>
       }
     >

@@ -167,7 +167,7 @@ export function CreateDesignDialog({
           {/* Modo de entrada: Manual (activo) · Asistente IA (próximamente) */}
           {!isEditMode && (
             <div className="mt-2 flex w-fit items-center gap-0.5 rounded-xl border border-border bg-background p-1">
-              <span className="flex h-8 items-center rounded-lg bg-panel-hover px-3 text-xs font-medium">
+              <span className="flex h-8 items-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground shadow-sm">
                 Manual
               </span>
               <span

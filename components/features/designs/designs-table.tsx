@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Eyebrow } from '@/components/ui/eyebrow';
 import {
   Table,
   TableBody,
@@ -37,7 +38,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Design, DesignStatus } from '@/lib/types/design';
+import type { Design } from '@/lib/types/design';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
@@ -67,8 +68,6 @@ interface DesignsTableProps {
   onOpenDetail: (designId: string) => void;
   onEdit: (design: Design) => void;
   onDelete: (design: Design) => void;
-  onStatusChange: (design: Design, newStatus: DesignStatus) => void;
-  updatingId: string | null;
   isAdmin: boolean;
   deletingId: string | null;
 }
@@ -133,32 +132,6 @@ function RowActions({
   );
 }
 
-function StatusSelect({
-  design,
-  onStatusChange,
-  disabled,
-}: {
-  design: Design;
-  onStatusChange: (design: Design, newStatus: DesignStatus) => void;
-  disabled: boolean;
-}) {
-  return (
-    <Select
-      value={design.status}
-      onValueChange={(v) => onStatusChange(design, v as DesignStatus)}
-      disabled={disabled}
-    >
-      <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs" aria-label="Cambiar estado">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="BACKLOG">{STATUS_LABELS.BACKLOG}</SelectItem>
-        <SelectItem value="DELIVERED">{STATUS_LABELS.DELIVERED}</SelectItem>
-      </SelectContent>
-    </Select>
-  );
-}
-
 export function DesignsTable({
   paginatedItems,
   designers,
@@ -178,8 +151,6 @@ export function DesignsTable({
   onOpenDetail,
   onEdit,
   onDelete,
-  onStatusChange,
-  updatingId,
   isAdmin,
   deletingId,
 }: DesignsTableProps) {
@@ -207,11 +178,11 @@ export function DesignsTable({
     <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
       {/* Barra superior discreta: recuento + items por página */}
       <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
-        <p className="text-xs text-muted-foreground">
+        <Eyebrow>
           {totalItems} diseño{totalItems !== 1 ? 's' : ''}
           {searchQueryActive &&
             ` · filtrado de ${totalUnfilteredCount} total${totalUnfilteredCount !== 1 ? 'es' : ''}`}
-        </p>
+        </Eyebrow>
         <div className="hidden items-center gap-2 sm:flex">
           <Label className="text-xs text-muted-foreground">Mostrar</Label>
           <Select
@@ -258,11 +229,7 @@ export function DesignsTable({
                 />
               </div>
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <StatusSelect
-                  design={design}
-                  onStatusChange={onStatusChange}
-                  disabled={updatingId === design.id}
-                />
+                <Badge status={design.status}>{STATUS_LABELS[design.status]}</Badge>
                 <span className="flex items-center gap-2">
                   <UrgencyDot level={getUrgency(design.deadline_at, design.status === 'DELIVERED')} />
                   <span className={cn('font-mono tabular text-xs', deadlineTone(design))}>
@@ -277,15 +244,15 @@ export function DesignsTable({
 
       {/* Desktop: tabla */}
       <div className="hidden md:block">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead>{sortableHead('title', 'Título')}</TableHead>
-              <TableHead>{sortableHead('player', 'Contexto')}</TableHead>
-              <TableHead>Diseñador</TableHead>
-              <TableHead>{sortableHead('status', 'Estado')}</TableHead>
-              <TableHead>{sortableHead('deadline', 'Fecha de entrega')}</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="w-[20%]">{sortableHead('title', 'Título')}</TableHead>
+              <TableHead className="w-[28%]">{sortableHead('player', 'Contexto')}</TableHead>
+              <TableHead className="w-[13%]">Diseñador</TableHead>
+              <TableHead className="w-[12%]">{sortableHead('status', 'Estado')}</TableHead>
+              <TableHead className="w-[16%]">{sortableHead('deadline', 'Fecha de entrega')}</TableHead>
+              <TableHead className="w-[11%] text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -293,21 +260,22 @@ export function DesignsTable({
               const designer = designers.find((d) => d.id === design.designer_id);
               return (
                 <TableRow key={design.id}>
-                  <TableCell className="font-medium">
+                  <TableCell>
                     <button
                       onClick={() => onOpenDetail(design.id)}
-                      className="text-left transition-colors hover:text-primary"
+                      title={design.title}
+                      className="block w-full truncate text-left text-[15px] font-semibold text-foreground transition-colors hover:text-primary"
                     >
                       {design.title}
                     </button>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{design.player}</span>
+                    <div className="flex min-w-0 flex-col">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="truncate font-medium">{design.player}</span>
                         <PlayerStatusTag status={design.player_status} variant="compact" />
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="truncate text-xs text-muted-foreground">
                         {getDesignContext(design)}
                       </span>
                     </div>
@@ -327,11 +295,7 @@ export function DesignsTable({
                     )}
                   </TableCell>
                   <TableCell>
-                    <StatusSelect
-                      design={design}
-                      onStatusChange={onStatusChange}
-                      disabled={updatingId === design.id}
-                    />
+                    <Badge status={design.status}>{STATUS_LABELS[design.status]}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

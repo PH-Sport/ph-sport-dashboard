@@ -145,16 +145,16 @@ export function DesignFormBulk({
           </div>
         )}
         <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges]">
-          <table className="w-full caption-bottom text-sm">
+          <table className="w-full caption-bottom text-sm table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10" aria-label="Expandir" />
                 <TableHead className="w-10">#</TableHead>
-                <TableHead className="min-w-[100px]">Jugador</TableHead>
-                {hasMatch && <TableHead className="min-w-[90px]">Local</TableHead>}
-                {hasMatch && <TableHead className="min-w-[90px]">Visitante</TableHead>}
-                <TableHead className="min-w-[120px]">Diseñador</TableHead>
-                <TableHead className="min-w-[140px]">Deadline</TableHead>
+                <TableHead className="w-[20%]">Jugador</TableHead>
+                {hasMatch && <TableHead className="w-[14%]">Local</TableHead>}
+                {hasMatch && <TableHead className="w-[14%]">Visitante</TableHead>}
+                <TableHead className="w-[24%]">Diseñador</TableHead>
+                <TableHead className="w-[22%]">Deadline</TableHead>
                 <TableHead className="w-10 text-right" aria-label="Quitar fila" />
               </TableRow>
             </TableHeader>
