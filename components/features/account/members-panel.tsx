@@ -18,6 +18,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { SPRINGS, TWEENS, STAGGER } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
+import { ROLE_ACCENT } from '@/lib/utils/role';
 import { useAuth } from '@/lib/auth/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { useUsersData, type Profile } from '@/lib/hooks/use-users-data';
@@ -147,7 +148,6 @@ export function MembersPanel() {
     >
       <motion.div variants={rise} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {users.map((m) => {
-          const admin = m.role === 'ADMIN';
           return (
             <button
               key={m.id}
@@ -158,7 +158,7 @@ export function MembersPanel() {
               <div
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-full font-mono text-base font-semibold',
-                  admin ? 'bg-primary/15 text-primary' : 'bg-muted text-foreground'
+                  ROLE_ACCENT[m.role]
                 )}
               >
                 {getInitial(m.full_name)}
@@ -172,7 +172,7 @@ export function MembersPanel() {
               <span
                 className={cn(
                   'mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
-                  admin ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                  ROLE_ACCENT[m.role]
                 )}
               >
                 {ROLE_LABELS[m.role]}
@@ -225,7 +225,7 @@ export function MembersPanel() {
                   <div
                     className={cn(
                       'flex h-12 w-12 items-center justify-center rounded-full font-mono text-base font-semibold',
-                      member.role === 'ADMIN' ? 'bg-primary/15 text-primary' : 'bg-muted text-foreground'
+                      ROLE_ACCENT[member.role]
                     )}
                   >
                     {getInitial(member.full_name)}
@@ -254,9 +254,7 @@ export function MembersPanel() {
                     <span
                       className={cn(
                         'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                        member.role === 'ADMIN'
-                          ? 'bg-primary/15 text-primary'
-                          : 'bg-muted text-muted-foreground'
+                        ROLE_ACCENT[member.role]
                       )}
                     >
                       {ROLE_LABELS[member.role]}

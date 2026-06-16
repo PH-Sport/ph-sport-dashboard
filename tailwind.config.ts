@@ -94,6 +94,7 @@ const config: Config = {
           error: 'hsl(var(--status-error))',
           info: 'hsl(var(--status-info))',
         },
+        'role-designer': 'hsl(var(--role-designer))',
       },
       borderRadius: {
         lg: 'var(--radius)',

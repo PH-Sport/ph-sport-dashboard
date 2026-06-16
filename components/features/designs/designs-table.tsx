@@ -283,7 +283,7 @@ export function DesignsTable({
                   <TableCell>
                     {designer ? (
                       <div className="flex items-center gap-2" title={designer.name}>
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-role-designer/15 text-xs font-medium text-role-designer">
                           {designer.name.charAt(0)}
                         </div>
                         <span className="max-w-[100px] truncate text-sm">

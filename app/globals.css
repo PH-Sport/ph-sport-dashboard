@@ -62,6 +62,8 @@
     --status-warning: 38 92% 32%;
     --status-error: 0 72% 50%;
     --status-info: 217 80% 42%;
+    /* Color por rol — Diseñador (azul); Mánager usa --primary (dorado) */
+    --role-designer: 217 80% 42%;
   }
 
   .dark {
@@ -109,6 +111,7 @@
     --status-warning: 38 92% 56%;
     --status-error: 0 65% 56%;
     --status-info: 217 80% 60%;
+    --role-designer: 217 80% 60%;
   }
 }
 
