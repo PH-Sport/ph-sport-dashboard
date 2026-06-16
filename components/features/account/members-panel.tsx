@@ -2,7 +2,7 @@
 
 /**
  * Panel de Miembros (dentro de Ajustes, solo Mánager) — lenguaje del concepto D.
- * Tarjetas del equipo (clic → popup), invitar e invitaciones pendientes.
+ * Tarjetas del equipo (clic → popup) e invitar.
  *
  * Acciones sobre un miembro:
  * - Renombrar: a la vista (acción normal).

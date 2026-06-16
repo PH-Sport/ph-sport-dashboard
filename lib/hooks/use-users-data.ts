@@ -9,30 +9,12 @@ export interface Profile {
   created_at: string;
 }
 
-export interface InvitationUse {
-  id: string;
-  email: string;
-  full_name: string;
-  used_at: string;
-}
-
-export interface Invitation {
-  id: string;
-  token: string;
-  role: 'ADMIN' | 'DESIGNER';
-  max_uses: number;
-  expires_at: string | null;
-  invitation_uses: InvitationUse[];
-}
-
 interface UsersData {
   users: Profile[];
-  invitations: Invitation[];
 }
 
 interface UseUsersDataReturn {
   users: Profile[];
-  invitations: Invitation[];
   isLoading: boolean;
   error: Error | null;
   mutate: () => void;
@@ -49,20 +31,8 @@ const fetchUsersData = async (): Promise<UsersData> => {
 
   if (usersError) throw usersError;
 
-  // Load all invitations with usage history
-  const { data: invData, error: invError } = await supabase
-    .from('invitations')
-    .select(`
-      id, token, role, max_uses, expires_at,
-      invitation_uses (id, email, full_name, used_at)
-    `)
-    .order('created_at', { ascending: false });
-
-  if (invError) throw invError;
-
   return {
     users: usersData || [],
-    invitations: invData || [],
   };
 };
 
@@ -78,7 +48,6 @@ export function useUsersData(): UseUsersDataReturn {
 
   return {
     users: data?.users ?? [],
-    invitations: data?.invitations ?? [],
     isLoading,
     error: error ?? null,
     mutate,
