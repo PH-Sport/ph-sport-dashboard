@@ -90,11 +90,11 @@ export function UserMenu() {
         </DropdownMenuItem>
         {profile?.role === 'ADMIN' && (
           <DropdownMenuItem
-            onClick={() => router.push('/ajustes/usuarios')}
+            onClick={() => router.push('/ajustes?tab=miembros')}
             className="text-foreground hover:bg-accent cursor-pointer"
           >
             <Users className="mr-2 h-4 w-4" />
-            <span>Usuarios</span>
+            <span>Miembros</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator className="bg-border" />

@@ -1,0 +1,63 @@
+'use client';
+
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface WeekNavProps {
+  /** Etiqueta de la semana (p. ej. "9 de jun - 15 de jun"). */
+  label: string;
+  onPrev: () => void;
+  onNext: () => void;
+  /** Saltar a la semana actual (clic sobre la etiqueta). Si se omite, la etiqueta no es interactiva. */
+  onCurrent?: () => void;
+  /** Si la semana visible ya es la actual, la etiqueta queda inerte. */
+  isCurrent?: boolean;
+  className?: string;
+}
+
+/**
+ * Navegador de semanas — placa compacta con chevrons (lenguaje del concepto D).
+ * La etiqueta, cuando no es la semana actual, es un botón que regresa a hoy.
+ */
+export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className }: WeekNavProps) {
+  const labelInteractive = !!onCurrent && !isCurrent;
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-raised',
+        className
+      )}
+    >
+      <button
+        type="button"
+        onClick={onPrev}
+        aria-label="Semana anterior"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={labelInteractive ? onCurrent : undefined}
+        disabled={!labelInteractive}
+        title={labelInteractive ? 'Ir a la semana actual' : undefined}
+        className={cn(
+          'rounded-lg px-2.5 py-1 font-mono tabular text-xs transition-colors',
+          labelInteractive
+            ? 'text-foreground hover:bg-muted/60'
+            : 'cursor-default text-muted-foreground'
+        )}
+      >
+        {label}
+      </button>
+      <button
+        type="button"
+        onClick={onNext}
+        aria-label="Semana siguiente"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}

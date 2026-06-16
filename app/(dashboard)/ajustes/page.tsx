@@ -1,20 +1,55 @@
 'use client';
 
-import { Settings, Bell, Eye, Save, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Settings, Save, Loader2 } from 'lucide-react';
 import { DashboardPage } from '@/components/ui/dashboard-page';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TRANSITIONS, animations } from '@/components/ui/animations';
+import { SPRINGS, STAGGER } from '@/components/ui/animations';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useUserPreferences } from '@/lib/hooks/use-user-preferences';
 import { AccountTab } from '@/components/features/account/account-tab';
 import { NotificationsTab } from '@/components/features/account/notifications-tab';
 import { AppearanceTab } from '@/components/features/account/appearance-tab';
+import { MembersPanel } from '@/components/features/account/members-panel';
 
-export default function SettingsPage() {
+type Tab = 'general' | 'miembros';
+
+const rise = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: SPRINGS.gentle },
+};
+
+/** Subapartado del concepto D: rótulo eyebrow + descripción, placa debajo. */
+function Section({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <p className="font-mono text-eyebrow uppercase text-primary">{label}</p>
+      <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
+      <div className="mt-3 rounded-2xl border border-border bg-card p-lg shadow-raised">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function SettingsContent() {
   const { user, profile } = useAuth();
+  const isAdmin = profile?.role === 'ADMIN';
+  const searchParams = useSearchParams();
+  const initialTab: Tab = isAdmin && searchParams.get('tab') === 'miembros' ? 'miembros' : 'general';
+  const [tab, setTab] = useState<Tab>(initialTab);
+
   const {
     name,
     setName,
@@ -28,102 +63,103 @@ export default function SettingsPage() {
     uploadAvatar,
   } = useUserPreferences();
 
+  const tabs: { id: Tab; label: string }[] = isAdmin
+    ? [
+        { id: 'general', label: 'General' },
+        { id: 'miembros', label: 'Miembros' },
+      ]
+    : [{ id: 'general', label: 'General' }];
+
+  const activeTab: Tab = isAdmin ? tab : 'general';
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{ show: { transition: { staggerChildren: STAGGER } } }}
+      className="space-y-4"
+    >
+      {isAdmin && (
+        <motion.div
+          variants={rise}
+          className="inline-flex items-center gap-0.5 rounded-xl border border-border bg-card p-1 shadow-raised"
+        >
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={cn(
+                'h-8 rounded-lg px-3.5 text-xs font-medium transition-colors',
+                activeTab === t.id
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </motion.div>
+      )}
+
+      {activeTab === 'general' ? (
+        <motion.div variants={rise} className="max-w-2xl space-y-xl pb-xl">
+          <Section label="Cuenta" hint="Tu nombre y datos de acceso">
+            <AccountTab
+              name={name}
+              onNameChange={setName}
+              email={user?.email}
+              role={profile?.role}
+              avatarUrl={profile?.avatar_url}
+              uploading={uploading}
+              onAvatarFile={uploadAvatar}
+            />
+          </Section>
+
+          <Section label="Apariencia" hint="Cómo se ve la app en este dispositivo">
+            <AppearanceTab defaultView={defaultView} onDefaultViewChange={setDefaultView} />
+          </Section>
+
+          <Section label="Notificaciones" hint="Qué te avisa la app y por dónde">
+            <NotificationsTab preferences={preferences} onToggle={togglePreference} />
+          </Section>
+
+          <div className="flex justify-end">
+            <Button onClick={save} disabled={saving} className="min-w-[150px]">
+              {saving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Guardar cambios
+                </>
+              )}
+            </Button>
+          </div>
+        </motion.div>
+      ) : (
+        <MembersPanel />
+      )}
+    </motion.div>
+  );
+}
+
+export default function SettingsPage() {
   return (
     <DashboardPage
       title="Ajustes"
       icon={Settings}
-      subtitle="Tu cuenta, notificaciones y apariencia"
+      subtitle="Tu cuenta, apariencia, notificaciones y la gestión del equipo"
       maxWidth="4xl"
       loading={false}
       skeleton={null}
     >
-      <Card>
-        <CardContent>
-          <Tabs defaultValue="account" className="flex w-full flex-col pt-lg">
-            <TabsList className="mb-lg grid w-full grid-cols-3 bg-muted/50">
-              <TabsTrigger value="account" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Cuenta
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                Notificaciones
-              </TabsTrigger>
-              <TabsTrigger value="appearance" className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Apariencia
-              </TabsTrigger>
-            </TabsList>
-
-            <div className="min-h-[320px]">
-              <AnimatePresence mode="wait">
-                <TabsContent value="account" className="mt-0 focus-visible:outline-none">
-                  <motion.div
-                    key="account"
-                    initial={animations.slideHorizontal.initial}
-                    animate={animations.slideHorizontal.animate}
-                    exit={animations.slideHorizontal.exit}
-                    transition={TRANSITIONS.fade}
-                  >
-                    <AccountTab
-                      name={name}
-                      onNameChange={setName}
-                      email={user?.email}
-                      role={profile?.role}
-                      avatarUrl={profile?.avatar_url}
-                      uploading={uploading}
-                      onAvatarFile={uploadAvatar}
-                    />
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
-                  <motion.div
-                    key="notifications"
-                    initial={animations.slideHorizontal.initial}
-                    animate={animations.slideHorizontal.animate}
-                    exit={animations.slideHorizontal.exit}
-                    transition={TRANSITIONS.fade}
-                  >
-                    <NotificationsTab preferences={preferences} onToggle={togglePreference} />
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="appearance" className="mt-0 focus-visible:outline-none">
-                  <motion.div
-                    key="appearance"
-                    initial={animations.slideHorizontal.initial}
-                    animate={animations.slideHorizontal.animate}
-                    exit={animations.slideHorizontal.exit}
-                    transition={TRANSITIONS.fade}
-                  >
-                    <AppearanceTab
-                      defaultView={defaultView}
-                      onDefaultViewChange={setDefaultView}
-                    />
-                  </motion.div>
-                </TabsContent>
-              </AnimatePresence>
-            </div>
-
-            <div className="mt-md flex justify-end border-t border-border pt-md">
-              <Button onClick={save} disabled={saving} className="min-w-[140px]">
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar cambios
-                  </>
-                )}
-              </Button>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
+      <Suspense fallback={null}>
+        <SettingsContent />
+      </Suspense>
     </DashboardPage>
   );
 }
