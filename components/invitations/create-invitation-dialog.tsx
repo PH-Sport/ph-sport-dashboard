@@ -172,7 +172,7 @@ export function CreateInvitationDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DESIGNER">Diseñador</SelectItem>
-                  <SelectItem value="ADMIN">Administrador</SelectItem>
+                  <SelectItem value="ADMIN">Mánager</SelectItem>
                 </SelectContent>
               </Select>
             </div>

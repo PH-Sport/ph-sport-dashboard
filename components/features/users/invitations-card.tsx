@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { Invitation } from '@/lib/hooks/use-users-data';
 
 const ROLE_LABELS: Record<string, string> = {
-  ADMIN: 'Admin',
+  ADMIN: 'Mánager',
   DESIGNER: 'Diseñador',
 };
 
