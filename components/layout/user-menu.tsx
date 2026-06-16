@@ -14,6 +14,10 @@ import {
 import { LogOut, Settings, Users } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useViewAs } from '@/lib/auth/view-as-context';
+import { ROLE_LABEL, ROLE_ACCENT } from '@/lib/utils/role';
+import { ViewAsMenuSection } from './view-as-menu-section';
+import { cn } from '@/lib/utils';
 
 function getInitials(name: string) {
   return name
@@ -26,7 +30,9 @@ function getInitials(name: string) {
 
 export function UserMenu() {
   const router = useRouter();
-  const { user, profile, status, logout } = useAuth();
+  // status/logout/profile.role(efectivo) de useAuth; identidad REAL de useViewAs.
+  const { status, logout, profile } = useAuth();
+  const { isDev, realName, realEmail, realRole } = useViewAs();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -43,7 +49,7 @@ export function UserMenu() {
     return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
   }
 
-  if (!user) {
+  if (!realEmail) {
     return (
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground text-sm">
         ?
@@ -51,8 +57,7 @@ export function UserMenu() {
     );
   }
 
-  const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
-  const displayRole = profile?.role === 'ADMIN' ? 'Mánager' : 'Diseñador';
+  const displayName = realName || realEmail.split('@')[0] || 'User';
 
   return (
     <DropdownMenu>
@@ -73,10 +78,17 @@ export function UserMenu() {
         <DropdownMenuLabel className="text-foreground">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{displayName}</p>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            <span className="mt-1 inline-block w-fit rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-              {displayRole}
-            </span>
+            <p className="text-xs text-muted-foreground truncate">{realEmail}</p>
+            {realRole && (
+              <span
+                className={cn(
+                  'mt-1 inline-block w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                  ROLE_ACCENT[realRole]
+                )}
+              >
+                {ROLE_LABEL[realRole]}
+              </span>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border" />
@@ -97,6 +109,9 @@ export function UserMenu() {
             <span>Miembros</span>
           </DropdownMenuItem>
         )}
+
+        {isDev && <ViewAsMenuSection />}
+
         <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
           onClick={() => setLogoutDialogOpen(true)}
