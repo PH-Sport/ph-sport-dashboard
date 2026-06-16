@@ -23,7 +23,6 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { useUsersData, type Profile } from '@/lib/hooks/use-users-data';
 import { CreateInvitationDialog } from '@/components/invitations/create-invitation-dialog';
-import { InvitationsCard } from '@/components/features/users/invitations-card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const ROLE_LABELS: Record<Profile['role'], string> = {
@@ -42,7 +41,7 @@ function getInitial(name: string): string {
 
 export function MembersPanel() {
   const { profile } = useAuth();
-  const { users, invitations, mutate } = useUsersData();
+  const { users, mutate } = useUsersData();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [member, setMember] = useState<Profile | null>(null);
@@ -189,10 +188,6 @@ export function MembersPanel() {
           <Plus className="h-6 w-6" />
           <span className="text-sm font-medium">Invitar miembro</span>
         </button>
-      </motion.div>
-
-      <motion.div variants={rise}>
-        <InvitationsCard invitations={invitations} onMutate={mutate} />
       </motion.div>
 
       <CreateInvitationDialog
