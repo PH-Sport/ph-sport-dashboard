@@ -23,6 +23,7 @@ export function RolePill() {
         type="button"
         onClick={exitToManager}
         title="Volver a Mánager"
+        aria-label={`Viendo como Diseñador ${simulatedDesignerName} — volver a Mánager`}
         className="flex items-center gap-1.5 rounded-full bg-role-designer/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-role-designer transition-colors hover:bg-role-designer/25"
       >
         <Eye className="h-3 w-3" />
