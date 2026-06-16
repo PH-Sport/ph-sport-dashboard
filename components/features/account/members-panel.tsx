@@ -14,8 +14,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Trash2, ChevronDown, ShieldAlert, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 import { SPRINGS, TWEENS, STAGGER } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
 import { ROLE_ACCENT } from '@/lib/utils/role';
@@ -165,9 +164,6 @@ export function MembersPanel() {
               <p className="mt-3 truncate font-heading text-base font-semibold">
                 {m.full_name || 'Sin nombre'}
               </p>
-              <p className="truncate font-mono text-xs text-muted-foreground">
-                Desde {formatDistanceToNow(new Date(m.created_at), { locale: es, addSuffix: true })}
-              </p>
               <span
                 className={cn(
                   'mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
@@ -254,7 +250,7 @@ export function MembersPanel() {
                     >
                       {ROLE_LABELS[member.role]}
                     </span>
-                    Desde {formatDistanceToNow(new Date(member.created_at), { locale: es, addSuffix: true })}
+                    Se unió el {format(new Date(member.created_at), 'dd/MM/yyyy')}
                   </p>
 
                   {/* Zona avanzada: rol + eliminar (extraordinario). Oculta para uno mismo. */}
