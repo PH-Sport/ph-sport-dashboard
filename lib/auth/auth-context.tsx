@@ -16,6 +16,7 @@ export interface Profile {
   full_name: string;
   role: 'ADMIN' | 'DESIGNER';
   avatar_url?: string;
+  is_dev?: boolean;
 }
 
 type AuthStatus = 'INITIALIZING' | 'AUTHENTICATED' | 'UNAUTHENTICATED';
@@ -112,7 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           prev.profile?.id === profile.id &&
           prev.profile?.full_name === profile.full_name &&
           prev.profile?.role === profile.role &&
-          prev.profile?.avatar_url === profile.avatar_url;
+          prev.profile?.avatar_url === profile.avatar_url &&
+          prev.profile?.is_dev === profile.is_dev;
 
         // If nothing changed, return previous state to avoid re-render
         if (prev.status === 'AUTHENTICATED' && isSameUser && isSameProfile) {

@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { AuthContext, useAuth, type Profile } from '@/lib/auth/auth-context';
-import { isDevAccount } from '@/lib/auth/dev-accounts';
 
 const STORAGE_KEY = 'phsport:view-as';
 
@@ -13,7 +12,7 @@ interface ViewAsState {
 }
 
 interface ViewAsContextValue {
-  /** La cuenta real es dev (email en allowlist) y su rol real es ADMIN. */
+  /** La cuenta real es dev (is_dev en Supabase) y su rol real es ADMIN. */
   isDev: boolean;
   /** Hay una simulación de diseñador activa. */
   simulating: boolean;
@@ -45,7 +44,7 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
   const realUser = auth.user;
   const realProfile = auth.profile;
 
-  const isDev = isDevAccount(realUser?.email) && realProfile?.role === 'ADMIN';
+  const isDev = realProfile?.is_dev === true && realProfile?.role === 'ADMIN';
 
   const [state, setState] = useState<ViewAsState>({
     mode: 'real',

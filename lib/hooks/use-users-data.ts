@@ -27,6 +27,7 @@ const fetchUsersData = async (): Promise<UsersData> => {
   const { data: usersData, error: usersError } = await supabase
     .from('profiles')
     .select('id, full_name, role, created_at')
+    .eq('is_dev', false)
     .order('created_at', { ascending: true });
 
   if (usersError) throw usersError;
