@@ -13,7 +13,7 @@ async function fetchDesigners(): Promise<Designer[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, role')
+    .select('id, full_name, role, avatar_url')
     .eq('role', 'DESIGNER');
 
   if (error) throw error;
@@ -21,6 +21,7 @@ async function fetchDesigners(): Promise<Designer[]> {
   return (data || []).map((p) => ({
     id: p.id,
     name: p.full_name || 'Sin nombre',
+    avatar_url: p.avatar_url ?? undefined,
   }));
 }
 

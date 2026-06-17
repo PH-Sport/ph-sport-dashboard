@@ -15,6 +15,7 @@ import { CalendarRange, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { TeamSkeleton } from '@/components/skeletons/team-skeleton';
 import { useTeamData, type DesignerWithDesigns } from '@/lib/hooks/use-team-data';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { cn } from '@/lib/utils';
@@ -61,9 +62,12 @@ function DesignerPlate({
           onClick={onHeaderClick}
           className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-semibold text-primary">
-            {designer.full_name.charAt(0).toUpperCase()}
-          </div>
+          <UserAvatar
+            name={designer.full_name}
+            src={designer.avatar_url}
+            className="h-9 w-9 shrink-0"
+            fallbackClassName="bg-primary/10 font-mono text-xs font-semibold text-primary"
+          />
           <div className="min-w-0 flex-1">
             <h2 className="flex items-center gap-1 truncate text-base font-semibold">
               {designer.full_name}

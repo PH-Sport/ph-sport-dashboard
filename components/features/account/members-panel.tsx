@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { SPRINGS, TWEENS, STAGGER } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { ROLE_ACCENT } from '@/lib/utils/role';
 import { useAuth } from '@/lib/auth/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -33,10 +34,6 @@ const rise = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: SPRINGS.gentle },
 };
-
-function getInitial(name: string): string {
-  return (name?.trim()?.charAt(0) || '·').toUpperCase();
-}
 
 export function MembersPanel() {
   const { profile } = useAuth();
@@ -153,14 +150,12 @@ export function MembersPanel() {
               onClick={() => openMember(m)}
               className="rounded-2xl border border-border bg-card p-lg text-left shadow-raised outline-none transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <div
-                className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-full font-mono text-base font-semibold',
-                  ROLE_ACCENT[m.role]
-                )}
-              >
-                {getInitial(m.full_name)}
-              </div>
+              <UserAvatar
+                name={m.full_name}
+                src={m.avatar_url}
+                className="h-12 w-12"
+                fallbackClassName={cn('font-mono text-base font-semibold', ROLE_ACCENT[m.role])}
+              />
               <p className="mt-3 truncate font-heading text-base font-semibold">
                 {m.full_name || 'Sin nombre'}
               </p>
@@ -213,14 +208,12 @@ export function MembersPanel() {
                 className="pointer-events-auto w-full max-w-sm rounded-2xl border border-border bg-card shadow-overlay"
               >
                 <div className="flex items-start justify-between p-lg pb-0">
-                  <div
-                    className={cn(
-                      'flex h-12 w-12 items-center justify-center rounded-full font-mono text-base font-semibold',
-                      ROLE_ACCENT[member.role]
-                    )}
-                  >
-                    {getInitial(member.full_name)}
-                  </div>
+                  <UserAvatar
+                    name={member.full_name}
+                    src={member.avatar_url}
+                    className="h-12 w-12"
+                    fallbackClassName={cn('font-mono text-base font-semibold', ROLE_ACCENT[member.role])}
+                  />
                   <button
                     type="button"
                     onClick={closeMember}

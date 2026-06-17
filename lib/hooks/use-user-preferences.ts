@@ -27,7 +27,31 @@ interface UseUserPreferencesResult {
   saving: boolean;
   uploading: boolean;
   save: () => Promise<void>;
-  uploadAvatar: (file: File) => Promise<void>;
+  /** Sube el JPEG ya recortado/comprimido. Devuelve true si tuvo éxito. */
+  uploadAvatar: (blob: Blob) => Promise<boolean>;
+}
+
+/** Traduce errores de subida a un mensaje claro para el usuario (sin errores silenciosos). */
+function avatarErrorMessage(error: unknown): string {
+  const msg = (error instanceof Error ? error.message : String(error ?? '')).toLowerCase();
+  if (msg.includes('size') || msg.includes('payload') || msg.includes('413') || msg.includes('large')) {
+    return 'La imagen es demasiado grande. Prueba con otra foto.';
+  }
+  if (msg.includes('mime') || msg.includes('not supported') || msg.includes('content type')) {
+    return 'Formato de imagen no admitido. Usa JPG o PNG.';
+  }
+  if (
+    msg.includes('row-level security') ||
+    msg.includes('unauthorized') ||
+    msg.includes('403') ||
+    msg.includes('permission')
+  ) {
+    return 'No tienes permiso para subir el avatar. Cierra sesión, vuelve a entrar e inténtalo de nuevo.';
+  }
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to')) {
+    return 'Error de conexión al subir el avatar. Revisa tu conexión e inténtalo de nuevo.';
+  }
+  return 'No se pudo actualizar el avatar. Inténtalo de nuevo.';
 }
 
 export function useUserPreferences(): UseUserPreferencesResult {
@@ -78,17 +102,17 @@ export function useUserPreferences(): UseUserPreferencesResult {
     }));
   };
 
-  const uploadAvatar = async (file: File) => {
-    if (!user) return;
+  const uploadAvatar = async (blob: Blob): Promise<boolean> => {
+    if (!user) return false;
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+      // El blob siempre llega como JPEG recortado/comprimido desde el diálogo.
+      const filePath = `${user.id}-${Math.random().toString(36).slice(2)}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, blob, { contentType: 'image/jpeg', cacheControl: '3600' });
 
       if (uploadError) throw uploadError;
 
@@ -105,9 +129,11 @@ export function useUserPreferences(): UseUserPreferencesResult {
 
       await refreshSession();
       toast.success('Avatar actualizado correctamente');
+      return true;
     } catch (error) {
       logger.error('Error updating avatar:', error);
-      toast.error('Error al actualizar el avatar');
+      toast.error(avatarErrorMessage(error));
+      return false;
     } finally {
       setUploading(false);
     }

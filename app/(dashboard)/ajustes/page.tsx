@@ -112,7 +112,7 @@ function SettingsContent() {
               role={profile?.role}
               avatarUrl={profile?.avatar_url}
               uploading={uploading}
-              onAvatarFile={uploadAvatar}
+              onAvatarConfirm={uploadAvatar}
             />
           </Section>
 

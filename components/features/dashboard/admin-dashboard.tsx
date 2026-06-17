@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { SPRINGS } from '@/components/ui/animations';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { cn } from '@/lib/utils';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import type { Design } from '@/lib/types/design';
 import { useDesigners } from '@/lib/hooks/use-designers';
 
@@ -21,6 +22,7 @@ interface AdminDashboardProps {
 interface DesignerLoad {
   id: string;
   name: string;
+  avatar_url?: string | null;
   active: number;
   delivered: number;
 }
@@ -89,6 +91,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
         return {
           id: designer.id,
           name: designer.name,
+          avatar_url: designer.avatar_url,
           active: designerDesigns.filter((d) => d.status !== 'DELIVERED').length,
           delivered: designerDesigns.filter((d) => d.status === 'DELIVERED').length,
         };
@@ -118,6 +121,10 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
   const activeDesignersCount = designerLoads.filter((d) => d.active > 0).length;
   const designerNameMap = useMemo(
     () => new Map(designers.map((d) => [d.id, d.name])),
+    [designers]
+  );
+  const designerAvatarMap = useMemo(
+    () => new Map(designers.map((d) => [d.id, d.avatar_url ?? null])),
     [designers]
   );
 
@@ -249,22 +256,27 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                 const designerName = design.designer_id
                   ? designerNameMap.get(design.designer_id)
                   : null;
+                const designerAvatar = design.designer_id
+                  ? designerAvatarMap.get(design.designer_id)
+                  : null;
 
                 return (
                   <li
                     key={design.id}
                     className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
                   >
-                    <div
-                      className={cn(
-                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-semibold',
-                        designerName
-                          ? 'bg-muted text-foreground'
-                          : 'bg-status-warning/15 text-status-warning'
-                      )}
-                    >
-                      {designerName ? designerName.charAt(0) : '?'}
-                    </div>
+                    {designerName ? (
+                      <UserAvatar
+                        name={designerName}
+                        src={designerAvatar}
+                        className="h-8 w-8 shrink-0"
+                        fallbackClassName="bg-muted text-foreground font-mono text-[11px] font-semibold"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-status-warning/15 font-mono text-[11px] font-semibold text-status-warning">
+                        ?
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{design.title}</p>
                       <p className="truncate text-xs text-muted-foreground">
@@ -312,9 +324,12 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                   <li key={designer.id}>
                     <div className="mb-1.5 flex items-center justify-between">
                       <span className="flex items-center gap-2 text-sm font-medium">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
-                          {designer.name.charAt(0)}
-                        </span>
+                        <UserAvatar
+                          name={designer.name}
+                          src={designer.avatar_url}
+                          className="h-6 w-6"
+                          fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
+                        />
                         {designer.name}
                       </span>
                       <span className="font-mono tabular text-xs text-muted-foreground">

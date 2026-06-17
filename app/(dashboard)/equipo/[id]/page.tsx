@@ -16,10 +16,10 @@ import {
   ArrowLeft,
   Calendar,
   ExternalLink,
-  User,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useTeamData } from '@/lib/hooks/use-team-data';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
@@ -144,9 +144,12 @@ function DesignerDetailPage() {
     <DashboardPage
       title={
         <span className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <User className="h-5 w-5 text-primary" />
-          </span>
+          <UserAvatar
+            name={designer?.full_name}
+            src={designer?.avatar_url}
+            className="h-10 w-10"
+            fallbackClassName="bg-primary/10 text-primary font-semibold"
+          />
           {designer?.full_name ?? 'Diseñador'}
         </span>
       }

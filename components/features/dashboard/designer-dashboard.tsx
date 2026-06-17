@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { cn } from '@/lib/utils';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import type { Design } from '@/lib/types/design';
 import { useDesigners } from '@/lib/hooks/use-designers';
 
@@ -77,6 +78,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
         return {
           id: designer.id,
           name: designer.name,
+          avatar_url: designer.avatar_url,
           active: designerDesigns.filter((d) => d.status !== 'DELIVERED').length,
         };
       })
@@ -195,9 +197,12 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
               {teammates.map((mate) => (
                 <li key={mate.id} className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted font-mono text-[10px] font-semibold">
-                      {mate.name.charAt(0)}
-                    </span>
+                    <UserAvatar
+                      name={mate.name}
+                      src={mate.avatar_url}
+                      className="h-6 w-6"
+                      fallbackClassName="bg-muted font-mono text-[10px] font-semibold"
+                    />
                     {mate.name}
                   </span>
                   <span className="font-mono tabular text-xs text-muted-foreground">

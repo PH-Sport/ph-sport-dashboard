@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,20 +19,11 @@ import { ROLE_LABEL, ROLE_ACCENT } from '@/lib/utils/role';
 import { ViewAsMenuSection } from './view-as-menu-section';
 import { cn } from '@/lib/utils';
 
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
-
 export function UserMenu() {
   const router = useRouter();
   // status/logout/profile.role(efectivo) de useAuth; identidad REAL de useViewAs.
   const { status, logout, profile } = useAuth();
-  const { isDev, realName, realEmail, realRole } = useViewAs();
+  const { isDev, realName, realEmail, realRole, realAvatarUrl } = useViewAs();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -67,11 +58,12 @@ export function UserMenu() {
           aria-label={`Menú de usuario — ${displayName}`}
           className="rounded-full outline-none ring-primary/40 transition-shadow hover:ring-2 focus-visible:ring-2"
         >
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary/15 text-xs font-semibold text-primary">
-              {getInitials(displayName)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            name={displayName}
+            src={realAvatarUrl}
+            className="h-8 w-8"
+            fallbackClassName="bg-primary/15 text-xs font-semibold text-primary"
+          />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 border border-border bg-popover text-popover-foreground shadow-xl">

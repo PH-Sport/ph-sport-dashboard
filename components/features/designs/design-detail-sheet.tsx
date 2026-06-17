@@ -29,6 +29,7 @@ import {
   Loader2,
   Trash2,
 } from 'lucide-react';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { useDesigners } from '@/lib/hooks/use-designers';
 import { useDesign } from '@/lib/hooks/use-design';
 import { useConfirm } from '@/lib/hooks/use-confirm';
@@ -229,9 +230,12 @@ export function DesignDetailSheet({
                       >
                         {designer ? (
                           <>
-                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
-                              {designer.name.charAt(0)}
-                            </span>
+                            <UserAvatar
+                              name={designer.name}
+                              src={designer.avatar_url}
+                              className="h-6 w-6"
+                              fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
+                            />
                             {designer.name}
                           </>
                         ) : (
@@ -247,9 +251,12 @@ export function DesignDetailSheet({
                       </button>
                     ) : designer ? (
                       <span className="flex items-center gap-2 text-sm font-medium">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-semibold text-primary">
-                          {designer.name.charAt(0)}
-                        </span>
+                        <UserAvatar
+                          name={designer.name}
+                          src={designer.avatar_url}
+                          className="h-6 w-6"
+                          fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
+                        />
                         {designer.name}
                       </span>
                     ) : (

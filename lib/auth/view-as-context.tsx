@@ -24,6 +24,7 @@ interface ViewAsContextValue {
   realName: string | null;
   realEmail: string | null;
   realRole: Profile['role'] | null;
+  realAvatarUrl: string | null;
 }
 
 const ViewAsContext = createContext<ViewAsContextValue>({
@@ -36,6 +37,7 @@ const ViewAsContext = createContext<ViewAsContextValue>({
   realName: null,
   realEmail: null,
   realRole: null,
+  realAvatarUrl: null,
 });
 
 export function ViewAsProvider({ children }: { children: React.ReactNode }) {
@@ -110,6 +112,7 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
       realName: realProfile?.full_name ?? null,
       realEmail: realUser?.email ?? null,
       realRole: realProfile?.role ?? null,
+      realAvatarUrl: realProfile?.avatar_url ?? null,
     }),
     [
       isDev,
@@ -120,6 +123,7 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
       exitToManager,
       realProfile?.full_name,
       realProfile?.role,
+      realProfile?.avatar_url,
       realUser?.email,
     ]
   );

@@ -7,6 +7,7 @@ import type { Design } from '@/lib/types/design';
 export interface DesignerWithDesigns {
   id: string;
   full_name: string;
+  avatar_url?: string | null;
   designs: Design[];
 }
 
@@ -23,7 +24,7 @@ const fetchTeamData = async ([, weekStart, weekEnd]: [string, Date, Date]): Prom
   // 1. Get all designers
   const { data: designersData, error: designersError } = await supabase
     .from('profiles')
-    .select('id, full_name')
+    .select('id, full_name, avatar_url')
     .eq('role', 'DESIGNER');
 
   if (designersError) throw designersError;
@@ -44,6 +45,7 @@ const fetchTeamData = async ([, weekStart, weekEnd]: [string, Date, Date]): Prom
     designerMap.set(d.id, {
       id: d.id,
       full_name: d.full_name || 'Sin nombre',
+      avatar_url: d.avatar_url ?? undefined,
       designs: [],
     });
   });

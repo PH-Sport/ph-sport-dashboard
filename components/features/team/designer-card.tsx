@@ -3,13 +3,14 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eyebrow } from '@/components/ui/eyebrow';
-import { User } from 'lucide-react';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
 
 interface DesignerWithDesigns {
   id: string;
   full_name: string;
+  avatar_url?: string | null;
   designs: Design[];
 }
 
@@ -40,9 +41,12 @@ export function DesignerCard({ designer, onClick }: DesignerCardProps) {
     >
       <CardContent className="space-y-4 pt-lg">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <User className="h-5 w-5 text-primary" />
-          </div>
+          <UserAvatar
+            name={designer.full_name}
+            src={designer.avatar_url}
+            className="h-10 w-10 shrink-0"
+            fallbackClassName="bg-primary/10 text-primary font-semibold"
+          />
           <span className="truncate text-card-title">{designer.full_name}</span>
         </div>
 

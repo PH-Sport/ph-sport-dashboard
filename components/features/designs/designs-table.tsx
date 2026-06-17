@@ -42,11 +42,13 @@ import type { Design } from '@/lib/types/design';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
 
 interface Designer {
   id: string;
   name: string;
+  avatar_url?: string | null;
 }
 
 interface DesignsTableProps {
@@ -283,9 +285,12 @@ export function DesignsTable({
                   <TableCell>
                     {designer ? (
                       <div className="flex items-center gap-2" title={designer.name}>
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-role-designer/15 text-xs font-medium text-role-designer">
-                          {designer.name.charAt(0)}
-                        </div>
+                        <UserAvatar
+                          name={designer.name}
+                          src={designer.avatar_url}
+                          className="h-6 w-6"
+                          fallbackClassName="bg-role-designer/15 text-xs font-medium text-role-designer"
+                        />
                         <span className="max-w-[100px] truncate text-sm">
                           {designer.name.split(' ')[0]}
                         </span>

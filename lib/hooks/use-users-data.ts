@@ -7,6 +7,7 @@ export interface Profile {
   full_name: string;
   role: 'ADMIN' | 'DESIGNER';
   created_at: string;
+  avatar_url?: string | null;
 }
 
 interface UsersData {
@@ -26,7 +27,7 @@ const fetchUsersData = async (): Promise<UsersData> => {
   // Load users
   const { data: usersData, error: usersError } = await supabase
     .from('profiles')
-    .select('id, full_name, role, created_at')
+    .select('id, full_name, role, created_at, avatar_url')
     .eq('is_dev', false)
     .order('created_at', { ascending: true });
 
