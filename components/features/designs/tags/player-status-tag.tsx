@@ -1,4 +1,5 @@
 import { AlertCircle, Ban, HelpCircle, Clock } from 'lucide-react';
+import { Hint } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export type PlayerStatus = 'injured' | 'suspended' | 'doubt' | 'last_minute';
@@ -41,16 +42,17 @@ export function PlayerStatusTag({ status, className, variant = 'default' }: Play
 
   if (variant === 'compact') {
     return (
-      <div 
-        className={cn(
-          "inline-flex items-center justify-center p-1 rounded-md border",
-          config.color,
-          className
-        )}
-        title={config.label}
-      >
-        <config.icon className="h-3 w-3" />
-      </div>
+      <Hint label={config.label}>
+        <div
+          className={cn(
+            "inline-flex items-center justify-center p-1 rounded-md border",
+            config.color,
+            className
+          )}
+        >
+          <config.icon className="h-3 w-3" />
+        </div>
+      </Hint>
     );
   }
 

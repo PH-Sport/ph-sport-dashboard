@@ -33,6 +33,7 @@ import { motion } from 'framer-motion';
 import { SPRINGS, TWEENS } from '@/components/ui/animations';
 import { CalendarRange, Home, Palette, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
+import { Hint } from '@/components/ui/tooltip';
 import { useAuth } from '@/lib/auth/auth-context';
 import { PhSportMark } from '@/components/layout/ph-sport-mark';
 import { cn } from '@/lib/utils';
@@ -286,11 +287,11 @@ function NavRow({
 }) {
   const Icon = item.icon;
   return (
+    <Hint label={!expanded ? item.label : undefined} side="right" sideOffset={12}>
     <Link
       href={item.href}
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
-      title={!expanded ? item.label : undefined}
       className={cn(
         'relative flex h-10 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
@@ -317,6 +318,7 @@ function NavRow({
         {item.label}
       </motion.span>
     </Link>
+    </Hint>
   );
 }
 
@@ -327,11 +329,11 @@ function ToggleRow({ expanded }: { expanded: boolean }) {
   const Icon = expanded ? PanelLeftClose : PanelLeftOpen;
   const label = expanded ? 'Contraer' : 'Expandir';
   return (
+    <Hint label={`${label} (⌘B)`} side="right" sideOffset={12}>
     <button
       type="button"
       onClick={toggle}
       aria-label={`${label} barra lateral`}
-      title={`${label} (⌘B)`}
       className={cn(
         'flex h-10 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors',
         'text-panel-foreground/70 hover:bg-panel-hover/60 hover:text-panel-foreground',
@@ -348,5 +350,6 @@ function ToggleRow({ expanded }: { expanded: boolean }) {
         Contraer
       </motion.span>
     </button>
+    </Hint>
   );
 }

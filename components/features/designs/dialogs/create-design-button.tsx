@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Hint } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
 import { CreateDesignDialog } from './create-design-dialog';
 import type { Design } from '@/lib/types/design';
@@ -41,17 +42,20 @@ export function CreateDesignButton({
 
   return (
     <>
-      <Button
-        variant={variant}
-        size={size}
-        className={className}
-        onClick={() => setDialogOpen(true)}
-        disabled={disabled}
-        title={disabledReason}
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        {editDesign ? 'Editar Diseño' : 'Crear Diseños'}
-      </Button>
+      <Hint label={disabled ? disabledReason : undefined}>
+        <span className="inline-flex">
+          <Button
+            variant={variant}
+            size={size}
+            className={className}
+            onClick={() => setDialogOpen(true)}
+            disabled={disabled}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {editDesign ? 'Editar Diseño' : 'Crear Diseños'}
+          </Button>
+        </span>
+      </Hint>
 
       <CreateDesignDialog
         open={dialogOpen}

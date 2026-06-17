@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Hint } from '@/components/ui/tooltip';
 import { useNotifications, Notification } from '@/lib/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 import { Loader } from '@/components/ui/loader';
@@ -127,13 +128,14 @@ export function NotificationsDropdown() {
                       {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: es })}
                     </p>
                   </div>
-                  <button
-                    onClick={(e) => handleDelete(e, notification.id)}
-                    className="mt-1 p-1 rounded hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                  </button>
+                  <Hint label="Eliminar">
+                    <button
+                      onClick={(e) => handleDelete(e, notification.id)}
+                      className="mt-1 p-1 rounded hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </button>
+                  </Hint>
                 </DropdownMenuItem>
               ))}
             </div>

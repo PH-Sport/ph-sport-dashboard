@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Hint } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -170,17 +171,18 @@ export function CreateDesignDialog({
               <span className="flex h-8 items-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground shadow-sm">
                 Manual
               </span>
-              <span
-                title="Asistente con IA — próximamente"
-                aria-disabled
-                className="flex h-8 cursor-not-allowed items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground/50"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Asistente
-                <span className="ml-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[9px] uppercase tracking-wider">
-                  Pronto
+              <Hint label="Asistente con IA — próximamente">
+                <span
+                  aria-disabled
+                  className="flex h-8 cursor-not-allowed items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground/50"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Asistente
+                  <span className="ml-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[9px] uppercase tracking-wider">
+                    Pronto
+                  </span>
                 </span>
-              </span>
+              </Hint>
             </div>
           )}
 

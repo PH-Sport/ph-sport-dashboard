@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Eyebrow } from '@/components/ui/eyebrow';
+import { Hint } from '@/components/ui/tooltip';
 import {
   Table,
   TableBody,
@@ -263,13 +264,14 @@ export function DesignsTable({
               return (
                 <TableRow key={design.id}>
                   <TableCell>
-                    <button
-                      onClick={() => onOpenDetail(design.id)}
-                      title={design.title}
-                      className="block w-full truncate text-left text-[15px] font-semibold text-foreground transition-colors hover:text-primary"
-                    >
-                      {design.title}
-                    </button>
+                    <Hint label={design.title}>
+                      <button
+                        onClick={() => onOpenDetail(design.id)}
+                        className="block w-full truncate text-left text-[15px] font-semibold text-foreground transition-colors hover:text-primary"
+                      >
+                        {design.title}
+                      </button>
+                    </Hint>
                   </TableCell>
                   <TableCell>
                     <div className="flex min-w-0 flex-col">
@@ -284,7 +286,8 @@ export function DesignsTable({
                   </TableCell>
                   <TableCell>
                     {designer ? (
-                      <div className="flex items-center gap-2" title={designer.name}>
+                      <Hint label={designer.name}>
+                      <div className="flex items-center gap-2">
                         <UserAvatar
                           name={designer.name}
                           src={designer.avatar_url}
@@ -295,6 +298,7 @@ export function DesignsTable({
                           {designer.name.split(' ')[0]}
                         </span>
                       </div>
+                      </Hint>
                     ) : (
                       <span className="text-sm text-status-warning">Sin asignar</span>
                     )}

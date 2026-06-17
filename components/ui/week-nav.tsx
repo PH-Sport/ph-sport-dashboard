@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Hint } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface WeekNavProps {
@@ -36,20 +37,21 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
-      <button
-        type="button"
-        onClick={labelInteractive ? onCurrent : undefined}
-        disabled={!labelInteractive}
-        title={labelInteractive ? 'Ir a la semana actual' : undefined}
-        className={cn(
-          'rounded-lg px-2.5 py-1 font-mono tabular text-xs transition-colors',
-          labelInteractive
-            ? 'text-foreground hover:bg-muted/60'
-            : 'cursor-default text-muted-foreground'
-        )}
-      >
-        {label}
-      </button>
+      <Hint label={labelInteractive ? 'Ir a la semana actual' : undefined} side="bottom">
+        <button
+          type="button"
+          onClick={labelInteractive ? onCurrent : undefined}
+          disabled={!labelInteractive}
+          className={cn(
+            'rounded-lg px-2.5 py-1 font-mono tabular text-xs transition-colors',
+            labelInteractive
+              ? 'text-foreground hover:bg-muted/60'
+              : 'cursor-default text-muted-foreground'
+          )}
+        >
+          {label}
+        </button>
+      </Hint>
       <button
         type="button"
         onClick={onNext}

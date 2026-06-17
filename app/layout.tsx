@@ -13,6 +13,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SWRProvider } from '@/components/providers/swr-provider';
 import { MotionProvider } from '@/components/providers/motion-provider';
 import { AuthProvider } from '@/lib/auth/auth-context';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 export const metadata: Metadata = {
   title: 'PH Sport Dashboard',
@@ -46,13 +47,15 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <MotionProvider>
-            <AuthProvider>
-              <SWRProvider>
-                {children}
-              </SWRProvider>
-            </AuthProvider>
-          </MotionProvider>
+          <TooltipProvider delayDuration={200}>
+            <MotionProvider>
+              <AuthProvider>
+                <SWRProvider>
+                  {children}
+                </SWRProvider>
+              </AuthProvider>
+            </MotionProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Hint } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
@@ -31,13 +32,13 @@ export function EmptyState({
           {(actionLabel && onAction) || actionHref ? (
             <div>
               {onAction ? (
-                <Button
-                  onClick={onAction}
-                  disabled={actionDisabled}
-                  title={actionDisabledReason}
-                >
-                  {actionLabel}
-                </Button>
+                <Hint label={actionDisabled ? actionDisabledReason : undefined}>
+                  <span className="inline-flex">
+                    <Button onClick={onAction} disabled={actionDisabled}>
+                      {actionLabel}
+                    </Button>
+                  </span>
+                </Hint>
               ) : actionHref ? (
                 <Button asChild>
                   <a href={actionHref}>{actionLabel}</a>

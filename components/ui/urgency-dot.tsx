@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Hint } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export type UrgencyLevel = 'overdue' | 'h24' | 'h48' | null;
@@ -33,15 +34,15 @@ export function UrgencyDot({ level, className }: { level: UrgencyLevel; classNam
   if (!level) return null;
   const meta = META[level];
   const base = cn('inline-block h-2 w-2 shrink-0 rounded-full', meta.color, className);
-  return meta.pulse ? (
+  const dot = meta.pulse ? (
     <motion.span
       aria-hidden
-      title={meta.label}
       animate={{ opacity: [0.35, 1, 0.35] }}
       transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
       className={base}
     />
   ) : (
-    <span aria-hidden title={meta.label} className={base} />
+    <span aria-hidden className={base} />
   );
+  return <Hint label={meta.label}>{dot}</Hint>;
 }

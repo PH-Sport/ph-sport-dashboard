@@ -27,4 +27,35 @@ const TooltipContent = React.forwardRef<
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
+type HintProps = {
+  /** Texto del tooltip. Si es falsy, renderiza el hijo tal cual (passthrough). */
+  label?: React.ReactNode;
+  /** Único elemento disparador (botón, link, span…). */
+  children: React.ReactElement;
+  side?: React.ComponentPropsWithoutRef<typeof TooltipContent>['side'];
+  align?: React.ComponentPropsWithoutRef<typeof TooltipContent>['align'];
+  sideOffset?: number;
+  className?: string;
+};
+
+/**
+ * Hint — tooltip estilizado de una sola línea. Sustituye al atributo `title`
+ * nativo del navegador (gris, rectangular, no estilizable) por el chip charcoal
+ * de la app. Si `label` es falsy hace passthrough, así que es seguro pasar
+ * valores condicionales (p. ej. `!expanded ? label : undefined`).
+ *
+ * Requiere un `<TooltipProvider>` antepuesto (montado en el layout raíz).
+ */
+function Hint({ label, children, side = 'top', align = 'center', sideOffset, className }: HintProps) {
+  if (!label) return children;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side={side} align={align} sideOffset={sideOffset} className={className}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, Hint };
