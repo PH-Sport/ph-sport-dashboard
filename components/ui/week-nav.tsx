@@ -37,7 +37,7 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
-      <Hint label={labelInteractive ? 'Ir a la semana actual' : undefined} side="bottom">
+      <Hint label={labelInteractive ? 'Ir a la semana actual' : undefined} side="top">
         <button
           type="button"
           onClick={labelInteractive ? onCurrent : undefined}
