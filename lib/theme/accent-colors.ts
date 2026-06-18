@@ -42,6 +42,9 @@ export interface AccentColor {
 /** Acento de fábrica: el dorado Champions de PH. */
 export const DEFAULT_ACCENT: AccentKey = 'gold';
 
+/** Clave de localStorage que cachea el acento para el primer pintado (anti-flash). */
+export const ACCENT_STORAGE_KEY = 'ph-accent';
+
 // Texto sobre acentos claros (dorado): charcoal, igual que el resto de la UI.
 const FG_DARK = '220 14% 11%';
 const FG_DARK_DM = '220 14% 8%';

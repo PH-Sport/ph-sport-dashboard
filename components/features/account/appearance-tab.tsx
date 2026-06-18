@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Moon, Sun } from 'lucide-react';
+import { Check, Moon, Sun } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { useAccentColor } from '@/lib/theme/use-accent-color';
+import { accentSwatch } from '@/lib/theme/accent-colors';
 import {
   Select,
   SelectContent,
@@ -26,7 +28,8 @@ const THEME_OPTIONS = [
 
 export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTabProps) {
   const { theme, setTheme } = useTheme();
-  // Evita mismatch de hidratación: next-themes no conoce el tema en SSR
+  const { accent, setAccent, options: accentOptions } = useAccentColor();
+  // Evita mismatch de hidratación: ni el tema ni el acento se conocen en SSR
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -59,6 +62,45 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
         </div>
         <p className="text-sm text-muted-foreground">
           Se aplica al instante en este dispositivo.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <Label>Color de acento</Label>
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Color de acento">
+          {accentOptions.map((color) => {
+            const active = mounted && accent === color.key;
+            return (
+              <button
+                key={color.key}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                aria-label={color.label}
+                title={color.label}
+                onClick={() => setAccent(color.key)}
+                style={{ backgroundColor: accentSwatch(color) }}
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-full transition-transform',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background',
+                  active
+                    ? 'ring-2 ring-foreground/80 ring-offset-2 ring-offset-background'
+                    : 'hover:scale-110'
+                )}
+              >
+                {active && (
+                  <Check
+                    className="h-4 w-4"
+                    style={{ color: `hsl(${color.light.foreground})` }}
+                    aria-hidden
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Tiñe botones, enlaces y elementos activos. Te sigue en todos tus dispositivos.
         </p>
       </div>
 

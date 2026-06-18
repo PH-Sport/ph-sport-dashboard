@@ -17,6 +17,8 @@ export interface Profile {
   role: 'ADMIN' | 'DESIGNER';
   avatar_url?: string;
   is_dev?: boolean;
+  /** Clave del acento elegido (gold|red|orange|…); null/undefined = dorado. */
+  accent_color?: string | null;
 }
 
 type AuthStatus = 'INITIALIZING' | 'AUTHENTICATED' | 'UNAUTHENTICATED';
@@ -114,7 +116,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           prev.profile?.full_name === profile.full_name &&
           prev.profile?.role === profile.role &&
           prev.profile?.avatar_url === profile.avatar_url &&
-          prev.profile?.is_dev === profile.is_dev;
+          prev.profile?.is_dev === profile.is_dev &&
+          prev.profile?.accent_color === profile.accent_color;
 
         // If nothing changed, return previous state to avoid re-render
         if (prev.status === 'AUTHENTICATED' && isSameUser && isSameProfile) {

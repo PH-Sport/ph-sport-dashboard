@@ -12,8 +12,14 @@ const fontMono = JetBrains_Mono({
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SWRProvider } from '@/components/providers/swr-provider';
 import { MotionProvider } from '@/components/providers/motion-provider';
+import { AccentSync } from '@/components/providers/accent-sync';
 import { AuthProvider } from '@/lib/auth/auth-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import {
+  accentThemeCss,
+  accentInitScript,
+  ACCENT_STORAGE_KEY,
+} from '@/lib/theme/accent-colors';
 
 export const metadata: Metadata = {
   title: 'PH Sport Dashboard',
@@ -45,11 +51,23 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${fontMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Acentos personalizables: reglas por [data-accent] (claro/oscuro). */}
+        <style
+          id="ph-accent-theme"
+          dangerouslySetInnerHTML={{ __html: accentThemeCss() }}
+        />
+        {/* Aplica el acento cacheado antes del primer pintado (anti-flash). */}
+        <script
+          dangerouslySetInnerHTML={{ __html: accentInitScript(ACCENT_STORAGE_KEY) }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <TooltipProvider delayDuration={200}>
             <MotionProvider>
               <AuthProvider>
+                <AccentSync />
                 <SWRProvider>
                   {children}
                 </SWRProvider>
