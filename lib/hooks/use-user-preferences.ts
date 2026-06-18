@@ -31,6 +31,15 @@ interface UseUserPreferencesResult {
   uploadAvatar: (blob: Blob) => Promise<boolean>;
 }
 
+/** Extrae el nombre del objeto en el bucket `avatars` desde su URL pública. Null si no pertenece a ese bucket. */
+function avatarObjectPath(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const marker = '/avatars/';
+  const idx = url.indexOf(marker);
+  if (idx < 0) return null;
+  return url.slice(idx + marker.length).split('?')[0] || null;
+}
+
 /** Traduce errores de subida a un mensaje claro para el usuario (sin errores silenciosos). */
 function avatarErrorMessage(error: unknown): string {
   const msg = (error instanceof Error ? error.message : String(error ?? '')).toLowerCase();
@@ -106,6 +115,8 @@ export function useUserPreferences(): UseUserPreferencesResult {
     if (!user) return false;
 
     setUploading(true);
+    // Foto anterior: la borraremos tras subir la nueva con éxito.
+    const previousPath = avatarObjectPath(profile?.avatar_url);
     try {
       // El blob siempre llega como JPEG recortado/comprimido desde el diálogo.
       const filePath = `${user.id}-${Math.random().toString(36).slice(2)}.jpg`;
@@ -126,6 +137,13 @@ export function useUserPreferences(): UseUserPreferencesResult {
         .eq('id', user.id);
 
       if (updateError) throw updateError;
+
+      // Borrar la foto anterior (best-effort): el usuario es dueño de su propio fichero,
+      // así que la policy de borrado lo permite. Un fallo aquí no rompe la subida.
+      if (previousPath && previousPath !== filePath) {
+        const { error: removeError } = await supabase.storage.from('avatars').remove([previousPath]);
+        if (removeError) logger.warn('No se pudo borrar el avatar anterior:', removeError);
+      }
 
       await refreshSession();
       toast.success('Avatar actualizado correctamente');
