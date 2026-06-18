@@ -12,7 +12,7 @@ const TooltipTrigger = TooltipPrimitive.Trigger;
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+>(({ className, sideOffset = 8, ...props }, ref) => (
   // Portal: renderiza el tooltip a nivel de <body> para que escape de cualquier
   // `overflow-hidden` o contexto de apilamiento del ancestro (p. ej. la placa de
   // la sidebar, que recorta su contenido durante la animación de colapso).
