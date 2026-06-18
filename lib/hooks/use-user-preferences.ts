@@ -26,6 +26,8 @@ interface UseUserPreferencesResult {
   togglePreference: (channel: NotificationChannel, type: NotificationEvent) => void;
   saving: boolean;
   uploading: boolean;
+  /** True hasta que el perfil y las preferencias de notificación están cargados. */
+  loading: boolean;
   save: () => Promise<void>;
   /** Sube el JPEG ya recortado/comprimido. Devuelve true si tuvo éxito. */
   uploadAvatar: (blob: Blob) => Promise<boolean>;
@@ -73,6 +75,7 @@ export function useUserPreferences(): UseUserPreferencesResult {
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFERENCES
   );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (profile?.full_name) {
@@ -82,16 +85,21 @@ export function useUserPreferences(): UseUserPreferencesResult {
     }
 
     const loadPreferences = async () => {
+      // Sin usuario aún (auth inicializando): seguimos en estado de carga.
       if (!user) return;
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('notification_preferences')
-        .eq('id', user.id)
-        .single();
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('notification_preferences')
+          .eq('id', user.id)
+          .single();
 
-      if (data?.notification_preferences) {
-        setPreferences(dbToUi(data.notification_preferences as NotificationPreferencesDb));
+        if (data?.notification_preferences) {
+          setPreferences(dbToUi(data.notification_preferences as NotificationPreferencesDb));
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -194,6 +202,7 @@ export function useUserPreferences(): UseUserPreferencesResult {
     togglePreference,
     saving,
     uploading,
+    loading,
     save,
     uploadAvatar,
   };

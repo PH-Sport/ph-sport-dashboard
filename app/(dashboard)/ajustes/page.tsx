@@ -14,6 +14,8 @@ import { AccountTab } from '@/components/features/account/account-tab';
 import { NotificationsTab } from '@/components/features/account/notifications-tab';
 import { AppearanceTab } from '@/components/features/account/appearance-tab';
 import { MembersPanel } from '@/components/features/account/members-panel';
+import { PageTransition } from '@/components/ui/page-transition';
+import { SettingsSkeleton } from '@/components/skeletons/settings-skeleton';
 
 type Tab = 'general' | 'miembros';
 
@@ -59,6 +61,7 @@ function SettingsContent() {
     togglePreference,
     saving,
     uploading,
+    loading,
     save,
     uploadAvatar,
   } = useUserPreferences();
@@ -73,12 +76,17 @@ function SettingsContent() {
   const activeTab: Tab = isAdmin ? tab : 'general';
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="show"
-      variants={{ show: { transition: { staggerChildren: STAGGER } } }}
-      className="space-y-4"
+    <PageTransition
+      loading={loading}
+      skeleton={<SettingsSkeleton isAdmin={isAdmin} />}
+      variant="fadeSlide"
     >
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={{ show: { transition: { staggerChildren: STAGGER } } }}
+        className="space-y-4"
+      >
       {isAdmin && (
         <motion.div
           variants={rise}
@@ -143,7 +151,8 @@ function SettingsContent() {
       ) : (
         <MembersPanel />
       )}
-    </motion.div>
+      </motion.div>
+    </PageTransition>
   );
 }
 
@@ -157,7 +166,7 @@ export default function SettingsPage() {
       loading={false}
       skeleton={null}
     >
-      <Suspense fallback={null}>
+      <Suspense fallback={<SettingsSkeleton />}>
         <SettingsContent />
       </Suspense>
     </DashboardPage>
