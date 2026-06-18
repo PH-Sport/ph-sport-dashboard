@@ -14,6 +14,7 @@ import { SWRProvider } from '@/components/providers/swr-provider';
 import { MotionProvider } from '@/components/providers/motion-provider';
 import { AccentSync } from '@/components/providers/accent-sync';
 import { AuthProvider } from '@/lib/auth/auth-context';
+import { getServerAuth } from '@/lib/auth/get-server-auth';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   accentThemeCss,
@@ -40,11 +41,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Auth resuelta en servidor: el AuthProvider arranca ya autenticado (sin spinner).
+  const { user, profile } = await getServerAuth();
+
   return (
     <html
       lang="es"
@@ -66,7 +70,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <TooltipProvider delayDuration={200}>
             <MotionProvider>
-              <AuthProvider>
+              <AuthProvider initialUser={user} initialProfile={profile}>
                 <AccentSync />
                 <SWRProvider>
                   {children}

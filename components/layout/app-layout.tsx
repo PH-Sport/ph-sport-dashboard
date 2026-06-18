@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { SPRINGS } from '@/components/ui/animations';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { AppSidebar, SidebarProvider, useSidebar } from './app-sidebar';
 import { Header } from './header';
 
@@ -15,6 +16,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { status } = useAuth();
   const router = useRouter();
+  const hydrated = useHydrated();
 
   useEffect(() => {
     if (status === 'UNAUTHENTICATED') router.push('/login');
@@ -40,7 +42,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         Saltar al contenido principal
       </a>
       <AppSidebar />
-      <MainArea>{children}</MainArea>
+      {/* El shell se renderiza en SSR; el contenido de datos (SWR persistido,
+          solo-cliente) se difiere a la hidratación para evitar mismatches. */}
+      <MainArea>{hydrated ? children : null}</MainArea>
     </SidebarProvider>
   );
 }

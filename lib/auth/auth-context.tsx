@@ -53,16 +53,30 @@ export const AuthContext = createContext<AuthContextType>({
 // Provider Component
 // ============================================================================
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+interface AuthProviderProps {
+  children: React.ReactNode;
+  /** Estado inicial resuelto en el servidor (Fase 2): evita el spinner de auth. */
+  initialUser?: User | null;
+  initialProfile?: Profile | null;
+}
+
+export function AuthProvider({
+  children,
+  initialUser = null,
+  initialProfile = null,
+}: AuthProviderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
+  // Si el servidor ya verificó sesión + perfil, arrancamos AUTHENTICATED.
+  const hasServerSession = Boolean(initialUser && initialProfile);
+
   // Single source of truth for Auth State
   const [state, setState] = useState<AuthState>({
-    status: 'INITIALIZING',
-    user: null,
-    profile: null,
+    status: hasServerSession ? 'AUTHENTICATED' : 'INITIALIZING',
+    user: initialUser,
+    profile: initialProfile,
     loggingOut: false,
   });
 
@@ -151,7 +165,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initial Mount
   useEffect(() => {
-    initializeAuth(true);
+    if (hasServerSession && initialUser) {
+      // Sesión ya verificada por el servidor: no repetimos el getUser()+profile
+      // bloqueante. Solo marcamos al dueño de la caché SWR persistida (Fase 1).
+      setSwrCacheOwner(initialUser.id);
+    } else {
+      initializeAuth(true);
+    }
 
     // Supabase Auth Listener (Handles other tabs, token refreshes, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
@@ -171,7 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [initializeAuth, supabase.auth]);
+  }, [initializeAuth, supabase.auth, hasServerSession, initialUser]);
 
   // "Hotel Sensor": Reset loggingOut flag when we actually land on login page
   useEffect(() => {

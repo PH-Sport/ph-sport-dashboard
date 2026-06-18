@@ -45,20 +45,43 @@ así que los dashboards montan tras la hidratación y leen el caché en cliente.
 Efecto: cold start pasa de `[auth → skeleton de datos → datos]` a `[auth → datos]`.
 (El spinner de auth sigue ahí en Fase 1; lo elimina la Fase 2.)
 
-### Fase 2 — Auth en servidor (pendiente)
+### Fase 2 — Auth en servidor ✅ implementada y validada
 
-- Resolver `user` + `profile` en el servidor (layout, con el server client SSR
-  existente) y pasarlos al `AuthProvider` como estado inicial → arranca ya
-  `AUTHENTICATED` sin spinner ni optimismo, con datos verificados.
-- Elimina el `getUser()`/`profile` duplicado del cliente → menos llamadas.
-- Con `initialUser` disponible de forma síncrona, el aislamiento de caché queda
-  blindado (sin depender del gate por cookie de la Fase 1).
-- Validar con cuidado: login, logout, invitación, refresh de token, cambio de rol.
+- **`lib/auth/get-server-auth.ts`** (nuevo): `getServerAuth()` resuelve
+  `user` + `profile` en el servidor con el server client SSR existente. Fallo
+  seguro → `{ null, null }` (cae al flujo cliente previo).
+- **`app/layout.tsx`**: root layout pasa a `async`, llama a `getServerAuth()` y
+  pasa `initialUser`/`initialProfile` al `AuthProvider`.
+- **`lib/auth/auth-context.tsx`**: `AuthProvider` acepta el estado inicial del
+  servidor; si viene sesión+perfil, arranca `AUTHENTICATED` y NO repite el
+  `getUser()`+profile bloqueante en cliente (solo marca el dueño de la caché y
+  monta el listener). Logout/invitación/refresh sin cambios.
+- Efecto: el HTML llega ya autenticado (sin spinner) y el cliente hace **0
+  llamadas `getUser`** en arranque en frío.
 
-## Validación (manual, DevTools)
+**Mitigación de hydration mismatch (clave):** al pasar a SSR autenticado, el
+servidor renderiza el dashboard con la caché SWR vacía (skeleton) mientras el
+cliente hidrata con la caché llena (datos) → mismatch. Solución:
 
-- Recargar Inicio → datos al instante sin skeleton; en Network se ve la
-  revalidación de fondo.
-- Throttle de red → se aprecia instant-on vs refresco.
-- Logout → caché borrada; login con otro usuario en el mismo navegador → sin fuga.
-- Sin errores de hidratación en consola.
+- **`lib/hooks/use-hydrated.ts`** (nuevo): `useHydrated()` (false en SSR y en el
+  primer render de cliente, true tras montar; flip en layout effect isomórfico,
+  sin parpadeo).
+- **`components/layout/app-layout.tsx`**: el shell autenticado (sidebar/header)
+  se renderiza en SSR, pero el contenido de datos (`children`) se difiere a la
+  hidratación (`{hydrated ? children : null}`). Así el primer render de cliente
+  coincide con el servidor y luego aparecen los datos cacheados.
+
+## Validación (manual, DevTools) — TODO ✅ verificado con Playwright
+
+Fase 1:
+- Persistencia entre recargas (2 entradas reales guardadas).
+- Instant-on probado con `/api/designs` bloqueado → datos sin skeleton.
+- Logout borra todo `phsport-swr*` (preserva theme/accent).
+
+Fase 2:
+- SSR renderiza el shell autenticado sin spinner (`contieneSpinnerAuth: false`).
+- Cliente: 0 llamadas `getUser` en arranque.
+- 0 errores de hidratación tras el gate `useHydrated`.
+- Instant-on intacto; cold start ~1s más rápido en dev.
+- Regresión: logout limpia caché+cookie; ruta protegida sin sesión redirige a
+  `/login` sin filtrar el shell.
