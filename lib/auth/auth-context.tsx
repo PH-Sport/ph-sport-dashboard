@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { LogoutOverlay } from '@/components/ui/logout-overlay';
 import { logger } from '@/lib/utils/logger';
+import { setSwrCacheOwner, clearSwrCache } from '@/lib/swr/persistent-cache';
 
 // ============================================================================
 // Types & Interfaces
@@ -108,6 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // 3. Success -> Fully Authenticated
+      // Marca al dueño de la caché SWR persistida (aislamiento por usuario).
+      setSwrCacheOwner(user.id);
+
       // Only update state if user/profile actually changed (prevents unnecessary re-renders)
       setState(prev => {
         const isSameUser = prev.user?.id === user.id;
@@ -199,6 +203,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearSupabaseKeys(window.localStorage);
         clearSupabaseKeys(window.sessionStorage);
       }
+
+      // Limpiar la caché SWR persistida para que el siguiente usuario no vea datos ajenos.
+      clearSwrCache();
 
       router.push('/login');
       // State update happens via onAuthStateChange --> SIGNED_OUT
