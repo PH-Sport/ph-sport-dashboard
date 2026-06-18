@@ -44,12 +44,16 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
           disabled={!labelInteractive}
           className={cn(
             'rounded-lg px-2.5 py-1 font-mono tabular text-xs transition-colors',
-            labelInteractive
-              ? 'text-foreground hover:bg-muted/60'
-              : 'cursor-default text-muted-foreground'
+            isCurrent
+              ? 'bg-primary/15 font-medium text-primary'
+              : labelInteractive
+                ? 'text-foreground hover:bg-muted/60'
+                : 'cursor-default text-muted-foreground'
           )}
         >
-          {label}
+          {/* Ancho fijo: 21ch = etiqueta más larga ("22 de jun - 28 de jun"),
+              centrada, para que la placa no salte al cambiar de semana. */}
+          <span className="inline-block min-w-[21ch] text-center">{label}</span>
         </button>
       </Hint>
       <button
