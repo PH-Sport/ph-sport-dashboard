@@ -6,7 +6,7 @@ import { Check, Moon, Sun } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useAccentColor } from '@/lib/theme/use-accent-color';
-import { accentSwatch } from '@/lib/theme/accent-colors';
+import { accentSwatch, accentSwatchForeground } from '@/lib/theme/accent-colors';
 import {
   Select,
   SelectContent,
@@ -27,11 +27,14 @@ const THEME_OPTIONS = [
 ] as const;
 
 export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTabProps) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { accent, setAccent, options: accentOptions } = useAccentColor();
   // Evita mismatch de hidratación: ni el tema ni el acento se conocen en SSR
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  // La muestra refleja el modo activo (sólido en claro, pastel en oscuro).
+  // Antes de montar = claro, igual que el render de SSR (sin mismatch).
+  const isDark = mounted && resolvedTheme === 'dark';
 
   return (
     <div className="space-y-lg py-2">
@@ -79,7 +82,7 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
                 aria-label={color.label}
                 title={color.label}
                 onClick={() => setAccent(color.key)}
-                style={{ backgroundColor: accentSwatch(color) }}
+                style={{ backgroundColor: accentSwatch(color, isDark) }}
                 className={cn(
                   'flex h-8 w-8 items-center justify-center rounded-full transition-transform',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background',
@@ -91,7 +94,7 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
                 {active && (
                   <Check
                     className="h-4 w-4"
-                    style={{ color: `hsl(${color.light.foreground})` }}
+                    style={{ color: accentSwatchForeground(color, isDark) }}
                     aria-hidden
                   />
                 )}
