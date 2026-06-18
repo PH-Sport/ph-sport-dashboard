@@ -71,7 +71,7 @@ export default function Dashboard() {
         ) : null
       }
       loading={showSkeleton}
-      skeleton={<DashboardSkeleton />}
+      skeleton={<DashboardSkeleton variant={profile?.role === 'ADMIN' ? 'admin' : 'designer'} />}
     >
       {showError ? (
         <Card>

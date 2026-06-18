@@ -1,80 +1,105 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface DashboardSkeletonProps {
+  /** 'admin' → 4 KPIs + carga del equipo; 'designer' → 3 KPIs + compañeros. */
+  variant?: 'admin' | 'designer';
+}
+
 /**
- * Skeleton de /inicio — espeja el layout real (tira de KPIs + lista de
- * vencimientos + bloque de equipo). Sin icon-boxes ni pills que no existen.
+ * Skeleton de /inicio — espeja el dashboard real según rol: tira de KPIs
+ * (placas) + dos columnas [2fr,1fr] (lista de vencimientos/cola + panel
+ * lateral de carga/compañeros). Mismas superficies rounded-2xl que la UI.
  */
-export function DashboardSkeleton() {
+export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonProps) {
+  const isAdmin = variant === 'admin';
   return (
     <PageContainer>
-      {/* Header: saludo + subtítulo + acción */}
+      {/* Header: saludo + subtítulo · acción (solo admin) */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <Skeleton className="mb-2 h-9 w-56" />
           <Skeleton className="h-5 w-40" />
         </div>
-        <Skeleton className="h-10 w-36" />
+        {isAdmin && <Skeleton className="h-10 w-36" />}
       </div>
 
-      {/* Tira de KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex flex-col gap-3 p-5">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-11 w-16" />
-              <Skeleton className="h-4 w-32" />
-            </CardContent>
-          </Card>
+      {/* KPIs */}
+      <div className={isAdmin ? 'grid grid-cols-2 gap-4 xl:grid-cols-4' : 'grid grid-cols-3 gap-4'}>
+        {[...Array(isAdmin ? 4 : 3)].map((_, i) => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="mt-2 h-9 w-14" />
+            <Skeleton className="mt-2 h-3 w-24" />
+          </div>
         ))}
       </div>
 
-      {/* Lista de vencimientos */}
-      <Card>
-        <CardContent className="pt-lg">
-          <div className="mb-4 flex items-end justify-between gap-4">
-            <div>
-              <Skeleton className="mb-2 h-3 w-28" />
-              <Skeleton className="h-5 w-48" />
+      {/* Dos columnas: lista principal (2fr) + panel lateral (1fr) */}
+      <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
+        {/* Izquierda: vencimientos / tu cola */}
+        <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-5 w-32" />
             </div>
-            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-3 w-16" />
           </div>
-          <div className="divide-y divide-border">
+          <ul className="-mx-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between gap-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <Skeleton className="mb-2 h-4 w-48" />
-                  <Skeleton className="h-3 w-64" />
-                </div>
-                <Skeleton className="h-4 w-24 shrink-0" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bloque de equipo / compañeros */}
-      <Card>
-        <CardContent className="pt-lg">
-          <div className="mb-5">
-            <Skeleton className="mb-2 h-3 w-28" />
-            <Skeleton className="h-5 w-56" />
-          </div>
-          <div className="space-y-5">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-4 w-32" />
+              <li key={i} className="flex items-center gap-3 rounded-xl px-2 py-2">
+                {isAdmin ? (
+                  <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+                ) : (
+                  <Skeleton className="h-2 w-2 shrink-0 rounded-full" />
+                )}
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-40" />
                   <Skeleton className="h-3 w-28" />
                 </div>
-                <Skeleton className="h-1.5 w-full" />
-              </div>
+                <Skeleton className="h-3 w-20 shrink-0" />
+              </li>
             ))}
+          </ul>
+        </div>
+
+        {/* Derecha: carga del equipo / compañeros */}
+        <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-5 w-32" />
           </div>
-        </CardContent>
-      </Card>
+          {isAdmin ? (
+            <ul className="mt-4 space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <li key={i} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-6 w-6 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-3 w-6" />
+                  </div>
+                  <Skeleton className="h-1 w-full rounded-full" />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <li key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-3 w-16" />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </PageContainer>
   );
 }
