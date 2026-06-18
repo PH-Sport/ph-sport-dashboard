@@ -287,7 +287,7 @@ function NavRow({
 }) {
   const Icon = item.icon;
   return (
-    <Hint label={!expanded ? item.label : undefined} side="right" sideOffset={12}>
+    <Hint label={!expanded ? item.label : undefined} side="right" sideOffset={20}>
     <Link
       href={item.href}
       onClick={onClick}
@@ -329,7 +329,7 @@ function ToggleRow({ expanded }: { expanded: boolean }) {
   const Icon = expanded ? PanelLeftClose : PanelLeftOpen;
   const label = expanded ? 'Contraer' : 'Expandir';
   return (
-    <Hint label={`${label} (⌘B)`} side="right" sideOffset={12}>
+    <Hint label={!expanded ? `${label} (⌘B)` : undefined} side="right" sideOffset={20}>
     <button
       type="button"
       onClick={toggle}
