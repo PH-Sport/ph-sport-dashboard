@@ -1,7 +1,13 @@
 /**
  * Saludos del dashboard — tono PHSPORT: directo, seguro, cálido. Sin chistes.
- * El saludo es DETERMINISTA por día y franja horaria (no cambia entre renders
- * ni al refrescar): la personalidad de la app debe ser estable, no aleatoria.
+ *
+ * Dos modos, según el caso de uso:
+ *  - getDailyTemplate / getDailyGreeting: DETERMINISTA por día y franja (mismo
+ *    valor en server y cliente). Sirve de SEED inicial para no romper la
+ *    hidratación.
+ *  - pickRotatingTemplate: rota entre las variantes de la franja en cada carga
+ *    (refresco o navegar-y-volver). Solo en cliente, tras la hidratación.
+ * La franja horaria SIEMPRE manda: la rotación elige variante dentro de ella.
  */
 
 const MORNING_GREETINGS = [
@@ -64,12 +70,40 @@ function fillTemplate(template: string, name: string): string {
   return template.replace('{name}', name);
 }
 
+/**
+ * Plantilla determinista del día (misma en server y cliente): SEED inicial para
+ * pintar algo coherente antes de que el cliente rote, sin mismatch de hidratación.
+ */
+export function getDailyTemplate(now: Date = new Date()): string {
+  const pool = getPool(getSlot(now.getHours()));
+  const dayIndex = Math.floor(now.getTime() / 86_400_000);
+  return pool[dayIndex % pool.length];
+}
+
 /** Saludo estable durante todo el día (rota entre días, no entre renders). */
 export function getDailyGreeting(name: string, now: Date = new Date()): string {
-  const slot = getSlot(now.getHours());
-  const pool = getPool(slot);
-  const dayIndex = Math.floor(now.getTime() / 86_400_000);
-  return fillTemplate(pool[dayIndex % pool.length], name);
+  return fillTemplate(getDailyTemplate(now), name);
+}
+
+/**
+ * Escoge una plantilla al azar dentro de la franja horaria actual, evitando
+ * `avoid` (la última mostrada) para que no se repita en cargas consecutivas.
+ * Llamar SOLO en cliente, tras la hidratación: usa aleatoriedad no determinista.
+ */
+export function pickRotatingTemplate(
+  avoid: string | null,
+  now: Date = new Date(),
+  rng: () => number = Math.random,
+): string {
+  const pool = getPool(getSlot(now.getHours()));
+  const candidates = avoid && pool.length > 1 ? pool.filter((t) => t !== avoid) : pool;
+  const choices = candidates.length > 0 ? candidates : pool;
+  return choices[Math.floor(rng() * choices.length)];
+}
+
+/** Rellena {name} en una plantilla (combina con get*Template / pickRotatingTemplate). */
+export function fillGreeting(template: string, name: string): string {
+  return fillTemplate(template, name);
 }
 
 export function getStaticGreeting(name: string, now: Date = new Date()): string {
