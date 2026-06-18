@@ -219,8 +219,18 @@
 @layer base {
   html {
     scrollbar-gutter: stable;
-    scrollbar-width: thin;                                   /* Firefox */
-    scrollbar-color: hsl(var(--primary) / 0.4) transparent;
+  }
+  /* Firefox — scrollbar-width/-color son propiedades estándar y HEREDABLES. En
+     Chromium 121+ su mera presencia DESACTIVA ::-webkit-scrollbar en ese
+     elemento y en todos los que heredan (vuelven las flechas, se pierde el
+     grosor fino y el ensanchamiento al agarrar). Por eso se gatean tras un
+     @supports que SOLO casa en motores SIN pseudo-elementos webkit (Firefox);
+     en Chromium/Safari el bloque no aplica y manda ::-webkit-scrollbar. */
+  @supports not selector(::-webkit-scrollbar-thumb) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: hsl(var(--primary) / 0.4) transparent;
+    }
   }
 
   ::-webkit-scrollbar {
@@ -259,9 +269,15 @@
 /* Variante aún más fina (gutter más ajustado) para contenedores densos. */
 @layer utilities {
   .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary) / 0.4) transparent;
     scrollbar-gutter: stable;
+  }
+  /* Mismo gate que la global: scrollbar-* solo en Firefox para no desactivar
+     ::-webkit-scrollbar en Chromium/Safari. */
+  @supports not selector(::-webkit-scrollbar-thumb) {
+    .scrollbar-thin {
+      scrollbar-width: thin;
+      scrollbar-color: hsl(var(--primary) / 0.4) transparent;
+    }
   }
   .scrollbar-thin::-webkit-scrollbar {
     width: 9px;
