@@ -1,56 +1,56 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/** Anchos variados para que las filas parezcan títulos reales, no barras iguales. */
+const ROW_WIDTHS = ['w-40', 'w-28', 'w-44'];
+
+/**
+ * Skeleton de /equipo — espeja el grid de placas de diseñador (2 columnas):
+ * cabecera con avatar + nombre + carga, y una lista de diseños debajo.
+ * No es un grid de 4 columnas con stats; eso era de una versión anterior.
+ */
 export function TeamSkeleton() {
   return (
     <PageContainer>
-      {/* Header skeleton */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-4 w-64" />
+      {/* Header: título + subtítulo + WeekNav */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <Skeleton className="mb-2 h-9 w-40" />
+          <Skeleton className="h-5 w-56" />
         </div>
-        {/* Week selector skeleton */}
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-10 w-10" />
-          <Skeleton className="h-10 w-[180px]" />
-          <Skeleton className="h-10 w-10" />
+        {/* Placa WeekNav (chevron · etiqueta · chevron) */}
+        <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-raised">
+          <Skeleton className="h-7 w-7 rounded-lg" />
+          <Skeleton className="h-7 w-32 rounded-lg" />
+          <Skeleton className="h-7 w-7 rounded-lg" />
         </div>
       </div>
 
-      {/* Grid de tarjetas skeleton */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {[...Array(8)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <CardHeader className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-5 w-32" />
+      {/* Grid de placas de diseñador */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="rounded-2xl border border-border bg-card p-lg shadow-raised"
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-16" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Skeleton className="h-3 w-16" />
-                  <Skeleton className="h-6 w-8" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-6 w-8" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-3 w-18" />
-                  <Skeleton className="h-6 w-8" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-6 w-8" />
-                </div>
-              </div>
-              <Skeleton className="h-2 w-full rounded-full" />
-            </CardContent>
-          </Card>
+            </div>
+            <ul className="-mx-2 space-y-1">
+              {ROW_WIDTHS.map((w, j) => (
+                <li key={j} className="flex items-center gap-3 rounded-xl px-2 py-2">
+                  <Skeleton className="h-1.5 w-1.5 shrink-0 rounded-full" />
+                  <Skeleton className={`h-4 ${w}`} />
+                  <div className="flex-1" />
+                  <Skeleton className="h-3 w-16 shrink-0" />
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
       </div>
     </PageContainer>

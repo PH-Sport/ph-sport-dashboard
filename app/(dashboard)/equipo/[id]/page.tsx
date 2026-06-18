@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { WeekNav } from '@/components/ui/week-nav';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { Eyebrow } from '@/components/ui/eyebrow';
-import { TeamSkeleton } from '@/components/skeletons/team-skeleton';
+import { DesignerDetailSkeleton } from '@/components/skeletons/designer-detail-skeleton';
 import {
   ArrowLeft,
   Calendar,
@@ -156,7 +156,7 @@ function DesignerDetailPage() {
       subtitle={`Diseños asignados · ${weekLabel}`}
       maxWidth="4xl"
       loading={showSkeleton}
-      skeleton={<TeamSkeleton />}
+      skeleton={<DesignerDetailSkeleton />}
       actions={
         <>
           <Button variant="ghost" asChild>
