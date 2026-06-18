@@ -248,15 +248,12 @@
     border: 4px solid transparent;          /* 11 − 4·2 = 3px visibles */
     background-clip: padding-box;
   }
-  /* Hover — el thumb gana un punto de cuerpo y presencia (la pista no se mueve). */
-  ::-webkit-scrollbar-thumb:hover {
+  /* Hover y agarre — mismo ligero ensanchamiento; al arrastrar NO engorda más.
+     La pista sigue fija (11px), así que tampoco aquí hay layout shift. */
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
     background-color: hsl(var(--primary) / 0.6);
     border-width: 3px;                      /* 11 − 3·2 = 5px visibles */
-  }
-  /* Agarre/arrastre — ensanchamiento máximo, tipo Apple (la pista no se mueve). */
-  ::-webkit-scrollbar-thumb:active {
-    background-color: hsl(var(--primary) / 0.85);
-    border-width: 2px;                      /* 11 − 2·2 = 7px visibles */
   }
   /* Sin flechas en los extremos (Windows las pinta por defecto; macOS no). */
   ::-webkit-scrollbar-button {
@@ -293,13 +290,10 @@
     border: 3px solid transparent;          /* 9 − 3·2 = 3px visibles */
     background-clip: padding-box;
   }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+  .scrollbar-thin::-webkit-scrollbar-thumb:active {
     background-color: hsl(var(--primary) / 0.6);
     border-width: 2px;                      /* 9 − 2·2 = 5px visibles */
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:active {
-    background-color: hsl(var(--primary) / 0.85);
-    border-width: 1px;                      /* 9 − 1·2 = 7px visibles */
   }
   .scrollbar-thin::-webkit-scrollbar-button {
     display: none;
