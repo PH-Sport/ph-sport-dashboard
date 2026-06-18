@@ -35,6 +35,16 @@
     --panel-hover: 220 12% 25%;                /* hover sutil sobre el panel */
     --panel-border: 220 12% 28%;
 
+    /* Sidebar — superficie PROPIA, desacoplada del panel charcoal de overlays.
+       Decisión (claro): NO charcoal. Material esmerilado cálido casi-cream que
+       se funde con el body (estilo sidebar macOS: vibrancy translúcida, no un
+       bloque de alto contraste). Texto charcoal, hover gris sutil; el pill
+       activo sigue siendo dorado (bg-primary/15 + text-primary en el componente). */
+    --sidebar: 36 30% 98%;
+    --sidebar-foreground: 220 14% 11%;
+    --sidebar-hover: 220 14% 91%;
+    --sidebar-border: 220 14% 88%;
+
     /* Acento Champions — dorado más saturado y un punto más cálido */
     --primary: 41 70% 52%;
     --primary-foreground: 220 14% 11%;
@@ -86,6 +96,13 @@
     --panel-active-foreground: 220 14% 8%;
     --panel-hover: 220 12% 16%;
     --panel-border: 220 12% 18%;
+
+    /* Sidebar dark — mantiene la placa elevada charcoal (como el panel), con su
+       propio token para no acoplarse a los overlays. Misma sensación que antes. */
+    --sidebar: 220 12% 12%;
+    --sidebar-foreground: 36 12% 92%;
+    --sidebar-hover: 220 12% 18%;
+    --sidebar-border: 220 12% 18%;
 
     /* Acento dorado igual de visible en charcoal */
     --primary: 41 70% 56%;
@@ -151,6 +168,16 @@
     -webkit-backdrop-filter: blur(12px) saturate(120%);
     backdrop-filter: blur(12px) saturate(120%);
   }
+  /* Sidebar esmerilada — material estilo macOS. Superficie propia (--sidebar),
+     más blur/saturación que glass-panel para la sensación de vibrancy. En claro
+     se funde con el body cream; en oscuro mantiene la placa elevada charcoal. */
+  .glass-sidebar {
+    background-color: hsl(var(--sidebar) / 0.72);
+    color: hsl(var(--sidebar-foreground));
+    border: 1px solid hsl(var(--sidebar-border) / 0.7);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
   /* Velo tras dialogs/sheets — oscurece y desenfoca el contenido de fondo */
   .glass-scrim {
     background-color: rgb(0 0 0 / 0.45);
@@ -161,6 +188,9 @@
   @supports not (backdrop-filter: blur(12px)) {
     .glass-panel {
       background-color: hsl(var(--panel));
+    }
+    .glass-sidebar {
+      background-color: hsl(var(--sidebar));
     }
     .glass-scrim {
       background-color: rgb(0 0 0 / 0.6);

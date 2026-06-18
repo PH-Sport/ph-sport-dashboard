@@ -170,7 +170,7 @@ export function AppSidebar() {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="glass-panel w-[16rem] p-0"
+          className="glass-sidebar w-[16rem] p-0"
         >
           <SheetTitle className="sr-only">Navegación PHSPORT</SheetTitle>
           <SheetDescription className="sr-only">Menú principal del producto</SheetDescription>
@@ -194,7 +194,7 @@ export function AppSidebar() {
       data-state={expanded ? 'expanded' : 'collapsed'}
       aria-label="Navegación principal"
       className={cn(
-        'glass-panel fixed bottom-3 left-3 top-3 z-30 hidden flex-col overflow-hidden',
+        'glass-sidebar fixed bottom-3 left-3 top-3 z-30 hidden flex-col overflow-hidden',
         'rounded-2xl shadow-overlay md:flex'
       )}
     >
@@ -234,7 +234,7 @@ function SidebarBody({
         ))}
       </nav>
 
-      <div className="flex flex-col gap-1.5 border-t border-panel-border/60 pt-3">
+      <div className="flex flex-col gap-1.5 border-t border-sidebar-border/60 pt-3">
         <NavRow
           item={{ href: '/ajustes', label: 'Ajustes', icon: Settings }}
           active={isItemActive(pathname, '/ajustes')}
@@ -258,13 +258,13 @@ function SidebarBrand({ expanded, onLinkClick }: { expanded: boolean; onLinkClic
       className="flex h-10 items-center overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset"
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-        <PhSportMark decorative className="h-6 text-panel-foreground" />
+        <PhSportMark decorative className="h-6 text-sidebar-foreground" />
       </span>
       <motion.span
         initial={false}
         animate={{ opacity: expanded ? 1 : 0 }}
         transition={TWEENS.fast}
-        className="whitespace-nowrap font-heading text-sm font-semibold tracking-tight text-panel-foreground"
+        className="whitespace-nowrap font-heading text-sm font-semibold tracking-tight text-sidebar-foreground"
       >
         PHSPORT
       </motion.span>
@@ -297,7 +297,7 @@ function NavRow({
         'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
         active
           ? 'text-primary'
-          : 'text-panel-foreground/70 hover:bg-panel-hover/60 hover:text-panel-foreground'
+          : 'text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground'
       )}
     >
       {active && (
@@ -336,7 +336,7 @@ function ToggleRow({ expanded }: { expanded: boolean }) {
       aria-label={`${label} barra lateral`}
       className={cn(
         'flex h-10 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors',
-        'text-panel-foreground/70 hover:bg-panel-hover/60 hover:text-panel-foreground',
+        'text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground',
         'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset'
       )}
     >

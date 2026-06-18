@@ -88,6 +88,12 @@ const config: Config = {
           hover: 'hsl(var(--panel-hover))',
           border: 'hsl(var(--panel-border))',
         },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          hover: 'hsl(var(--sidebar-hover))',
+          border: 'hsl(var(--sidebar-border))',
+        },
         status: {
           success: 'hsl(var(--status-success))',
           warning: 'hsl(var(--status-warning))',
