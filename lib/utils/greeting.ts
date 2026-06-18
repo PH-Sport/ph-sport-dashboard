@@ -14,21 +14,32 @@ const MORNING_GREETINGS = [
   'Buenos días, {name}',
   'Hola, {name}',
   '{name}, empieza el día',
+  '¡Arriba, {name}!',
+  'Día nuevo, {name}',
 ];
 
 const AFTERNOON_GREETINGS = [
   'Buenas tardes, {name}',
   'Hola, {name}',
   '{name}, sigamos',
+  '{name}, a tope',
+  '{name}, buen ritmo',
 ];
 
 const EVENING_GREETINGS = [
   'Buenas tardes, {name}',
   '{name}, última pasada',
   'Hola, {name}',
+  '{name}, recta final',
+  'Casi está, {name}',
 ];
 
-const NIGHT_GREETINGS = ['Buenas noches, {name}', 'Hola, {name}'];
+const NIGHT_GREETINGS = [
+  'Buenas noches, {name}',
+  'Hola, {name}',
+  '{name}, a descansar',
+  'Modo noche, {name}',
+];
 
 const FALLBACKS = {
   morning: 'Buenos días',
