@@ -28,8 +28,7 @@ export function useDesignSubmit({
   const [loading, setLoading] = useState(false);
   const isEditMode = !!design;
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
     setLoading(true);
 
     try {

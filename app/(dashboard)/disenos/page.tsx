@@ -16,7 +16,6 @@ import type { Design } from '@/lib/types/design';
 import { toast } from 'sonner';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { useAuth } from '@/lib/auth/auth-context';
 import { useDesigns } from '@/lib/hooks/use-designs';
 import { useDesignsFilters } from '@/lib/hooks/use-designs-filters';
 import { useDesignsTable } from '@/lib/hooks/use-designs-table';
@@ -41,8 +40,6 @@ export default function DesignsPage() {
 }
 
 function DesignsPageContent() {
-  const { profile } = useAuth();
-  const isAdmin = profile?.role === 'ADMIN';
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingDesign, setEditingDesign] = useState<Design | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -132,10 +129,6 @@ function DesignsPageContent() {
   };
 
   const handleDelete = (design: Design) => {
-    if (!isAdmin) {
-      toast.error('Solo administradores pueden eliminar diseños');
-      return;
-    }
     setDesignToDelete(design);
     setDeleteConfirmOpen(true);
   };
@@ -216,8 +209,6 @@ function DesignsPageContent() {
           </Tabs>
           <CreateDesignButton
             onDesignCreated={() => mutate()}
-            disabled={!isAdmin}
-            disabledReason="Solo administradores pueden crear diseños"
             activeWeekStart={filters.weekStartFilter}
             activeWeekEnd={filters.weekEndFilter}
           />
@@ -254,13 +245,10 @@ function DesignsPageContent() {
             if (searchQueryActive) {
               filters.setSearchQuery('');
             } else {
-              if (!isAdmin) return;
               setEditingDesign(null);
               setEditDialogOpen(true);
             }
           }}
-          actionDisabled={!isAdmin && !searchQueryActive}
-          actionDisabledReason={!isAdmin && !searchQueryActive ? 'Solo administradores pueden crear diseños' : undefined}
         />
       ) : (
         <DesignsTable
@@ -285,7 +273,6 @@ function DesignsPageContent() {
           onOpenDetail={handleOpenDetail}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          isAdmin={isAdmin}
           deletingId={deletingId}
         />
       )}
@@ -304,7 +291,6 @@ function DesignsPageContent() {
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}
         onDesignUpdated={() => mutate()}
-        isAdmin={isAdmin}
         onRequestDelete={handleDelete}
       />
 

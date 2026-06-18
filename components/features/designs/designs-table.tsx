@@ -71,7 +71,6 @@ interface DesignsTableProps {
   onOpenDetail: (designId: string) => void;
   onEdit: (design: Design) => void;
   onDelete: (design: Design) => void;
-  isAdmin: boolean;
   deletingId: string | null;
 }
 
@@ -84,13 +83,11 @@ function deadlineTone(design: Design): string {
 /** Acciones de fila tras menú ⋯ — borrar deja de ser un objetivo siempre visible. */
 function RowActions({
   design,
-  isAdmin,
   deletingId,
   onEdit,
   onDelete,
 }: {
   design: Design;
-  isAdmin: boolean;
   deletingId: string | null;
   onEdit: (design: Design) => void;
   onDelete: (design: Design) => void;
@@ -120,16 +117,14 @@ function RowActions({
           <Edit2 className="mr-2 h-4 w-4" />
           Editar
         </DropdownMenuItem>
-        {isAdmin && (
-          <DropdownMenuItem
-            onClick={() => onDelete(design)}
-            disabled={deletingId === design.id}
-            className="text-destructive focus:text-destructive"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem
+          onClick={() => onDelete(design)}
+          disabled={deletingId === design.id}
+          className="text-destructive focus:text-destructive"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Eliminar
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -154,7 +149,6 @@ export function DesignsTable({
   onOpenDetail,
   onEdit,
   onDelete,
-  isAdmin,
   deletingId,
 }: DesignsTableProps) {
   const renderSortIcon = (column: DesignSortColumn) => {
@@ -225,7 +219,6 @@ export function DesignsTable({
                 </button>
                 <RowActions
                   design={design}
-                  isAdmin={isAdmin}
                   deletingId={deletingId}
                   onEdit={onEdit}
                   onDelete={onDelete}
@@ -325,7 +318,6 @@ export function DesignsTable({
                     <div className="flex items-center justify-end">
                       <RowActions
                         design={design}
-                        isAdmin={isAdmin}
                         deletingId={deletingId}
                         onEdit={onEdit}
                         onDelete={onDelete}

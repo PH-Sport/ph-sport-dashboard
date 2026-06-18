@@ -28,6 +28,8 @@ import {
 import { DesignFormSingle } from './design-form-single';
 import { DesignFormBulk } from './design-form-bulk';
 import { useDesignSubmit } from '@/lib/hooks/use-design-submit';
+import { useConfirm } from '@/lib/hooks/use-confirm';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface CreateDesignDialogProps {
   open: boolean;
@@ -108,6 +110,8 @@ export function CreateDesignDialog({
     setBulkRows([...bulkRows, ...newRows]);
   };
 
+  const { confirm, isOpen: confirmOpen, options: confirmOptions, handleConfirm, handleCancel } = useConfirm();
+
   const { loading, submit } = useDesignSubmit({
     design,
     formData,
@@ -131,6 +135,33 @@ export function CreateDesignDialog({
   });
 
   const validBulkCount = bulkRows.filter(isRowValid).length;
+
+  // Toda creación/edición pasa por una confirmación antes de impactar la base.
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEditMode) {
+      const ok = await confirm({
+        title: 'Guardar cambios',
+        description: `¿Guardar los cambios en «${design?.title ?? 'este diseño'}»?`,
+        confirmText: 'Guardar cambios',
+        cancelText: 'Cancelar',
+        variant: 'info',
+      });
+      if (!ok) return;
+    } else {
+      if (validBulkCount === 0) return;
+      const plural = validBulkCount !== 1;
+      const ok = await confirm({
+        title: 'Confirmar creación',
+        description: `Se ${plural ? 'crearán' : 'creará'} ${validBulkCount} diseño${plural ? 's' : ''}. ¿Continuar?`,
+        confirmText: `Crear ${validBulkCount} diseño${plural ? 's' : ''}`,
+        cancelText: 'Cancelar',
+        variant: 'info',
+      });
+      if (!ok) return;
+    }
+    await submit();
+  };
   const hasIncompleteRows = bulkRows.some((r) => !isRowValid(r) && !isRowEmpty(r));
   const editDeadlineOutsideWeek = isEditMode && isOutsideWeek(formData.deadline_at, activeWeekStart, activeWeekEnd);
 
@@ -139,6 +170,7 @@ export function CreateDesignDialog({
     : null;
 
   return (
+    <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className={cn(
           "max-h-[90vh]",
@@ -187,7 +219,7 @@ export function CreateDesignDialog({
           )}
 
           <form
-            onSubmit={submit}
+            onSubmit={handleFormSubmit}
             className={cn(!isEditMode && "mt-4 flex flex-1 min-h-0 flex-col")}
           >
             <div className={cn("space-y-6 mt-4", !isEditMode && "mt-0 flex-1 min-h-0")}>
@@ -304,5 +336,19 @@ export function CreateDesignDialog({
         </form>
       </DialogContent>
     </Dialog>
+
+      {confirmOptions && (
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={handleCancel}
+          onConfirm={handleConfirm}
+          title={confirmOptions.title}
+          description={confirmOptions.description}
+          confirmLabel={confirmOptions.confirmText || 'Confirmar'}
+          cancelLabel={confirmOptions.cancelText || 'Cancelar'}
+          variant={confirmOptions.variant || 'info'}
+        />
+      )}
+    </>
   );
 }

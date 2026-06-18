@@ -36,7 +36,7 @@ import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ApiError } from '@/lib/utils/api-fetcher';
 import { cn } from '@/lib/utils';
 import type { Design, DesignStatus } from '@/lib/types/design';
-import { STATUS_LABELS, DESIGN_STATUS_ORDER, getDesignContext } from '@/lib/types/design';
+import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
@@ -46,7 +46,6 @@ interface DesignDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDesignUpdated?: () => void;
-  isAdmin?: boolean;
   /** Conecta con el flujo de borrado de la página (cierra el modal y confirma allí). */
   onRequestDelete?: (design: Design) => void;
 }
@@ -56,7 +55,6 @@ export function DesignDetailSheet({
   open,
   onOpenChange,
   onDesignUpdated,
-  isAdmin = false,
   onRequestDelete,
 }: DesignDetailSheetProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -80,17 +78,17 @@ export function DesignDetailSheet({
 
   const handleStatusChange = async (newStatus: DesignStatus) => {
     if (!design) return;
-    const isRegressive =
-      DESIGN_STATUS_ORDER.indexOf(newStatus) < DESIGN_STATUS_ORDER.indexOf(design.status);
-    if (isRegressive) {
-      const confirmed = await confirm({
-        title: '¿Volver atrás?',
-        description: `¿Estás seguro de cambiar "${design.title}" de ${STATUS_LABELS[design.status]} a ${STATUS_LABELS[newStatus]}?`,
-        confirmText: 'Sí, cambiar',
-        cancelText: 'Cancelar',
-      });
-      if (!confirmed) return;
-    }
+    const toDelivered = newStatus === 'DELIVERED';
+    const confirmed = await confirm({
+      title: toDelivered ? '¿Marcar como entregado?' : '¿Volver a pendiente?',
+      description: toDelivered
+        ? `«${design.title}» pasará a entregados.`
+        : `¿Seguro que quieres cambiar «${design.title}» de ${STATUS_LABELS[design.status]} a ${STATUS_LABELS[newStatus]}?`,
+      confirmText: toDelivered ? 'Sí, entregar' : 'Sí, cambiar',
+      cancelText: 'Cancelar',
+      variant: toDelivered ? 'info' : 'warning',
+    });
+    if (!confirmed) return;
 
     setUpdating(true);
     try {
@@ -119,6 +117,15 @@ export function DesignDetailSheet({
     if (!design) return;
     setAssignOpen(false);
     if (design.designer_id === designerId) return;
+    const targetName = designers.find((u) => u.id === designerId)?.name ?? 'Sin asignar';
+    const confirmed = await confirm({
+      title: 'Reasignar diseño',
+      description: `¿Asignar «${design.title}» a ${targetName}?`,
+      confirmText: 'Reasignar',
+      cancelText: 'Cancelar',
+      variant: 'info',
+    });
+    if (!confirmed) return;
     try {
       await mutate(
         async () => {
@@ -219,52 +226,38 @@ export function DesignDetailSheet({
                   </motion.div>
                 </div>
 
-                {/* Diseñador — reasignable en un clic para el mánager */}
+                {/* Diseñador — reasignable en un clic */}
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Diseñador</span>
-                    {isAdmin ? (
-                      <button
-                        onClick={() => setAssignOpen((v) => !v)}
-                        className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40"
+                    <button
+                      onClick={() => setAssignOpen((v) => !v)}
+                      className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40"
+                    >
+                      {designer ? (
+                        <>
+                          <UserAvatar
+                            name={designer.name}
+                            src={designer.avatar_url}
+                            className="h-6 w-6"
+                            fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
+                          />
+                          {designer.name}
+                        </>
+                      ) : (
+                        <span className="text-status-warning">Sin asignar</span>
+                      )}
+                      <motion.span
+                        initial={false}
+                        animate={{ rotate: assignOpen ? 180 : 0 }}
+                        transition={SPRINGS.snappy}
                       >
-                        {designer ? (
-                          <>
-                            <UserAvatar
-                              name={designer.name}
-                              src={designer.avatar_url}
-                              className="h-6 w-6"
-                              fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
-                            />
-                            {designer.name}
-                          </>
-                        ) : (
-                          <span className="text-status-warning">Sin asignar</span>
-                        )}
-                        <motion.span
-                          initial={false}
-                          animate={{ rotate: assignOpen ? 180 : 0 }}
-                          transition={SPRINGS.snappy}
-                        >
-                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                        </motion.span>
-                      </button>
-                    ) : designer ? (
-                      <span className="flex items-center gap-2 text-sm font-medium">
-                        <UserAvatar
-                          name={designer.name}
-                          src={designer.avatar_url}
-                          className="h-6 w-6"
-                          fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
-                        />
-                        {designer.name}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-status-warning">Sin asignar</span>
-                    )}
+                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                      </motion.span>
+                    </button>
                   </div>
                   <AnimatePresence initial={false}>
-                    {assignOpen && isAdmin && (
+                    {assignOpen && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
@@ -337,16 +330,14 @@ export function DesignDetailSheet({
                 )}
 
                 {/* Editar / Drive */}
-                <div className={cn('grid gap-2', isAdmin ? 'grid-cols-2' : 'grid-cols-1')}>
-                  {isAdmin && (
-                    <button
-                      onClick={() => setIsEditDialogOpen(true)}
-                      className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      Editar
-                    </button>
-                  )}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setIsEditDialogOpen(true)}
+                    className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Editar
+                  </button>
                   {design.folder_url ? (
                     <a
                       href={design.folder_url}
@@ -366,8 +357,8 @@ export function DesignDetailSheet({
                 </div>
               </div>
 
-              {/* Eliminar (admin) */}
-              {isAdmin && onRequestDelete && (
+              {/* Eliminar */}
+              {onRequestDelete && (
                 <div className="border-t border-border/60 p-lg pt-md">
                   <button
                     onClick={() => {

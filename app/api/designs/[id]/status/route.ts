@@ -5,7 +5,6 @@ import {
   validationErrorResponse,
   internalErrorResponse,
   unauthorizedResponse,
-  forbiddenResponse,
   notFoundResponse,
 } from '@/lib/api/errors';
 
@@ -26,14 +25,6 @@ export async function PATCH(
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return unauthorizedResponse();
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
-
   const { data: originalDesign, error: originalError } = await supabase
     .from('designs')
     .select('designer_id, status')
@@ -42,11 +33,7 @@ export async function PATCH(
 
   if (originalError || !originalDesign) return notFoundResponse('Diseño');
 
-  // Diseñador solo puede mover sus propios diseños.
-  if (profile?.role !== 'ADMIN' && originalDesign.designer_id !== user.id) {
-    return forbiddenResponse();
-  }
-
+  // Cualquier usuario autenticado puede cambiar el estado de cualquier diseño.
   const updateData: Record<string, unknown> = { status };
   if (status === 'DELIVERED') {
     updateData.delivered_at = new Date().toISOString();

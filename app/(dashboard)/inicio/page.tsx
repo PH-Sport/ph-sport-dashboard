@@ -65,11 +65,7 @@ export default function Dashboard() {
     <DashboardPage
       title={title}
       subtitle={`Semana del ${dateRangeLabel}`}
-      actions={
-        profile?.role === 'ADMIN' ? (
-          <CreateDesignButton onDesignCreated={() => mutate()} variant="outline" />
-        ) : null
-      }
+      actions={<CreateDesignButton onDesignCreated={() => mutate()} variant="outline" />}
       loading={showSkeleton}
       skeleton={<DashboardSkeleton variant={profile?.role === 'ADMIN' ? 'admin' : 'designer'} />}
     >

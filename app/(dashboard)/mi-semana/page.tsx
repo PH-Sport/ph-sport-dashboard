@@ -25,8 +25,6 @@ import { DesignDetailSheet } from '@/components/features/designs/design-detail-s
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 
-const STATUS_ORDER: Record<DesignStatus, number> = { BACKLOG: 0, DELIVERED: 1 };
-
 const rise = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: SPRINGS.gentle },
@@ -60,16 +58,17 @@ export default function MyWeekPage() {
   }, [status, profile, router]);
 
   const handleStatusChange = async (design: Design, newStatus: DesignStatus) => {
-    const isRegressive = STATUS_ORDER[newStatus] < STATUS_ORDER[design.status];
-    if (isRegressive) {
-      const confirmed = await confirm({
-        title: '¿Volver a pendiente?',
-        description: `«${design.title}» dejará de contar como entregada y volverá a tu cola.`,
-        confirmText: 'Volver atrás',
-        cancelText: 'Cancelar',
-      });
-      if (!confirmed) return;
-    }
+    const toDelivered = newStatus === 'DELIVERED';
+    const confirmed = await confirm({
+      title: toDelivered ? '¿Marcar como entregada?' : '¿Volver a pendiente?',
+      description: toDelivered
+        ? `«${design.title}» pasará a entregadas.`
+        : `«${design.title}» dejará de contar como entregada y volverá a tu cola.`,
+      confirmText: toDelivered ? 'Sí, entregar' : 'Volver atrás',
+      cancelText: 'Cancelar',
+      variant: toDelivered ? 'info' : 'warning',
+    });
+    if (!confirmed) return;
 
     setUpdating(design.id);
     try {

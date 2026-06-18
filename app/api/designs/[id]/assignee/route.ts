@@ -5,7 +5,6 @@ import {
   validationErrorResponse,
   internalErrorResponse,
   unauthorizedResponse,
-  forbiddenResponse,
 } from '@/lib/api/errors';
 
 export async function PATCH(
@@ -25,15 +24,7 @@ export async function PATCH(
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return unauthorizedResponse();
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
-  if (profile?.role !== 'ADMIN') return forbiddenResponse();
-
+  // Cualquier usuario autenticado puede reasignar diseños.
   // Resolver 'auto' a id concreto.
   let resolvedDesignerId: string | null = designer_id ?? null;
   if (designer_id === 'auto') {

@@ -5,7 +5,6 @@ import {
   validationErrorResponse,
   internalErrorResponse,
   unauthorizedResponse,
-  forbiddenResponse,
   notFoundResponse,
 } from '@/lib/api/errors';
 
@@ -48,19 +47,7 @@ export async function PUT(
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return unauthorizedResponse();
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
-
-  // Solo admin puede reasignar diseñador.
-  if (body.designer_id !== undefined && profile?.role !== 'ADMIN') {
-    return forbiddenResponse();
-  }
-
+  // Cualquier usuario autenticado puede editar y reasignar diseños.
   // Whitelist explícita: solo se modifican los campos permitidos por el schema.
   // Resolver designer_id 'auto' a un id real antes de enviar a DB.
   const updateData: Record<string, unknown> = {};
@@ -98,15 +85,7 @@ export async function DELETE(
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return unauthorizedResponse();
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError) return internalErrorResponse(profileError, 'role check', reqId);
-  if (profile?.role !== 'ADMIN') return forbiddenResponse();
-
+  // Cualquier usuario autenticado puede eliminar diseños.
   const { error } = await supabase.from('designs').delete().eq('id', id);
   if (error) return internalErrorResponse(error, 'design delete', reqId);
 

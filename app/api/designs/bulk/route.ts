@@ -6,7 +6,6 @@ import {
   validationErrorResponse,
   internalErrorResponse,
   unauthorizedResponse,
-  forbiddenResponse,
 } from '@/lib/api/errors';
 import { selectDesignerByLoad } from '@/lib/services/designs/select-designer';
 
@@ -34,22 +33,7 @@ export async function POST(request: Request) {
     const { data, error: userError } = await supabase.auth.getUser();
     if (userError || !data.user) return unauthorizedResponse();
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single();
-
-    if (profileError) {
-      logger.serverError('[API Bulk] Role check error', { reqId, userId: data.user.id, error: profileError });
-      return internalErrorResponse(profileError, 'role check', reqId);
-    }
-
-    if (profile?.role !== 'ADMIN') {
-      logger.serverError('[API Bulk] Forbidden attempt', { reqId, userId: data.user.id, role: profile?.role });
-      return forbiddenResponse();
-    }
-
+    // Cualquier usuario autenticado (mánager o diseñador) puede crear diseños.
     logger.serverInfo('[API Bulk] Attempt', {
       reqId,
       userId: data.user.id,

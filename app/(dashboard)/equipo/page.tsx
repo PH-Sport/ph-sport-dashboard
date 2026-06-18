@@ -233,7 +233,6 @@ export default function TeamPage() {
           if (!open) setTimeout(() => setSelectedDesignId(null), 300);
         }}
         onDesignUpdated={() => mutate()}
-        isAdmin
       />
     </DashboardPage>
   );
