@@ -80,7 +80,6 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
                 role="radio"
                 aria-checked={active}
                 aria-label={color.label}
-                title={color.label}
                 onClick={() => setAccent(color.key)}
                 style={{ backgroundColor: accentSwatch(color, isDark) }}
                 className={cn(
