@@ -1,9 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
-  // Asegurar que no hay conflicto con Pages Router
   experimental: {
-    // Desactivar cualquier experimental que pueda causar problemas
+    // Caché del Router del lado cliente: reutiliza el RSC de rutas ya visitadas
+    // para que revisitar sea instantáneo (sin ida y vuelta al servidor). La
+    // frescura de los datos la sigue garantizando SWR al montar/enfocar.
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
   // Transpile packages if needed
   transpilePackages: [],

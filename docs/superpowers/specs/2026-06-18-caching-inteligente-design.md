@@ -85,3 +85,29 @@ Fase 2:
 - Instant-on intacto; cold start ~1s más rápido en dev.
 - Regresión: logout limpia caché+cookie; ruta protegida sin sesión redirige a
   `/login` sin filtrar el shell.
+
+### Fase 3 — Navegación instantánea (loading.tsx + staleTimes) ✅ implementada y validada
+
+Síntoma: el clic en un enlace del menú "no reaccionaba" — la app esperaba la ida
+y vuelta al servidor antes de cambiar de pantalla. Causas (medidas en build de
+producción real): (1) **no existía ningún `loading.tsx`** → sin feedback hasta
+que el servidor responde; (2) la Fase 2 volvió la app dinámica (cookies en el
+layout) → cada navegación es un round-trip y, con `staleTimes.dynamic = 0` por
+defecto, también las revisitas; (3) parte de la lentitud percibida era ruido de
+`next dev` (recompilación on-demand + sin prefetch), inexistente en producción.
+
+- **`app/(dashboard)/{inicio,equipo,equipo/[id],disenos,mi-semana,ajustes}/loading.tsx`**
+  (nuevos): cada uno renderiza el skeleton dedicado de su página. Next muestra el
+  fallback al instante al clicar, mientras llega el RSC → el clic reacciona en
+  ~30ms. El skeleton interno (SWR) de cada página toma el relevo al montar.
+  Nota: `inicio/loading.tsx` usa `variant="admin"` (4 KPIs); para DESIGNER hay un
+  leve reflow de 1 KPI hasta que monta su skeleton real (aceptado).
+- **`next.config.js`**: `experimental.staleTimes = { dynamic: 30, static: 180 }`
+  → revisitas servidas desde la caché de router del cliente (sin round-trip). La
+  frescura de datos la sigue garantizando SWR al montar/enfocar.
+
+Medición producción (clic→contenido), antes → después:
+- Inicio→Semana 1ª vez: 1311ms → clic reacciona 32ms / contenido 327ms.
+- Revisitas: 187–213ms (con round-trip) → 23–45ms SIN round-trip al servidor.
+- Round-trips RSC en el recorrido: 7 → 5 (las revisitas dejan de pedir al server).
+- 0 errores de consola; instant-on de Fase 1 preservado (probado con API bloqueada).
