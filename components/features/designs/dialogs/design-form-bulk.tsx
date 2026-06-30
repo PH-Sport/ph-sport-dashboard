@@ -36,6 +36,7 @@ import { DESIGN_TYPES, DESIGN_TYPE_LABELS, typeHasMatch } from '@/lib/types/desi
 interface Designer {
   id: string;
   name: string;
+  displayName: string;
 }
 
 interface DesignFormBulkProps {
@@ -247,7 +248,7 @@ export function DesignFormBulk({
                             ) : (
                               designers.map((user) => (
                                 <SelectItem key={user.id} value={user.id}>
-                                  {user.name}
+                                  {user.displayName}
                                 </SelectItem>
                               ))
                             )}

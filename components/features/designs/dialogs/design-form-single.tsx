@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 interface Designer {
   id: string;
   name: string;
+  displayName: string;
 }
 
 interface DesignFormSingleProps {
@@ -181,7 +182,7 @@ export function DesignFormSingle({
                   ) : (
                     designers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {user.name}
+                        {user.displayName}
                       </SelectItem>
                     ))
                   )}

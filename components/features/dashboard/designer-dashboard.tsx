@@ -78,6 +78,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
         return {
           id: designer.id,
           name: designer.name,
+          displayName: designer.displayName,
           avatar_url: designer.avatar_url,
           active: designerDesigns.filter((d) => d.status !== 'DELIVERED').length,
         };
@@ -203,7 +204,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
                       className="h-6 w-6"
                       fallbackClassName="bg-muted font-mono text-[10px] font-semibold"
                     />
-                    {mate.name}
+                    {mate.displayName}
                   </span>
                   <span className="font-mono tabular text-xs text-muted-foreground">
                     {mate.active} activas

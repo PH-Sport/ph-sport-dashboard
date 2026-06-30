@@ -23,7 +23,7 @@ export function UserMenu() {
   const router = useRouter();
   // status/logout/profile.role(efectivo) de useAuth; identidad REAL de useViewAs.
   const { status, logout, profile } = useAuth();
-  const { isDev, realName, realEmail, realRole, realAvatarUrl } = useViewAs();
+  const { isDev, realName, realDisplayName, realEmail, realRole, realAvatarUrl } = useViewAs();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -48,18 +48,20 @@ export function UserMenu() {
     );
   }
 
-  const displayName = realName || realEmail.split('@')[0] || 'User';
+  // Etiqueta corta (display_name) en el día a día; el avatar usa el nombre completo para las iniciales.
+  const label = realDisplayName || realEmail.split('@')[0] || 'User';
+  const avatarName = realName || label;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Menú de usuario — ${displayName}`}
+          aria-label={`Menú de usuario — ${label}`}
           className="rounded-full outline-none ring-primary/40 transition-shadow hover:ring-2 focus-visible:ring-2"
         >
           <UserAvatar
-            name={displayName}
+            name={avatarName}
             src={realAvatarUrl}
             className="h-8 w-8"
             fallbackClassName="bg-primary/15 text-xs font-semibold text-primary"
@@ -69,7 +71,7 @@ export function UserMenu() {
       <DropdownMenuContent align="end" className="w-56 border border-border bg-popover text-popover-foreground shadow-xl">
         <DropdownMenuLabel className="text-foreground">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-sm font-medium">{label}</p>
             <p className="text-xs text-muted-foreground truncate">{realEmail}</p>
             {realRole && (
               <span

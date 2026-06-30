@@ -34,7 +34,9 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [fullName, setFullName] = useState('');
+  const [givenName, setGivenName] = useState('');
+  const [familyName, setFamilyName] = useState('');
+  const [alias, setAlias] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -94,7 +96,13 @@ export default function InvitePage() {
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: {
+          data: {
+            given_name: givenName.trim(),
+            family_name: familyName.trim() || null,
+            alias: alias.trim() || null,
+          },
+        },
       });
 
       if (signUpError) {
@@ -117,7 +125,7 @@ export default function InvitePage() {
         p_invitation_id: invitation.id,
         p_user_id: authData.user.id,
         p_email: email,
-        p_full_name: fullName,
+        p_full_name: `${givenName.trim()} ${familyName.trim()}`.trim(),
       });
 
       if (useError) {
@@ -176,16 +184,46 @@ export default function InvitePage() {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="givenName">Nombre</Label>
+            <Input
+              id="givenName"
+              name="givenName"
+              type="text"
+              required
+              placeholder="Tu nombre"
+              value={givenName}
+              onChange={(e) => setGivenName(e.target.value)}
+              disabled={submitting}
+              className="h-11"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="familyName">Primer apellido</Label>
+            <Input
+              id="familyName"
+              name="familyName"
+              type="text"
+              required
+              placeholder="Tu apellido"
+              value={familyName}
+              onChange={(e) => setFamilyName(e.target.value)}
+              disabled={submitting}
+              className="h-11"
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
-          <Label htmlFor="fullName">Nombre completo</Label>
+          <Label htmlFor="alias">Alias (opcional)</Label>
           <Input
-            id="fullName"
-            name="fullName"
+            id="alias"
+            name="alias"
             type="text"
-            required
-            placeholder="Tu nombre"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            placeholder={givenName || 'Cómo quieres que te muestren'}
+            value={alias}
+            onChange={(e) => setAlias(e.target.value)}
             disabled={submitting}
             className="h-11"
           />

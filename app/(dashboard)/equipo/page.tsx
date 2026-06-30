@@ -70,7 +70,7 @@ function DesignerPlate({
           />
           <div className="min-w-0 flex-1">
             <h2 className="flex items-center gap-1 truncate text-base font-semibold">
-              {designer.full_name}
+              {designer.display_name}
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground" />
             </h2>
             <p className="font-mono tabular text-xs text-muted-foreground">{active} activas</p>

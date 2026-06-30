@@ -24,12 +24,6 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 // Última variante mostrada, por pestaña: sobrevive a refresco y a navegar-y-volver.
 const GREETING_STORAGE_KEY = 'phsport:greeting:last';
 
-function getFirstName(fullName: string | null | undefined, email: string | null | undefined): string {
-  if (fullName) return fullName.split(' ')[0];
-  if (email) return email.split('@')[0];
-  return '';
-}
-
 export default function Dashboard() {
   const { user, profile } = useAuth();
   const { items, isLoading, mutate, error } = useDashboard();
@@ -39,7 +33,8 @@ export default function Dashboard() {
   const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
   const dateRangeLabel = `${format(weekStart, 'd MMM', { locale: es })} – ${format(weekEnd, 'd MMM', { locale: es })}`;
 
-  const firstName = getFirstName(profile?.full_name, user?.email);
+  // Nombre corto (alias || nombre) ya resuelto por la BD; cae al email si no hay perfil aún.
+  const firstName = profile?.display_name || (user?.email ? user.email.split('@')[0] : '');
 
   // Seed determinista (server === cliente) para no romper la hidratación...
   const [template, setTemplate] = useState<string>(getDailyTemplate);

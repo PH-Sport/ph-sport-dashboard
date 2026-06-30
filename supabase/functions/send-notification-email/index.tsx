@@ -46,7 +46,7 @@ interface NotificationPreferences {
 
 interface UserProfile {
   notification_preferences: NotificationPreferences | null;
-  full_name: string | null;
+  display_name: string | null;
 }
 
 interface EmailCopy {
@@ -78,12 +78,6 @@ const nextRetryAtFromAttempt = (attemptCount: number): string | null => {
 };
 
 // --- Helpers ---
-
-const getGreetingName = (fullName: string | null | undefined): string => {
-  const trimmed = (fullName || "").trim();
-  if (!trimmed) return "";
-  return trimmed.split(/\s+/)[0] || "";
-};
 
 const getAssignmentCount = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isFinite(value) && value > 0) {
@@ -413,7 +407,7 @@ Deno.serve(async (req: Request) => {
     // 2. Get User Preferences
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("notification_preferences, full_name")
+      .select("notification_preferences, display_name")
       .eq("id", notification.user_id)
       .single();
 
@@ -465,7 +459,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ skipped: true, reason: "User preference" }), { status: 200 });
     }
 
-    const greetingName = getGreetingName(profile.full_name);
+    const greetingName = (profile.display_name || "").trim();
     const copy = buildEmailCopy(notification);
 
     // 4. Select Template & Render HTML

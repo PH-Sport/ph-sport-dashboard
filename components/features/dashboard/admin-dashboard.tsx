@@ -21,7 +21,10 @@ interface AdminDashboardProps {
 
 interface DesignerLoad {
   id: string;
+  /** Nombre completo (para iniciales del avatar). */
   name: string;
+  /** Nombre corto para mostrar (alias || nombre). */
+  displayName: string;
   avatar_url?: string | null;
   active: number;
   delivered: number;
@@ -91,6 +94,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
         return {
           id: designer.id,
           name: designer.name,
+          displayName: designer.displayName,
           avatar_url: designer.avatar_url,
           active: designerDesigns.filter((d) => d.status !== 'DELIVERED').length,
           delivered: designerDesigns.filter((d) => d.status === 'DELIVERED').length,
@@ -120,7 +124,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
 
   const activeDesignersCount = designerLoads.filter((d) => d.active > 0).length;
   const designerNameMap = useMemo(
-    () => new Map(designers.map((d) => [d.id, d.name])),
+    () => new Map(designers.map((d) => [d.id, d.displayName])),
     [designers]
   );
   const designerAvatarMap = useMemo(
@@ -166,7 +170,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                       {overloadedDesigners.length} diseñador
                       {overloadedDesigners.length !== 1 ? 'es' : ''}
                     </span>{' '}
-                    con sobrecarga ({overloadedDesigners.map((d) => d.name).join(', ')}).
+                    con sobrecarga ({overloadedDesigners.map((d) => d.displayName).join(', ')}).
                   </li>
                 )}
                 {unassignedCount > 0 && (
@@ -330,7 +334,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                           className="h-6 w-6"
                           fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
                         />
-                        {designer.name}
+                        {designer.displayName}
                       </span>
                       <span className="font-mono tabular text-xs text-muted-foreground">
                         {designer.active}
@@ -360,7 +364,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                 Sin trabajo esta semana
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {inactiveDesigners.map((d) => d.name).join(', ')}
+                {inactiveDesigners.map((d) => d.displayName).join(', ')}
               </p>
             </div>
           )}

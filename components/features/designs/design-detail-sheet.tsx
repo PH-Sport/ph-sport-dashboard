@@ -117,7 +117,7 @@ export function DesignDetailSheet({
     if (!design) return;
     setAssignOpen(false);
     if (design.designer_id === designerId) return;
-    const targetName = designers.find((u) => u.id === designerId)?.name ?? 'Sin asignar';
+    const targetName = designers.find((u) => u.id === designerId)?.displayName ?? 'Sin asignar';
     const confirmed = await confirm({
       title: 'Reasignar diseño',
       description: `¿Asignar «${design.title}» a ${targetName}?`,
@@ -242,7 +242,7 @@ export function DesignDetailSheet({
                             className="h-6 w-6"
                             fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
                           />
-                          {designer.name}
+                          {designer.displayName}
                         </>
                       ) : (
                         <span className="text-status-warning">Sin asignar</span>
@@ -277,7 +277,7 @@ export function DesignDetailSheet({
                                   : 'border-border bg-background text-muted-foreground hover:text-foreground'
                               )}
                             >
-                              {m.name}
+                              {m.displayName}
                             </button>
                           ))}
                         </div>

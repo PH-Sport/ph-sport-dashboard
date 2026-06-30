@@ -18,8 +18,12 @@ import {
 export type DefaultView = 'list' | 'calendar';
 
 interface UseUserPreferencesResult {
-  name: string;
-  setName: (name: string) => void;
+  givenName: string;
+  setGivenName: (v: string) => void;
+  familyName: string;
+  setFamilyName: (v: string) => void;
+  alias: string;
+  setAlias: (v: string) => void;
   defaultView: DefaultView;
   setDefaultView: (v: DefaultView) => void;
   preferences: NotificationPreferences;
@@ -70,7 +74,9 @@ export function useUserPreferences(): UseUserPreferencesResult {
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [name, setName] = useState('');
+  const [givenName, setGivenName] = useState('');
+  const [familyName, setFamilyName] = useState('');
+  const [alias, setAlias] = useState('');
   const [defaultView, setDefaultView] = useState<DefaultView>('list');
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFERENCES
@@ -78,10 +84,12 @@ export function useUserPreferences(): UseUserPreferencesResult {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (profile?.full_name) {
-      setName(profile.full_name);
+    if (profile) {
+      setGivenName(profile.given_name || '');
+      setFamilyName(profile.family_name || '');
+      setAlias(profile.alias || '');
     } else if (user?.email) {
-      setName(user.email.split('@')[0]);
+      setGivenName(user.email.split('@')[0]);
     }
 
     const loadPreferences = async () => {
@@ -175,7 +183,9 @@ export function useUserPreferences(): UseUserPreferencesResult {
       const { error } = await supabase
         .from('profiles')
         .update({
-          full_name: name,
+          given_name: givenName.trim() || (user.email ? user.email.split('@')[0] : 'Usuario'),
+          family_name: familyName.trim() || null,
+          alias: alias.trim() || null,
           notification_preferences: uiToDb(preferences),
           updated_at: new Date().toISOString(),
         })
@@ -194,8 +204,12 @@ export function useUserPreferences(): UseUserPreferencesResult {
   };
 
   return {
-    name,
-    setName,
+    givenName,
+    setGivenName,
+    familyName,
+    setFamilyName,
+    alias,
+    setAlias,
     defaultView,
     setDefaultView,
     preferences,

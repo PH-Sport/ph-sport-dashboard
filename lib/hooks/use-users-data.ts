@@ -4,7 +4,11 @@ import { useAuth } from '@/lib/auth/auth-context';
 
 export interface Profile {
   id: string;
+  given_name: string;
+  family_name?: string | null;
+  alias?: string | null;
   full_name: string;
+  display_name: string;
   role: 'ADMIN' | 'DESIGNER';
   created_at: string;
   avatar_url?: string | null;
@@ -27,7 +31,7 @@ const fetchUsersData = async (): Promise<UsersData> => {
   // Load users
   const { data: usersData, error: usersError } = await supabase
     .from('profiles')
-    .select('id, full_name, role, created_at, avatar_url')
+    .select('id, given_name, family_name, alias, full_name, display_name, role, created_at, avatar_url')
     .eq('is_dev', false)
     .order('created_at', { ascending: true });
 

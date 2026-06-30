@@ -41,7 +41,9 @@ export function MembersPanel() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [member, setMember] = useState<Profile | null>(null);
-  const [nameDraft, setNameDraft] = useState('');
+  const [givenDraft, setGivenDraft] = useState('');
+  const [familyDraft, setFamilyDraft] = useState('');
+  const [aliasDraft, setAliasDraft] = useState('');
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [busy, setBusy] = useState<null | 'save' | 'role' | 'delete'>(null);
   const [confirmRole, setConfirmRole] = useState(false);
@@ -53,7 +55,9 @@ export function MembersPanel() {
 
   const openMember = (m: Profile) => {
     setMember(m);
-    setNameDraft(m.full_name || '');
+    setGivenDraft(m.given_name || '');
+    setFamilyDraft(m.family_name || '');
+    setAliasDraft(m.alias || '');
     setAdvancedOpen(false);
   };
 
@@ -62,7 +66,12 @@ export function MembersPanel() {
     setAdvancedOpen(false);
   };
 
-  const patchUser = async (payload: { full_name?: string; role?: Profile['role'] }) => {
+  const patchUser = async (payload: {
+    given_name?: string;
+    family_name?: string | null;
+    alias?: string | null;
+    role?: Profile['role'];
+  }) => {
     if (!member) return false;
     const res = await fetch(`/api/users/${member.id}`, {
       method: 'PATCH',
@@ -78,14 +87,24 @@ export function MembersPanel() {
 
   const handleSaveName = async () => {
     if (!member) return;
-    const trimmed = nameDraft.trim();
-    if (!trimmed || trimmed === member.full_name) {
+    const given = givenDraft.trim();
+    const family = familyDraft.trim();
+    const alias = aliasDraft.trim();
+    if (!given) {
+      toast.error('El nombre no puede estar vacío');
+      return;
+    }
+    const unchanged =
+      given === (member.given_name || '') &&
+      family === (member.family_name || '') &&
+      alias === (member.alias || '');
+    if (unchanged) {
       closeMember();
       return;
     }
     setBusy('save');
     try {
-      await patchUser({ full_name: trimmed });
+      await patchUser({ given_name: given, family_name: family || null, alias: alias || null });
       toast.success('Nombre actualizado');
       mutate();
       closeMember();
@@ -224,15 +243,41 @@ export function MembersPanel() {
                 </div>
 
                 <div className="space-y-4 p-lg">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-mono text-eyebrow uppercase text-muted-foreground">
+                        Nombre
+                      </label>
+                      <input
+                        value={givenDraft}
+                        onChange={(e) => setGivenDraft(e.target.value)}
+                        className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-mono text-eyebrow uppercase text-muted-foreground">
+                        Primer apellido
+                      </label>
+                      <input
+                        value={familyDraft}
+                        onChange={(e) => setFamilyDraft(e.target.value)}
+                        className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="font-mono text-eyebrow uppercase text-muted-foreground">
-                      Nombre
+                      Alias <span className="normal-case text-muted-foreground/60">(opcional)</span>
                     </label>
                     <input
-                      value={nameDraft}
-                      onChange={(e) => setNameDraft(e.target.value)}
+                      value={aliasDraft}
+                      onChange={(e) => setAliasDraft(e.target.value)}
+                      placeholder={givenDraft || 'Nombre para mostrar'}
                       className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Si lo rellenas, se mostrará en vez del nombre.
+                    </p>
                   </div>
                   <p className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span

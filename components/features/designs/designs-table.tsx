@@ -49,6 +49,7 @@ import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-ta
 interface Designer {
   id: string;
   name: string;
+  displayName: string;
   avatar_url?: string | null;
 }
 
@@ -214,7 +215,7 @@ export function DesignsTable({
                   <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
                     {design.player}
                     <PlayerStatusTag status={design.player_status} variant="compact" />
-                    <span>· {designer ? designer.name : 'Sin asignar'}</span>
+                    <span>· {designer ? designer.displayName : 'Sin asignar'}</span>
                   </p>
                 </button>
                 <RowActions
@@ -288,7 +289,7 @@ export function DesignsTable({
                           fallbackClassName="bg-role-designer/15 text-xs font-medium text-role-designer"
                         />
                         <span className="max-w-[100px] truncate text-sm">
-                          {designer.name.split(' ')[0]}
+                          {designer.displayName}
                         </span>
                       </div>
                       </Hint>

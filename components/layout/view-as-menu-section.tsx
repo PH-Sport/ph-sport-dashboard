@@ -30,11 +30,11 @@ export function ViewAsMenuSection() {
       {designers.map((d) => (
         <DropdownMenuItem
           key={d.id}
-          onClick={() => enterDesignerView(d.id, d.name)}
+          onClick={() => enterDesignerView(d.id, d.displayName)}
           className="cursor-pointer text-foreground hover:bg-accent"
         >
           <UserCog className="mr-2 h-4 w-4 text-role-designer" />
-          <span className="flex-1 truncate">{d.name}</span>
+          <span className="flex-1 truncate">{d.displayName}</span>
           {simulating && simulatedDesignerId === d.id && (
             <Check className="h-4 w-4 text-role-designer" />
           )}

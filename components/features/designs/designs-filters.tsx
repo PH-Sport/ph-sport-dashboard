@@ -16,6 +16,7 @@ import type { DesignStatus } from '@/lib/types/filters';
 interface Designer {
   id: string;
   name: string;
+  displayName: string;
 }
 
 interface DesignsFiltersProps {
@@ -98,7 +99,7 @@ export function DesignsFilters({
                 <SelectItem value="all">Todos</SelectItem>
                 {designers.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
-                    {user.name}
+                    {user.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>

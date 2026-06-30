@@ -150,7 +150,7 @@ function DesignerDetailPage() {
             className="h-10 w-10"
             fallbackClassName="bg-primary/10 text-primary font-semibold"
           />
-          {designer?.full_name ?? 'Diseñador'}
+          {designer?.display_name ?? 'Diseñador'}
         </span>
       }
       subtitle={`Diseños asignados · ${weekLabel}`}

@@ -14,7 +14,13 @@ import { setSwrCacheOwner, clearSwrCache } from '@/lib/swr/persistent-cache';
 
 export interface Profile {
   id: string;
+  given_name: string;
+  family_name?: string | null;
+  alias?: string | null;
+  /** Generada por la BD = Nombre + Primer apellido. Gestión / contextos formales. */
   full_name: string;
+  /** Generada por la BD = alias || given_name. Nombre corto para el día a día. */
+  display_name: string;
   role: 'ADMIN' | 'DESIGNER';
   avatar_url?: string;
   is_dev?: boolean;
@@ -132,6 +138,7 @@ export function AuthProvider({
         const isSameProfile =
           prev.profile?.id === profile.id &&
           prev.profile?.full_name === profile.full_name &&
+          prev.profile?.display_name === profile.display_name &&
           prev.profile?.role === profile.role &&
           prev.profile?.avatar_url === profile.avatar_url &&
           prev.profile?.is_dev === profile.is_dev &&

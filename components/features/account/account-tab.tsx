@@ -9,8 +9,12 @@ import { Camera } from 'lucide-react';
 import { AvatarUploadDialog } from './avatar-upload-dialog';
 
 interface AccountTabProps {
-  name: string;
-  onNameChange: (name: string) => void;
+  givenName: string;
+  onGivenNameChange: (v: string) => void;
+  familyName: string;
+  onFamilyNameChange: (v: string) => void;
+  alias: string;
+  onAliasChange: (v: string) => void;
   email: string | undefined;
   role: string | undefined;
   avatarUrl: string | null | undefined;
@@ -20,8 +24,12 @@ interface AccountTabProps {
 }
 
 export function AccountTab({
-  name,
-  onNameChange,
+  givenName,
+  onGivenNameChange,
+  familyName,
+  onFamilyNameChange,
+  alias,
+  onAliasChange,
   email,
   role,
   avatarUrl,
@@ -57,7 +65,7 @@ export function AccountTab({
     }
   };
 
-  const displayName = name || email?.split('@')[0];
+  const displayName = alias.trim() || givenName.trim() || email?.split('@')[0];
 
   return (
     <div className="space-y-6 py-2">
@@ -87,15 +95,40 @@ export function AccountTab({
       </div>
 
       <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="givenName">Nombre</Label>
+            <Input
+              id="givenName"
+              value={givenName}
+              onChange={(e) => onGivenNameChange(e.target.value)}
+              placeholder="Tu nombre"
+              className="bg-background border-input"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="familyName">Primer apellido</Label>
+            <Input
+              id="familyName"
+              value={familyName}
+              onChange={(e) => onFamilyNameChange(e.target.value)}
+              placeholder="Tu apellido"
+              className="bg-background border-input"
+            />
+          </div>
+        </div>
         <div className="space-y-2">
-          <Label htmlFor="name">Nombre Completo</Label>
+          <Label htmlFor="alias">Alias (opcional)</Label>
           <Input
-            id="name"
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-            placeholder="Tu nombre"
+            id="alias"
+            value={alias}
+            onChange={(e) => onAliasChange(e.target.value)}
+            placeholder={givenName || 'Cómo quieres que te muestren'}
             className="bg-background border-input"
           />
+          <p className="text-xs text-muted-foreground">
+            Si lo rellenas, se mostrará en vez de tu nombre.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

@@ -22,6 +22,8 @@ interface ViewAsContextValue {
   exitToManager: () => void;
   /** Identidad REAL (para el menú de cuenta y la píldora). */
   realName: string | null;
+  /** Nombre corto real (display_name) para el día a día. */
+  realDisplayName: string | null;
   realEmail: string | null;
   realRole: Profile['role'] | null;
   realAvatarUrl: string | null;
@@ -35,6 +37,7 @@ const ViewAsContext = createContext<ViewAsContextValue>({
   enterDesignerView: () => {},
   exitToManager: () => {},
   realName: null,
+  realDisplayName: null,
   realEmail: null,
   realRole: null,
   realAvatarUrl: null,
@@ -94,7 +97,11 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
       user: { ...realUser, id: state.designerId! },
       profile: {
         id: state.designerId!,
+        given_name: state.designerName ?? 'Diseñador',
+        family_name: null,
+        alias: null,
         full_name: state.designerName ?? 'Diseñador',
+        display_name: state.designerName ?? 'Diseñador',
         role: 'DESIGNER' as const,
         avatar_url: undefined,
       } satisfies Profile,
@@ -110,6 +117,7 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
       enterDesignerView,
       exitToManager,
       realName: realProfile?.full_name ?? null,
+      realDisplayName: realProfile?.display_name ?? null,
       realEmail: realUser?.email ?? null,
       realRole: realProfile?.role ?? null,
       realAvatarUrl: realProfile?.avatar_url ?? null,
@@ -122,6 +130,7 @@ export function ViewAsProvider({ children }: { children: React.ReactNode }) {
       enterDesignerView,
       exitToManager,
       realProfile?.full_name,
+      realProfile?.display_name,
       realProfile?.role,
       realProfile?.avatar_url,
       realUser?.email,

@@ -5,7 +5,10 @@ import { createClient } from '@/lib/supabase/client';
 
 export interface Designer {
   id: string;
+  /** Nombre completo (Nombre + Primer apellido). Gestión / compat. */
   name: string;
+  /** Nombre corto para el día a día (alias || given_name). */
+  displayName: string;
   avatar_url?: string;
 }
 
@@ -13,7 +16,7 @@ async function fetchDesigners(): Promise<Designer[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, role, avatar_url')
+    .select('id, full_name, display_name, role, avatar_url')
     .eq('role', 'DESIGNER');
 
   if (error) throw error;
@@ -21,6 +24,7 @@ async function fetchDesigners(): Promise<Designer[]> {
   return (data || []).map((p) => ({
     id: p.id,
     name: p.full_name || 'Sin nombre',
+    displayName: p.display_name || p.full_name || 'Sin nombre',
     avatar_url: p.avatar_url ?? undefined,
   }));
 }

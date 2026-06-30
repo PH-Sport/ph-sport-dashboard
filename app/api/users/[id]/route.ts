@@ -11,12 +11,19 @@ import {
 
 const updateUserSchema = z
   .object({
-    full_name: z.string().trim().min(1, 'El nombre no puede estar vacío').max(80).optional(),
+    given_name: z.string().trim().min(1, 'El nombre no puede estar vacío').max(80).optional(),
+    family_name: z.string().trim().max(80).nullable().optional(),
+    alias: z.string().trim().max(80).nullable().optional(),
     role: z.enum(['ADMIN', 'DESIGNER']).optional(),
   })
-  .refine((d) => d.full_name !== undefined || d.role !== undefined, {
-    message: 'Nada que actualizar',
-  });
+  .refine(
+    (d) =>
+      d.given_name !== undefined ||
+      d.family_name !== undefined ||
+      d.alias !== undefined ||
+      d.role !== undefined,
+    { message: 'Nada que actualizar' }
+  );
 
 /**
  * PATCH /api/users/[id] — renombrar y/o cambiar el rol de un miembro.
@@ -84,7 +91,9 @@ export async function PATCH(
   }
 
   const updateData: Record<string, unknown> = {};
-  if (body.full_name !== undefined) updateData.full_name = body.full_name;
+  if (body.given_name !== undefined) updateData.given_name = body.given_name;
+  if (body.family_name !== undefined) updateData.family_name = body.family_name || null;
+  if (body.alias !== undefined) updateData.alias = body.alias || null;
   if (body.role !== undefined) updateData.role = body.role;
   updateData.updated_at = new Date().toISOString();
 
@@ -92,7 +101,7 @@ export async function PATCH(
     .from('profiles')
     .update(updateData)
     .eq('id', id)
-    .select('id, full_name, role')
+    .select('id, given_name, family_name, alias, full_name, display_name, role')
     .single();
 
   if (error) return internalErrorResponse(error, 'user update', reqId);

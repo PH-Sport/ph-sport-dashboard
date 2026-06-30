@@ -53,8 +53,12 @@ function SettingsContent() {
   const [tab, setTab] = useState<Tab>(initialTab);
 
   const {
-    name,
-    setName,
+    givenName,
+    setGivenName,
+    familyName,
+    setFamilyName,
+    alias,
+    setAlias,
     defaultView,
     setDefaultView,
     preferences,
@@ -114,8 +118,12 @@ function SettingsContent() {
         <motion.div variants={rise} className="max-w-2xl space-y-xl pb-xl">
           <Section label="Cuenta" hint="Tu nombre y datos de acceso">
             <AccountTab
-              name={name}
-              onNameChange={setName}
+              givenName={givenName}
+              onGivenNameChange={setGivenName}
+              familyName={familyName}
+              onFamilyNameChange={setFamilyName}
+              alias={alias}
+              onAliasChange={setAlias}
               email={user?.email}
               role={profile?.role}
               avatarUrl={profile?.avatar_url}
