@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import type { User } from '@supabase/supabase-js';
 import type { Profile } from '@/lib/auth/auth-context';
@@ -16,10 +17,15 @@ export interface ServerAuth {
  *   - Se elimina el getUser() + profile bloqueante que se hacía en cliente
  *     en cada arranque en frío.
  *
+ * Envuelto en React `cache()`: si en un mismo render del servidor lo llaman
+ * varios consumidores (p. ej. el root layout y el `loading.tsx` de una sección
+ * en una carga completa), se resuelve UNA sola vez en lugar de repetir el
+ * getUser() + query de perfil.
+ *
  * Fallo seguro: ante cualquier error → { null, null }; el AuthProvider cae al
  * flujo de inicialización en cliente (comportamiento previo a Fase 2).
  */
-export async function getServerAuth(): Promise<ServerAuth> {
+export const getServerAuth = cache(async function getServerAuth(): Promise<ServerAuth> {
   try {
     const supabase = await createClient();
 
@@ -42,4 +48,4 @@ export async function getServerAuth(): Promise<ServerAuth> {
   } catch {
     return { user: null, profile: null };
   }
-}
+});

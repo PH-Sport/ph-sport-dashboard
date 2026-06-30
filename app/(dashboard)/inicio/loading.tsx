@@ -1,11 +1,14 @@
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton';
+import { getServerAuth } from '@/lib/auth/get-server-auth';
 
 /**
  * Fallback de navegación (App Router): se muestra al instante al clicar el
  * enlace, mientras llega el RSC de /inicio. Elimina la sensación de "clic
- * muerto". El variant admin es el caso denso; al montar la página, su propio
- * skeleton (SWR) toma el relevo con el variant correcto por rol.
+ * muerto". Resuelve el rol en servidor (Fase 2, deduplicado vía React cache)
+ * para pintar el variant correcto y NO reflowear al montar la página: admin =
+ * 4 KPIs, designer = 3. Misma lógica que `inicio/page.tsx` para que casen.
  */
-export default function Loading() {
-  return <DashboardSkeleton variant="admin" />;
+export default async function Loading() {
+  const { profile } = await getServerAuth();
+  return <DashboardSkeleton variant={profile?.role === 'ADMIN' ? 'admin' : 'designer'} />;
 }
