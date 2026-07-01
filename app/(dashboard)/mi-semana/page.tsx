@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronDown, Undo2, CalendarRange, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Collapse } from '@/components/ui/collapse';
 import { Button } from '@/components/ui/button';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { MyWeekSkeleton } from '@/components/skeletons/my-week-skeleton';
@@ -240,55 +241,47 @@ export default function MyWeekPage() {
                           {w.items.length}
                         </span>
                       </button>
-                      <AnimatePresence initial={false}>
-                        {open && (
-                          <motion.ul
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={SPRINGS.smooth}
-                            className="overflow-hidden"
-                          >
-                            {w.items.map((d) => {
-                              const busy = updating === d.id;
-                              const short = format(new Date(d.deadline_at), "d MMM", { locale: es });
-                              return (
-                                <motion.li
-                                  key={d.id}
-                                  layout
-                                  className="group flex items-center gap-3 rounded-xl py-2 pl-9 pr-2 transition-colors hover:bg-muted/40"
+                      <Collapse open={open}>
+                        <ul>
+                          {w.items.map((d) => {
+                            const busy = updating === d.id;
+                            const short = format(new Date(d.deadline_at), "d MMM", { locale: es });
+                            return (
+                              <motion.li
+                                key={d.id}
+                                layout
+                                className="group flex items-center gap-3 rounded-xl py-2 pl-9 pr-2 transition-colors hover:bg-muted/40"
+                              >
+                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />
+                                <button
+                                  type="button"
+                                  onClick={() => openDetail(d.id)}
+                                  className="min-w-0 flex-1 truncate text-left text-sm text-muted-foreground line-through outline-none"
                                 >
-                                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />
-                                  <button
-                                    type="button"
-                                    onClick={() => openDetail(d.id)}
-                                    className="min-w-0 flex-1 truncate text-left text-sm text-muted-foreground line-through outline-none"
-                                  >
-                                    {d.title}
-                                  </button>
-                                  <span className="shrink-0 font-mono tabular text-xs text-muted-foreground">
-                                    {short}
-                                  </span>
-                                  <Hint label="Volver a pendiente">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleStatusChange(d, 'BACKLOG')}
-                                    disabled={busy}
-                                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-100 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100"
-                                  >
-                                    {busy ? (
-                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                    ) : (
-                                      <Undo2 className="h-3.5 w-3.5" />
-                                    )}
-                                  </button>
-                                  </Hint>
-                                </motion.li>
-                              );
-                            })}
-                          </motion.ul>
-                        )}
-                      </AnimatePresence>
+                                  {d.title}
+                                </button>
+                                <span className="shrink-0 font-mono tabular text-xs text-muted-foreground">
+                                  {short}
+                                </span>
+                                <Hint label="Volver a pendiente">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStatusChange(d, 'BACKLOG')}
+                                  disabled={busy}
+                                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-100 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100"
+                                >
+                                  {busy ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    <Undo2 className="h-3.5 w-3.5" />
+                                  )}
+                                </button>
+                                </Hint>
+                              </motion.li>
+                            );
+                          })}
+                        </ul>
+                      </Collapse>
                     </div>
                   );
                 })}

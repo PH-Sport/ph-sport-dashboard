@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Check, ChevronDown, Crown, Eye, UserCog } from 'lucide-react';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { SPRINGS } from '@/components/ui/animations';
+import { Collapse } from '@/components/ui/collapse';
 import { useViewAs } from '@/lib/auth/view-as-context';
 import { useDesigners } from '@/lib/hooks/use-designers';
 
@@ -58,39 +59,29 @@ export function ViewAsMenuSection() {
         </motion.span>
       </DropdownMenuItem>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={SPRINGS.smooth}
-            className="overflow-hidden"
+      <Collapse open={open}>
+        <DropdownMenuItem
+          onClick={exitToManager}
+          className="cursor-pointer text-foreground hover:bg-accent"
+        >
+          <Crown className="mr-2 h-4 w-4 text-primary" />
+          <span className="flex-1">Mánager</span>
+          {!simulating && <Check className="h-4 w-4 text-primary" />}
+        </DropdownMenuItem>
+        {designers.map((d) => (
+          <DropdownMenuItem
+            key={d.id}
+            onClick={() => enterDesignerView(d.id, d.displayName)}
+            className="cursor-pointer text-foreground hover:bg-accent"
           >
-            <DropdownMenuItem
-              onClick={exitToManager}
-              className="cursor-pointer text-foreground hover:bg-accent"
-            >
-              <Crown className="mr-2 h-4 w-4 text-primary" />
-              <span className="flex-1">Mánager</span>
-              {!simulating && <Check className="h-4 w-4 text-primary" />}
-            </DropdownMenuItem>
-            {designers.map((d) => (
-              <DropdownMenuItem
-                key={d.id}
-                onClick={() => enterDesignerView(d.id, d.displayName)}
-                className="cursor-pointer text-foreground hover:bg-accent"
-              >
-                <UserCog className="mr-2 h-4 w-4 text-role-designer" />
-                <span className="flex-1 truncate">{d.displayName}</span>
-                {simulating && simulatedDesignerId === d.id && (
-                  <Check className="h-4 w-4 text-role-designer" />
-                )}
-              </DropdownMenuItem>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <UserCog className="mr-2 h-4 w-4 text-role-designer" />
+            <span className="flex-1 truncate">{d.displayName}</span>
+            {simulating && simulatedDesignerId === d.id && (
+              <Check className="h-4 w-4 text-role-designer" />
+            )}
+          </DropdownMenuItem>
+        ))}
+      </Collapse>
     </>
   );
 }

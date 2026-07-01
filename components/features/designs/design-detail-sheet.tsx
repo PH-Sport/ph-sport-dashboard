@@ -10,9 +10,10 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { SPRINGS } from '@/components/ui/animations';
+import { Collapse } from '@/components/ui/collapse';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -266,34 +267,24 @@ export function DesignDetailSheet({
                       </motion.span>
                     </button>
                   </div>
-                  <AnimatePresence initial={false}>
-                    {assignOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={SPRINGS.smooth}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex flex-wrap gap-1.5 pt-3">
-                          {designers.map((m) => (
-                            <button
-                              key={m.id}
-                              onClick={() => handleAssign(m.id)}
-                              className={cn(
-                                'h-8 rounded-full border px-3 text-xs font-medium transition-colors',
-                                design.designer_id === m.id
-                                  ? 'border-primary/40 bg-primary/10 text-foreground'
-                                  : 'border-border bg-background text-muted-foreground hover:text-foreground'
-                              )}
-                            >
-                              {m.displayName}
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <Collapse open={assignOpen}>
+                    <div className="flex flex-wrap gap-1.5 pt-3">
+                      {designers.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => handleAssign(m.id)}
+                          className={cn(
+                            'h-8 rounded-full border px-3 text-xs font-medium transition-colors',
+                            design.designer_id === m.id
+                              ? 'border-primary/40 bg-primary/10 text-foreground'
+                              : 'border-border bg-background text-muted-foreground hover:text-foreground'
+                          )}
+                        >
+                          {m.displayName}
+                        </button>
+                      ))}
+                    </div>
+                  </Collapse>
                 </div>
 
                 {/* Entrega */}

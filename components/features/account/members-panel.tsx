@@ -16,6 +16,7 @@ import { Plus, X, Trash2, ChevronDown, ShieldAlert, Loader2 } from 'lucide-react
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { SPRINGS, TWEENS, STAGGER } from '@/components/ui/animations';
+import { Collapse } from '@/components/ui/collapse';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { ROLE_ACCENT } from '@/lib/utils/role';
@@ -321,35 +322,25 @@ export function MembersPanel() {
                           <ChevronDown className="h-4 w-4" />
                         </motion.span>
                       </button>
-                      <AnimatePresence initial={false}>
-                        {advancedOpen && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={SPRINGS.smooth}
-                            className="overflow-hidden"
+                      <Collapse open={advancedOpen}>
+                        <div className="space-y-2 px-3 pb-3 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setConfirmRole(true)}
+                            className="flex h-9 w-full items-center justify-between rounded-lg border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                           >
-                            <div className="space-y-2 px-3 pb-3 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => setConfirmRole(true)}
-                                className="flex h-9 w-full items-center justify-between rounded-lg border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
-                              >
-                                <span>Cambiar rol a {ROLE_LABELS[nextRole]}</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setConfirmDelete(true)}
-                                className="flex h-9 w-full items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                                Eliminar usuario
-                              </button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                            <span>Cambiar rol a {ROLE_LABELS[nextRole]}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDelete(true)}
+                            className="flex h-9 w-full items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Eliminar usuario
+                          </button>
+                        </div>
+                      </Collapse>
                     </div>
                   )}
                 </div>
