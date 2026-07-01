@@ -6,6 +6,7 @@ import { es } from 'date-fns/locale';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
+import { Collapse } from '@/components/ui/collapse';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import type { Design } from '@/lib/types/design';
@@ -90,30 +91,32 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Hero de urgencia — la entrega más próxima manda cuando vence en <24 h */}
-      {isUrgent && nextDeadline && (
-        <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-lg shadow-raised md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-5">
-            <span className="font-mono tabular text-5xl font-semibold leading-none text-destructive">
-              {Math.floor(hoursUntilNext!)} h
-            </span>
-            <div>
-              <p className="font-mono text-eyebrow uppercase text-destructive">Entrega más próxima</p>
-              <p className="mt-0.5 text-sm font-medium">{nextDeadline.title}</p>
-              <p className="text-xs text-muted-foreground">
-                {nextDeadline.player} ·{' '}
-                {format(new Date(nextDeadline.deadline_at), "d 'de' MMM 'a las' HH:mm", { locale: es })}
-              </p>
+      <Collapse open={isUrgent}>
+        {nextDeadline && (
+          <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-lg shadow-raised md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-5">
+              <span className="font-mono tabular text-5xl font-semibold leading-none text-destructive">
+                {Math.floor(hoursUntilNext!)} h
+              </span>
+              <div>
+                <p className="font-mono text-eyebrow uppercase text-destructive">Entrega más próxima</p>
+                <p className="mt-0.5 text-sm font-medium">{nextDeadline.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {nextDeadline.player} ·{' '}
+                  {format(new Date(nextDeadline.deadline_at), "d 'de' MMM 'a las' HH:mm", { locale: es })}
+                </p>
+              </div>
             </div>
-          </div>
-          <Link
-            href="/mi-semana"
-            className="flex h-9 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Ver mi semana
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </section>
-      )}
+            <Link
+              href="/mi-semana"
+              className="flex h-9 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Ver mi semana
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </section>
+        )}
+      </Collapse>
 
       {/* KPIs personales */}
       <section className="grid grid-cols-3 gap-4">

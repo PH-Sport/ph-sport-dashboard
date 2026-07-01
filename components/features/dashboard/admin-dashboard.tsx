@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Users, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { SPRINGS } from '@/components/ui/animations';
+import { Collapse } from '@/components/ui/collapse';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -141,7 +142,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
   return (
     <div className="flex flex-col gap-4">
       {/* Triage — única superficie de acción: avisos + reparto */}
-      {hasAlerts && (
+      <Collapse open={hasAlerts}>
         <section className="flex flex-col gap-4 rounded-2xl border border-primary/20 bg-card p-lg shadow-raised md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-5">
             <span className="font-mono tabular text-5xl font-semibold leading-none text-primary">
@@ -204,7 +205,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
             </Link>
           </div>
         </section>
-      )}
+      </Collapse>
 
       {/* KPIs */}
       <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
