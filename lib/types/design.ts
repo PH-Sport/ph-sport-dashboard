@@ -88,6 +88,8 @@ export interface Design {
   updated_at?: string; // ISO 8601 string (opcional, para historial)
   created_by?: string; // UUID (opcional)
   reviewed_by?: string; // UUID (opcional)
+  former_designer_id?: string; // UUID del diseñador eliminado (registro histórico)
+  former_designer_name?: string; // display_name congelado del diseñador eliminado
   delivered_at?: string; // ISO 8601 string (opcional)
 }
 
