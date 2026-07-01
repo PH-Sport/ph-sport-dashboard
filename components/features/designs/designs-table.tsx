@@ -41,6 +41,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
+import { resolveDesigner } from '@/lib/utils/designer-display';
 import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -203,7 +204,7 @@ export function DesignsTable({
       {/* Móvil: lista de filas (la tabla de 6 columnas no se encoge) */}
       <ul className="space-y-0.5 md:hidden">
         {paginatedItems.map((design) => {
-          const designer = designers.find((d) => d.id === design.designer_id);
+          const dz = resolveDesigner(design, designers);
           return (
             <li key={design.id} className="rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-start justify-between gap-2">
@@ -215,7 +216,14 @@ export function DesignsTable({
                   <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
                     {design.player}
                     <PlayerStatusTag status={design.player_status} variant="compact" />
-                    <span>· {designer ? designer.displayName : 'Sin asignar'}</span>
+                    <span>
+                      ·{' '}
+                      {dz.kind === 'active'
+                        ? dz.displayName
+                        : dz.kind === 'former'
+                          ? `${dz.name} (exmiembro)`
+                          : 'Sin asignar'}
+                    </span>
                   </p>
                 </button>
                 <RowActions
@@ -254,7 +262,7 @@ export function DesignsTable({
           </TableHeader>
           <TableBody>
             {paginatedItems.map((design) => {
-              const designer = designers.find((d) => d.id === design.designer_id);
+              const dz = resolveDesigner(design, designers);
               return (
                 <TableRow key={design.id}>
                   <TableCell>
@@ -279,20 +287,32 @@ export function DesignsTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {designer ? (
-                      <Hint label={designer.name}>
+                    {dz.kind === 'active' ? (
+                      <Hint label={dz.name}>
                       <div className="flex items-center gap-2">
                         <UserAvatar
-                          name={designer.name}
-                          src={designer.avatar_url}
+                          name={dz.name}
+                          src={dz.avatarUrl}
                           className="h-6 w-6"
                           fallbackClassName="bg-role-designer/15 text-xs font-medium text-role-designer"
                         />
                         <span className="max-w-[100px] truncate text-sm">
-                          {designer.displayName}
+                          {dz.displayName}
                         </span>
                       </div>
                       </Hint>
+                    ) : dz.kind === 'former' ? (
+                      <div className="flex items-center gap-2">
+                        <UserAvatar
+                          name={dz.name}
+                          className="h-6 w-6"
+                          fallbackClassName="bg-muted text-xs font-medium text-muted-foreground"
+                        />
+                        <span className="flex max-w-[120px] items-baseline gap-1 truncate text-sm text-muted-foreground">
+                          <span className="truncate">{dz.name}</span>
+                          <span className="shrink-0 text-xs">· exmiembro</span>
+                        </span>
+                      </div>
                     ) : (
                       <span className="text-sm text-status-warning">Sin asignar</span>
                     )}
