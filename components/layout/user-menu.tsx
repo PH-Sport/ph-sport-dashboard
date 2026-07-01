@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Settings, Users } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { SPRINGS } from '@/components/ui/animations';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useViewAs } from '@/lib/auth/view-as-context';
 import { ROLE_LABEL, ROLE_ACCENT } from '@/lib/utils/role';
@@ -25,6 +27,7 @@ export function UserMenu() {
   const { status, logout, profile } = useAuth();
   const { isDev, realName, realDisplayName, realEmail, realRole, realAvatarUrl } = useViewAs();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     setLogoutDialogOpen(false);
@@ -53,12 +56,12 @@ export function UserMenu() {
   const avatarName = realName || label;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           aria-label={`Menú de usuario — ${label}`}
-          className="rounded-full outline-none ring-primary/40 transition-shadow hover:ring-2 focus-visible:ring-2"
+          className="rounded-full outline-none ring-primary/40 transition-shadow hover:ring-2 focus-visible:ring-2 data-[state=open]:ring-2 data-[state=open]:ring-primary/60"
         >
           <UserAvatar
             name={avatarName}
@@ -68,53 +71,67 @@ export function UserMenu() {
           />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 border border-border bg-popover text-popover-foreground shadow-xl">
-        <DropdownMenuLabel className="text-foreground">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{label}</p>
-            <p className="text-xs text-muted-foreground truncate">{realEmail}</p>
-            {realRole && (
-              <span
-                className={cn(
-                  'mt-1 inline-block w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                  ROLE_ACCENT[realRole]
-                )}
+      <AnimatePresence>
+        {menuOpen && (
+          <DropdownMenuPrimitive.Portal forceMount>
+            <DropdownMenuPrimitive.Content asChild align="end" sideOffset={8} forceMount>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={SPRINGS.smooth}
+                className="z-50 w-56 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-xl"
               >
-                {ROLE_LABEL[realRole]}
-              </span>
-            )}
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuLabel className="text-foreground">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{label}</p>
+                    <p className="text-xs text-muted-foreground truncate">{realEmail}</p>
+                    {realRole && (
+                      <span
+                        className={cn(
+                          'mt-1 inline-block w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                          ROLE_ACCENT[realRole]
+                        )}
+                      >
+                        {ROLE_LABEL[realRole]}
+                      </span>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border" />
 
-        <DropdownMenuItem
-          onClick={() => router.push('/ajustes')}
-          className="text-foreground hover:bg-accent cursor-pointer"
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Ajustes</span>
-        </DropdownMenuItem>
-        {profile?.role === 'ADMIN' && (
-          <DropdownMenuItem
-            onClick={() => router.push('/ajustes?tab=miembros')}
-            className="text-foreground hover:bg-accent cursor-pointer"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            <span>Miembros</span>
-          </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push('/ajustes')}
+                  className="text-foreground hover:bg-accent cursor-pointer"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Ajustes</span>
+                </DropdownMenuItem>
+                {profile?.role === 'ADMIN' && (
+                  <DropdownMenuItem
+                    onClick={() => router.push('/ajustes?tab=miembros')}
+                    className="text-foreground hover:bg-accent cursor-pointer"
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>Miembros</span>
+                  </DropdownMenuItem>
+                )}
+
+                {isDev && <ViewAsMenuSection />}
+
+                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuItem
+                  onClick={() => setLogoutDialogOpen(true)}
+                  className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Cerrar Sesión</span>
+                </DropdownMenuItem>
+              </motion.div>
+            </DropdownMenuPrimitive.Content>
+          </DropdownMenuPrimitive.Portal>
         )}
-
-        {isDev && <ViewAsMenuSection />}
-
-        <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem
-          onClick={() => setLogoutDialogOpen(true)}
-          className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 cursor-pointer"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Cerrar Sesión</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      </AnimatePresence>
 
       <ConfirmDialog
         open={logoutDialogOpen}
