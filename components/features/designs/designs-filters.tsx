@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -31,6 +34,7 @@ interface DesignsFiltersProps {
   weekEndFilter: Date | undefined;
   onWeekEndChange: (date: Date | undefined) => void;
   designers: Designer[];
+  formerDesigners: { id: string; name: string }[];
   hasActiveFilters: boolean;
   onReset: () => void;
 }
@@ -52,6 +56,7 @@ export function DesignsFilters({
   weekEndFilter,
   onWeekEndChange,
   designers,
+  formerDesigners,
   hasActiveFilters,
   onReset,
 }: DesignsFiltersProps) {
@@ -102,6 +107,21 @@ export function DesignsFilters({
                     {user.displayName}
                   </SelectItem>
                 ))}
+                {formerDesigners.length > 0 && (
+                  <>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Exmiembros
+                      </SelectLabel>
+                      {formerDesigners.map((f) => (
+                        <SelectItem key={`former:${f.id}`} value={`former:${f.id}`}>
+                          {f.name} (exmiembro)
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </>
+                )}
               </SelectContent>
             </Select>
 

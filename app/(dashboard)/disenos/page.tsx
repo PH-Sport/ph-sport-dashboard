@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { DesignsSkeleton } from '@/components/skeletons/designs-skeleton';
 import { useDesigners } from '@/lib/hooks/use-designers';
+import { useFormerDesigners } from '@/lib/hooks/use-former-designers';
 import type { Design } from '@/lib/types/design';
 import { toast } from 'sonner';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
@@ -53,6 +54,7 @@ function DesignsPageContent() {
   const [designToDelete, setDesignToDelete] = useState<Design | null>(null);
 
   const { designers } = useDesigners();
+  const { formerDesigners } = useFormerDesigners();
   const filters = useDesignsFilters();
   const router = useRouter();
 
@@ -227,6 +229,7 @@ function DesignsPageContent() {
         weekEndFilter={filters.weekEndFilter}
         onWeekEndChange={filters.setWeekEndFilter}
         designers={designers}
+        formerDesigners={formerDesigners}
         hasActiveFilters={filters.hasActiveFilters}
         onReset={filters.resetFilters}
       />
