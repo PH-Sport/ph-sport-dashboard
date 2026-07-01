@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     weekEnd: searchParams.get('weekEnd') ?? '',
     status: searchParams.get('status') ?? undefined,
     designerId: searchParams.get('designerId') ?? undefined,
+    formerDesignerId: searchParams.get('formerDesignerId') ?? undefined,
   });
 
   if (!parsed.success) return validationErrorResponse(parsed.error, reqId);
@@ -39,6 +40,8 @@ export async function GET(request: Request) {
 
   if (filters.status) query = query.eq('status', filters.status);
   if (filters.designerId) query = query.eq('designer_id', filters.designerId);
+  if (filters.formerDesignerId)
+    query = query.eq('former_designer_id', filters.formerDesignerId).is('designer_id', null);
 
   const { data: items, error } = await query;
 

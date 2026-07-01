@@ -21,6 +21,7 @@ export const weekFiltersSchema = z.object({
   weekEnd: isoDate,
   status: z.enum(DESIGN_STATUS_VALUES).optional(),
   designerId: uuid.optional(),
+  formerDesignerId: uuid.optional(),
 });
 export type WeekFiltersInput = z.infer<typeof weekFiltersSchema>;
 

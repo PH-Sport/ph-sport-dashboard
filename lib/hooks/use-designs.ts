@@ -31,7 +31,11 @@ export function useDesigns({
           weekStart: format(weekStart, 'yyyy-MM-dd'),
           weekEnd: format(weekEnd, 'yyyy-MM-dd'),
           ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
-          ...(designerFilter !== 'all' ? { designerId: designerFilter } : {}),
+          ...(designerFilter !== 'all'
+            ? designerFilter.startsWith('former:')
+              ? { formerDesignerId: designerFilter.slice('former:'.length) }
+              : { designerId: designerFilter }
+            : {}),
         }).toString()}`
       : null;
 
