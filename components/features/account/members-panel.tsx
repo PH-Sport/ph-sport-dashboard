@@ -141,12 +141,24 @@ export function MembersPanel() {
         body: { userId: member.id },
       });
       if (error) throw error;
-      toast.success('Usuario eliminado. Sus diseños se conservan, sin asignar.');
+      toast.success('Usuario eliminado. Sus diseños se conservan marcados como «exmiembro».');
       mutate();
       setConfirmDelete(false);
       closeMember();
-    } catch {
-      toast.error('No se pudo eliminar el usuario');
+    } catch (e) {
+      // supabase.functions.invoke envuelve el error; el cuerpo real ({ error }) viene en context.
+      let msg = 'No se pudo eliminar el usuario';
+      if (e && typeof e === 'object' && 'context' in e) {
+        try {
+          const body = await (e as { context: Response }).context.json();
+          if (body?.error) msg = body.error as string;
+        } catch {
+          /* cuerpo no-JSON: nos quedamos con el mensaje genérico */
+        }
+      } else if (e instanceof Error) {
+        msg = e.message;
+      }
+      toast.error(msg);
       setConfirmDelete(false);
     } finally {
       setBusy(null);
@@ -386,7 +398,7 @@ export function MembersPanel() {
         onOpenChange={(o) => !o && setConfirmDelete(false)}
         onConfirm={handleDelete}
         title="¿Eliminar usuario?"
-        description={`${member?.full_name || 'Este usuario'} perderá el acceso al panel. Sus diseños se conservan (quedan sin asignar). No se puede deshacer.`}
+        description={`${member?.full_name || 'Este usuario'} perderá el acceso al panel. Sus diseños se conservan y quedarán marcados como «exmiembro». No se puede deshacer.`}
         confirmLabel="Eliminar usuario"
         variant="danger"
         loading={busy === 'delete'}
