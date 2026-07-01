@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { useDesigners } from '@/lib/hooks/use-designers';
+import { resolveDesigner } from '@/lib/utils/designer-display';
 import { useDesign } from '@/lib/hooks/use-design';
 import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ApiError } from '@/lib/utils/api-fetcher';
@@ -65,9 +66,9 @@ export function DesignDetailSheet({
   const { designers } = useDesigners();
   const { confirm, isOpen, options, handleConfirm, handleCancel } = useConfirm();
 
-  const designer = design?.designer_id
-    ? designers.find((u) => u.id === design.designer_id)
-    : null;
+  const dz: ReturnType<typeof resolveDesigner> = design
+    ? resolveDesigner(design, designers)
+    : { kind: 'none' };
   const notFound = error instanceof ApiError && error.status === 404;
   const urgency = design ? getUrgency(design.deadline_at, design.status === 'DELIVERED') : null;
 
@@ -234,15 +235,24 @@ export function DesignDetailSheet({
                       onClick={() => setAssignOpen((v) => !v)}
                       className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40"
                     >
-                      {designer ? (
+                      {dz.kind === 'active' ? (
                         <>
                           <UserAvatar
-                            name={designer.name}
-                            src={designer.avatar_url}
+                            name={dz.name}
+                            src={dz.avatarUrl}
                             className="h-6 w-6"
                             fallbackClassName="bg-primary/10 font-mono text-[10px] font-semibold text-primary"
                           />
-                          {designer.displayName}
+                          {dz.displayName}
+                        </>
+                      ) : dz.kind === 'former' ? (
+                        <>
+                          <UserAvatar
+                            name={dz.name}
+                            className="h-6 w-6"
+                            fallbackClassName="bg-muted font-mono text-[10px] font-semibold text-muted-foreground"
+                          />
+                          <span className="text-muted-foreground">{dz.name} · exmiembro</span>
                         </>
                       ) : (
                         <span className="text-status-warning">Sin asignar</span>
