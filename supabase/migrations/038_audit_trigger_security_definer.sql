@@ -1,0 +1,17 @@
+-- 038: Fix del borrado de usuarios — trigger de auditoría a SECURITY DEFINER.
+--
+-- `log_design_audit` (trigger AFTER INSERT/UPDATE/DELETE en designs) era
+-- SECURITY INVOKER y escribe en `public.audit_log`. Al borrar un usuario, GoTrue
+-- lo hace como el rol `supabase_auth_admin`; la cascada actualiza `designs`
+-- (SET NULL en designer_id + nuestro trigger de snapshot) → dispara el audit →
+-- `INSERT INTO audit_log` ejecutado como `supabase_auth_admin`, que NO tiene
+-- permiso sobre esa tabla → "permission denied for table audit_log" → aborta
+-- TODO el borrado.
+--
+-- Fix: correr la función como su dueño (postgres), igual que su hermano
+-- `notify_on_assignment` (ya SECURITY DEFINER por el mismo motivo: escribe en
+-- otra tabla desde un trigger). `auth.uid()` sigue devolviendo el actor real en
+-- updates de la app (lee el JWT, no depende del rol de Postgres) y NULL en
+-- acciones de sistema/cascada. La función ya usa nombres calificados
+-- (public.audit_log, auth.uid) y `SET search_path TO ''`, seguro para DEFINER.
+ALTER FUNCTION public.log_design_audit() SECURITY DEFINER;
