@@ -55,7 +55,8 @@ export async function PUT(
     if (value === undefined) continue;
     if (key === 'designer_id' && value === 'auto') {
       const { assignDesignerAutomatically } = await import('@/lib/services/designs/assignment');
-      updateData.designer_id = await assignDesignerAutomatically(id);
+      const deadlineAt = typeof body.deadline_at === 'string' ? body.deadline_at : undefined;
+      updateData.designer_id = await assignDesignerAutomatically(id, deadlineAt);
     } else {
       updateData[key] = value;
     }

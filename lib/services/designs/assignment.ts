@@ -1,15 +1,22 @@
 import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/utils/logger';
 import { selectDesignerByLoad } from './select-designer';
+import { buildWeeklyWeightMaps, loadMapForWeek, weekKeyFor } from './weekly-load';
 
 /**
- * Asigna automáticamente un diseñador a UN diseño basándose en la carga actual.
- * Para asignaciones masivas, ver `assign/route.ts` o `bulk/route.ts` que mantienen
- * cursor entre llamadas para mejor distribución.
+ * Asigna automáticamente un diseñador a UN diseño según la carga ponderada de
+ * la semana a la que pertenece ese diseño (mismo criterio que las rutas de
+ * lote). El propio diseño se excluye del conteo.
  *
- * @param excludeDesignId — id del diseño a excluir del conteo (útil al actualizar)
+ * @param designId — id del diseño que se está (re)asignando. Se excluye del conteo.
+ * @param deadlineAt — fecha de entrega efectiva (ISO). Si se omite, se lee la
+ *   almacenada del diseño. Pásala cuando el mismo request cambia la fecha, para
+ *   repartir según la semana NUEVA y no la antigua.
  */
-export async function assignDesignerAutomatically(excludeDesignId?: string): Promise<string | null> {
+export async function assignDesignerAutomatically(
+  designId: string,
+  deadlineAt?: string,
+): Promise<string | null> {
   try {
     const supabase = await createClient();
 
@@ -22,17 +29,31 @@ export async function assignDesignerAutomatically(excludeDesignId?: string): Pro
       logger.error('Error fetching designers for assignment:', designersError);
       return null;
     }
-
     if (!designers || designers.length === 0) {
       logger.warn('No designers found for assignment');
       return null;
     }
-
     const designerIds = designers.map((d) => d.id);
+
+    // Semana objetivo: la fecha efectiva pasada, o la almacenada del diseño.
+    let effectiveDeadline = deadlineAt;
+    if (!effectiveDeadline) {
+      const { data: target, error: targetError } = await supabase
+        .from('designs')
+        .select('deadline_at')
+        .eq('id', designId)
+        .single();
+      if (targetError || !target) {
+        logger.error('Error fetching target design for assignment:', targetError);
+        return null;
+      }
+      effectiveDeadline = target.deadline_at;
+    }
+    const wk = weekKeyFor(effectiveDeadline);
 
     const { data: activeDesigns, error: designsError } = await supabase
       .from('designs')
-      .select('id, designer_id')
+      .select('id, designer_id, deadline_at, type')
       .neq('status', 'DELIVERED')
       .not('designer_id', 'is', null);
 
@@ -41,17 +62,14 @@ export async function assignDesignerAutomatically(excludeDesignId?: string): Pro
       return null;
     }
 
-    const taskCounts = new Map<string, number>();
-    designerIds.forEach((id) => taskCounts.set(id, 0));
+    // Carga ponderada de la semana objetivo, excluyendo el propio diseño.
+    const weekMaps = buildWeeklyWeightMaps(
+      (activeDesigns ?? []).filter((d) => d.id !== designId),
+      designerIds,
+    );
+    const loadMap = loadMapForWeek(weekMaps, wk, designerIds);
 
-    activeDesigns?.forEach((d) => {
-      if (d.designer_id && taskCounts.has(d.designer_id)) {
-        if (excludeDesignId && d.id === excludeDesignId) return;
-        taskCounts.set(d.designer_id, (taskCounts.get(d.designer_id) || 0) + 1);
-      }
-    });
-
-    return selectDesignerByLoad(designerIds, taskCounts).id;
+    return selectDesignerByLoad(designerIds, loadMap).id;
   } catch (error) {
     logger.error('Unexpected error in assignDesignerAutomatically:', error);
     return null;
