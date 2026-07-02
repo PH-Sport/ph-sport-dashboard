@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
@@ -28,6 +28,26 @@ export function UserMenu() {
   const { isDev, realName, realDisplayName, realEmail, realRole, realAvatarUrl } = useViewAs();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Altura medida en píxeles (subpíxel exacto) para el despliegue del menú.
+  // Animar height a un número — en vez de 'auto' — evita el swap final de framer
+  // (el "microcorte"). El ResizeObserver la mantiene al día, así el "Ver como"
+  // interno también empuja la altura sin recortarse.
+  const roRef = useRef<ResizeObserver | null>(null);
+  const [menuHeight, setMenuHeight] = useState(0);
+
+  // Callback ref: mide la altura real en píxeles (subpíxel exacto) en cuanto el
+  // contenido monta en el portal, y la mantiene al día con ResizeObserver.
+  // Animar height a ese número — en vez de 'auto' — evita el swap final de framer
+  // (el "microcorte"); el RO deja crecer el "Ver como" interno sin recortarse.
+  const measureRef = useCallback((node: HTMLDivElement | null) => {
+    roRef.current?.disconnect();
+    if (!node) return;
+    const measure = () => setMenuHeight(node.getBoundingClientRect().height);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(node);
+    roRef.current = ro;
+  }, []);
 
   const handleLogout = async () => {
     setLogoutDialogOpen(false);
@@ -77,11 +97,15 @@ export function UserMenu() {
             <DropdownMenuPrimitive.Content asChild align="end" sideOffset={8} forceMount>
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: menuHeight }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={SPRINGS.smooth}
-                className="z-50 w-56 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-xl"
+                className="z-50 w-56 overflow-hidden rounded-md shadow-xl"
               >
+                <div
+                  ref={measureRef}
+                  className="rounded-md border border-border bg-popover p-1 text-popover-foreground"
+                >
                 <DropdownMenuLabel className="text-foreground">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{label}</p>
@@ -127,6 +151,7 @@ export function UserMenu() {
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Cerrar Sesión</span>
                 </DropdownMenuItem>
+                </div>
               </motion.div>
             </DropdownMenuPrimitive.Content>
           </DropdownMenuPrimitive.Portal>
