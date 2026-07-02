@@ -100,7 +100,6 @@ export async function POST(request: Request) {
         title,
         type: d.type ?? 'matchday',
         player: d.player,
-        player_status: d.player_status ?? null,
         match_home: isMatchday ? d.match_home : null,
         match_away: isMatchday ? d.match_away : null,
         deadline_at: d.deadline_at,

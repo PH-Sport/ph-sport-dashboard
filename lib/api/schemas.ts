@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { DESIGN_TYPES } from '@/lib/types/design';
 
-const PLAYER_STATUS_VALUES = ['injured', 'suspended', 'doubt', 'last_minute'] as const;
 const DESIGN_STATUS_VALUES = ['BACKLOG', 'DELIVERED'] as const;
 
 const isoDateTime = z.string().refine(
@@ -35,7 +34,6 @@ const bulkDesignItemSchema = z
     match_away: z.string().trim().max(100).optional(),
     deadline_at: isoDateTime,
     designer_id: z.union([uuid, z.literal('auto')]).nullish(),
-    player_status: z.enum(PLAYER_STATUS_VALUES).nullish(),
     folder_url: z.string().url().max(2000).optional().or(z.literal('')),
   })
   .strict()
@@ -65,7 +63,6 @@ export const updateDesignSchema = z
     match_away: z.string().trim().max(100).nullable().optional(),
     deadline_at: isoDateTime.optional(),
     folder_url: z.string().url().max(2000).nullable().optional(),
-    player_status: z.enum(PLAYER_STATUS_VALUES).nullable().optional(),
     designer_id: z.union([uuid, z.literal('auto')]).nullable().optional(),
   })
   .strict();

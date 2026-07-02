@@ -10,17 +10,78 @@ export type { DesignStatus } from './filters';
 export const DESIGN_STATUS_ORDER = ['BACKLOG', 'DELIVERED'] as const;
 
 // ─── Tipos de pieza ──────────────────────────────────────────
-// Conjunto único y EXTENSIBLE: añadir un tipo = añadir su slug aquí + su label.
-// Solo 'matchday' tiene partido (match_home/match_away); el resto, no.
-export const DESIGN_TYPES = ['matchday', 'presentacion', 'cumpleanos'] as const;
+// Conjunto único y EXTENSIBLE: añadir un tipo = añadir su slug aquí + su
+// label + su peso. Solo 'matchday' tiene partido (match_home/match_away);
+// el resto, no.
+export const DESIGN_TYPES = [
+  'matchday',
+  'cumpleanos',
+  'convocatoria',
+  'debut',
+  'internacionalidad',
+  'fichaje',
+  'cesion',
+  'firma',
+  'playoff',
+  'welcome',
+  'md_conjunto',
+  'md_animado',
+  'cv',
+  'presentacion_captacion',
+] as const;
 export type DesignType = (typeof DESIGN_TYPES)[number];
 export const DEFAULT_DESIGN_TYPE: DesignType = 'matchday';
 
 export const DESIGN_TYPE_LABELS: Record<DesignType, string> = {
   matchday: 'Matchday',
-  presentacion: 'Presentación',
   cumpleanos: 'Cumpleaños',
+  convocatoria: 'Convocatorias',
+  debut: 'Debuts',
+  internacionalidad: 'Internacionalidades',
+  fichaje: 'Fichajes',
+  cesion: 'Cesiones',
+  firma: 'Firmas',
+  playoff: 'Playoffs',
+  welcome: 'Welcome',
+  md_conjunto: 'MD conjuntos',
+  md_animado: 'MD Animados',
+  cv: 'CV',
+  presentacion_captacion: 'Presentación para captación',
 };
+
+/** Peso de esfuerzo de cada tipo de pieza (usado por la Fase 2 para ponderar el reparto de carga). */
+export type DesignWeight = 'RAPIDA' | 'MEDIA' | 'PESADA';
+
+export const DESIGN_TYPE_WEIGHT: Record<DesignType, DesignWeight> = {
+  matchday: 'RAPIDA',
+  cumpleanos: 'RAPIDA',
+  convocatoria: 'RAPIDA',
+  debut: 'MEDIA',
+  internacionalidad: 'MEDIA',
+  fichaje: 'MEDIA',
+  cesion: 'MEDIA',
+  firma: 'MEDIA',
+  playoff: 'MEDIA',
+  welcome: 'MEDIA',
+  md_conjunto: 'MEDIA',
+  md_animado: 'PESADA',
+  cv: 'PESADA',
+  presentacion_captacion: 'PESADA',
+};
+
+/** Valor numérico de cada peso. Pesada > el doble de Media: una pieza pesada
+ * suele equivaler en tiempo real a varias piezas rápidas, no a "un poco más". */
+export const DESIGN_WEIGHT_VALUES: Record<DesignWeight, number> = {
+  RAPIDA: 1,
+  MEDIA: 2,
+  PESADA: 4,
+};
+
+/** Resuelve un tipo de pieza directamente a su peso numérico. */
+export function getDesignWeightValue(type: DesignType | undefined): number {
+  const weight = DESIGN_TYPE_WEIGHT[type ?? DEFAULT_DESIGN_TYPE];
+  return DESIGN_WEIGHT_VALUES[weight];
+}
 
 /** Tipos con partido (muestran/exigen equipos). De momento solo matchday. */
 export function typeHasMatch(type: DesignType | undefined): boolean {
@@ -29,7 +90,7 @@ export function typeHasMatch(type: DesignType | undefined): boolean {
 
 /**
  * Texto de contexto de un diseño según su tipo: el partido si es matchday,
- * o la etiqueta del tipo (Cumpleaños, Presentación) en caso contrario.
+ * o la etiqueta del tipo (Cumpleaños, Presentación...) en caso contrario.
  */
 export function getDesignContext(d: {
   type?: DesignType;
@@ -79,7 +140,7 @@ export interface Design {
   player: string;
   match_home?: string; // Solo matchday
   match_away?: string; // Solo matchday
-  player_status?: 'injured' | 'suspended' | 'doubt' | 'last_minute'; // Estado del jugador
+  details?: string; // Texto libre con lo específico del tipo de pieza (rival, club, selección...)
   folder_url?: string;
   deadline_at: string; // ISO 8601 string
   status: DesignStatus;
