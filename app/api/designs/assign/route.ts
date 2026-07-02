@@ -11,9 +11,10 @@ import { buildWeeklyWeightMaps, loadMapForWeek, weekKeyFor } from '@/lib/service
 import { getDesignWeightValue } from '@/lib/types/design';
 
 /**
- * Round-robin balanced assignment.
+ * Asignación balanceada por carga ponderada semanal.
  * Distribuye diseños sin asignar entre diseñadores en una sola pasada
- * (1 fetch de cargas + reparto in-memory + batch update por diseñador).
+ * (1 fetch de cargas + reparto in-memory por semana según peso de tipo +
+ * batch update por diseñador).
  */
 export async function POST(_request: Request) {
   const reqId = crypto.randomUUID();
@@ -73,7 +74,7 @@ export async function POST(_request: Request) {
   const weekMaps = buildWeeklyWeightMaps(activeDesigns ?? [], designerIds);
   const cursorByWeek = new Map<string, number>();
 
-  // Round-robin in-memory por semana: agrupar por diseñador asignado.
+  // 4. Reparto in-memory por semana: agrupar por diseñador asignado.
   const assignmentsByDesigner = new Map<string, string[]>();
 
   for (const design of unassigned) {

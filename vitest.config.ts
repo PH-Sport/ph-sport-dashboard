@@ -7,6 +7,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    env: { TZ: 'UTC' },
     include: ['**/*.test.ts'],
     exclude: ['node_modules', '.next', 'dist'],
   },

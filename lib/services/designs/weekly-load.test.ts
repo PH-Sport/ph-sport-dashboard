@@ -24,6 +24,11 @@ describe('weekKeyFor', () => {
   it('acepta un Date además de string', () => {
     expect(weekKeyFor(new Date(2026, 6, 1, 12, 0, 0))).toBe('2026-06-29');
   });
+
+  it('frontera UTC (tests fijados a TZ=UTC): el lunes a las 00:30 UTC ya es semana propia, el domingo a las 23:30 UTC sigue siendo de la semana anterior', () => {
+    expect(weekKeyFor('2026-07-06T00:30:00Z')).toBe('2026-07-06');
+    expect(weekKeyFor('2026-07-05T23:30:00Z')).toBe('2026-06-29');
+  });
 });
 
 describe('buildWeeklyWeightMaps', () => {

@@ -13,6 +13,11 @@ export interface LoadDesign {
  * como `yyyy-MM-dd`. Semana empieza en lunes (weekStartsOn: 1), igual que la
  * Team page. Se construye con la fecha LOCAL (no toISOString) para no
  * desplazar el día por zona horaria.
+ *
+ * Supuesto de coherencia: el bucket sale del día calendario LOCAL del
+ * servidor, mientras que el rango de fechas de la Team page lo interpreta
+ * Postgres/Supabase en UTC. Ambos coinciden solo cuando el servidor corre en
+ * UTC (como en Vercel); si el runtime tuviera otra zona horaria, se rompería.
  */
 export function weekKeyFor(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
