@@ -110,9 +110,11 @@ Y deja el bloque así (quitando la línea `{design.player_status && <PlayerStatu
             </p>
 ```
 
-- [ ] **Step 5: Borrar el componente**
+- [ ] **Step 5: Quitar el componente, dejar viva la config**
 
-Borra el archivo `components/features/designs/tags/player-status-tag.tsx` por completo.
+> **Corrección post-implementación (2026-07-02):** este paso decía originalmente "borra el archivo por completo". Eso es incorrecto: `design-form-single.tsx` y `design-form-bulk.tsx` (Task 2, todavía no tocados en este punto) importan `PLAYER_STATUS_CONFIG` desde este archivo — borrarlo aquí rompe `npm run type-check` hasta que la Task 2 se ejecute. La revisión de la Task 1 confirmó esto por grep antes de aprobarlo. El archivo se borra de verdad al final de la **Task 2** (Step 6), una vez sus dos únicos consumidores dejan de necesitarlo.
+
+En `components/features/designs/tags/player-status-tag.tsx`, quita el componente `PlayerStatusTag`, su interfaz `PlayerStatusTagProps`, y los imports que solo él usaba (`Hint`, `cn`). Quita también el type export `PlayerStatus` (no lo consume nadie: `design-form-single.tsx`/`design-form-bulk.tsx` importan solo `PLAYER_STATUS_CONFIG` de este archivo, y tienen su propio `PlayerStatus` en `lib/utils/design-form.ts`). Deja **solo** `PLAYER_STATUS_CONFIG` exportado — lo siguen necesitando los dos formularios hasta la Task 2.
 
 - [ ] **Step 6: Verificar**
 
@@ -139,6 +141,7 @@ git commit -m "refactor(designs): quita la insignia de estado del jugador de lis
 - Modify: `components/features/designs/dialogs/design-form-bulk.tsx`
 - Modify: `components/features/designs/dialogs/create-design-dialog.tsx`
 - Modify: `lib/hooks/use-design-submit.ts`
+- Delete: `components/features/designs/tags/player-status-tag.tsx` (una vez sus 2 últimos consumidores se limpian en esta misma tarea — ver Step 6; la Task 1 dejó vivo solo `PLAYER_STATUS_CONFIG` de ese archivo, ver su Step 5 corregido)
 
 **Interfaces:**
 - Consumes: nada de la Task 1.
@@ -416,19 +419,23 @@ Y en el `map` de `validRows` (modo lote), quita la línea:
               player_status: r.player_status || undefined,
 ```
 
-- [ ] **Step 6: Verificar**
+- [ ] **Step 6: Borrar `player-status-tag.tsx` de una vez por todas**
+
+Tras los Steps 2 y 3, `design-form-single.tsx` y `design-form-bulk.tsx` ya no importan `PLAYER_STATUS_CONFIG` — eran sus dos únicos consumidores (la Task 1 dejó ese export vivo a propósito para no romper el build hasta este momento). Borra el archivo `components/features/designs/tags/player-status-tag.tsx` por completo.
+
+- [ ] **Step 7: Verificar**
 
 Run: `npm run type-check`
-Expected: sin errores en los 5 archivos de esta tarea. Pueden seguir apareciendo referencias a `player_status` en `lib/api/schemas.ts`, `lib/types/design.ts` y `app/api/designs/bulk/route.ts` — se resuelven en la Task 3.
+Expected: sin errores en los 5 archivos de esta tarea ni en el archivo borrado. Pueden seguir apareciendo referencias a `player_status` en `lib/api/schemas.ts`, `lib/types/design.ts` y `app/api/designs/bulk/route.ts` — se resuelven en la Task 3.
 
 Run: `npm run lint`
 Expected: sin imports no usados ni warnings nuevos.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add lib/utils/design-form.ts components/features/designs/dialogs/design-form-single.tsx components/features/designs/dialogs/design-form-bulk.tsx components/features/designs/dialogs/create-design-dialog.tsx lib/hooks/use-design-submit.ts
-git commit -m "refactor(designs): quita el campo Estado Jugador de los formularios de alta/edición"
+git add lib/utils/design-form.ts components/features/designs/dialogs/design-form-single.tsx components/features/designs/dialogs/design-form-bulk.tsx components/features/designs/dialogs/create-design-dialog.tsx lib/hooks/use-design-submit.ts components/features/designs/tags/player-status-tag.tsx
+git commit -m "refactor(designs): quita el campo Estado Jugador de los formularios de alta/edición y borra player-status-tag.tsx"
 ```
 
 ---
