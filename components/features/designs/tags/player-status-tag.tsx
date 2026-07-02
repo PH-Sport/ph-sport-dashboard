@@ -1,7 +1,5 @@
 import { AlertCircle, Ban, HelpCircle, Clock } from 'lucide-react';
 
-export type PlayerStatus = 'injured' | 'suspended' | 'doubt' | 'last_minute';
-
 export const PLAYER_STATUS_CONFIG = {
   injured: {
     label: 'Lesionado',
