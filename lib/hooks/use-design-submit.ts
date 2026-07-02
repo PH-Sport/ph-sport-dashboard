@@ -51,7 +51,6 @@ export function useDesignSubmit({
             player: formData.player,
             match_home: isMatchday ? formData.match_home : null,
             match_away: isMatchday ? formData.match_away : null,
-            player_status: formData.player_status,
             folder_url: formData.folder_url || null,
             deadline_at: deadline.toISOString(),
             designer_id: formData.designer_id || null,
@@ -94,7 +93,6 @@ export function useDesignSubmit({
               deadline_at: r.deadline_at!.toISOString(),
               designer_id: r.designer_id || undefined,
               folder_url: r.folder_url || undefined,
-              player_status: r.player_status || undefined,
             })),
           }),
         });

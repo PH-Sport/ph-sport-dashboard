@@ -12,8 +12,7 @@ import {
 } from '@/components/ui/select';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { Info } from 'lucide-react';
-import { PLAYER_STATUS_CONFIG } from '@/components/features/designs/tags/player-status-tag';
-import type { PlayerStatus, SingleDesignFormData } from '@/lib/utils/design-form';
+import type { SingleDesignFormData } from '@/lib/utils/design-form';
 import { DESIGN_TYPES, DESIGN_TYPE_LABELS, typeHasMatch } from '@/lib/types/design';
 import { cn } from '@/lib/utils';
 
@@ -104,44 +103,15 @@ export function DesignFormSingle({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="player">Jugador/Equipo</Label>
-              <Input
-                id="player"
-                placeholder="Jugador o equipo"
-                required
-                value={formData.player}
-                onChange={(e) => onChange({ ...formData, player: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="player_status">Estado Jugador (Opcional)</Label>
-              <Select
-                value={formData.player_status || 'none'}
-                onValueChange={(value) =>
-                  onChange({
-                    ...formData,
-                    player_status: value === 'none' ? null : (value as PlayerStatus),
-                  })
-                }
-              >
-                <SelectTrigger id="player_status">
-                  <SelectValue placeholder="Sin estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sin estado</SelectItem>
-                  {Object.entries(PLAYER_STATUS_CONFIG).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      <div className="flex items-center gap-2">
-                        <config.icon className="h-4 w-4" />
-                        <span>{config.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="player">Jugador/Equipo</Label>
+            <Input
+              id="player"
+              placeholder="Jugador o equipo"
+              required
+              value={formData.player}
+              onChange={(e) => onChange({ ...formData, player: e.target.value })}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

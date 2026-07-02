@@ -1,7 +1,5 @@
 import { type DesignType, DEFAULT_DESIGN_TYPE } from '@/lib/types/design';
 
-export type PlayerStatus = 'injured' | 'suspended' | 'doubt' | 'last_minute';
-
 export interface SingleDesignFormData {
   type: DesignType;
   title: string;
@@ -11,7 +9,6 @@ export interface SingleDesignFormData {
   deadline_at: Date | undefined;
   folder_url: string;
   designer_id: string | null;
-  player_status: PlayerStatus | null;
 }
 
 export interface BulkDesignRow {
@@ -24,7 +21,6 @@ export interface BulkDesignRow {
   deadline_at: Date | undefined;
   designer_id: string | null;
   folder_url: string;
-  player_status: PlayerStatus | null;
 }
 
 export function generateId(): string {
@@ -42,7 +38,6 @@ export function createEmptyRow(type: DesignType = DEFAULT_DESIGN_TYPE): BulkDesi
     deadline_at: undefined,
     designer_id: null,
     folder_url: '',
-    player_status: null,
   };
 }
 

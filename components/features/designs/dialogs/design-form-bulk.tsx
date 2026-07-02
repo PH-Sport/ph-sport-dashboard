@@ -23,11 +23,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Trash2, ChevronRight, ChevronDown, Info } from 'lucide-react';
-import { PLAYER_STATUS_CONFIG } from '@/components/features/designs/tags/player-status-tag';
 import { cn } from '@/lib/utils';
 import {
   type BulkDesignRow,
-  type PlayerStatus,
   isRowValid,
   isRowEmpty,
   isOutsideWeek,
@@ -298,7 +296,7 @@ export function DesignFormBulk({
                           style={{ overflow: 'hidden' }}
                         >
                           <div className="p-4">
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
                               <div className="space-y-2">
                                 <Label>Título (opcional)</Label>
                                 <Input
@@ -315,34 +313,6 @@ export function DesignFormBulk({
                                   value={row.folder_url}
                                   onChange={(e) => updateBulkRow(row.id, 'folder_url', e.target.value)}
                                 />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Estado jugador</Label>
-                                <Select
-                                  value={row.player_status || 'none'}
-                                  onValueChange={(value) =>
-                                    updateBulkRow(
-                                      row.id,
-                                      'player_status',
-                                      value === 'none' ? null : (value as PlayerStatus)
-                                    )
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Sin estado" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="none">Sin estado</SelectItem>
-                                    {Object.entries(PLAYER_STATUS_CONFIG).map(([key, config]) => (
-                                      <SelectItem key={key} value={key}>
-                                        <div className="flex items-center gap-2">
-                                          <config.icon className="h-3 w-3" />
-                                          <span>{config.label}</span>
-                                        </div>
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
                               </div>
                             </div>
                           </div>

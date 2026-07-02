@@ -65,7 +65,6 @@ export function CreateDesignDialog({
     deadline_at: undefined,
     folder_url: '',
     designer_id: null,
-    player_status: null,
   });
 
   // Datos para modo lote (filas completas)
@@ -82,7 +81,6 @@ export function CreateDesignDialog({
         deadline_at: design.deadline_at ? new Date(design.deadline_at) : undefined,
         folder_url: design.folder_url || '',
         designer_id: design.designer_id || null,
-        player_status: design.player_status || null,
       });
     } else {
       setFormData({
@@ -94,7 +92,6 @@ export function CreateDesignDialog({
         deadline_at: undefined,
         folder_url: '',
         designer_id: null,
-        player_status: null,
       });
       setBulkRows([createEmptyRow()]);
     }
@@ -126,7 +123,6 @@ export function CreateDesignDialog({
         deadline_at: undefined,
         folder_url: '',
         designer_id: null,
-        player_status: null,
       });
       setBulkRows([createEmptyRow()]);
       onDesignCreated();
