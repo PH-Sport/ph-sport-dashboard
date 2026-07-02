@@ -41,7 +41,6 @@ import type { Design, DesignStatus } from '@/lib/types/design';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
-import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 
 interface DesignDetailSheetProps {
   designId: string | null;
@@ -210,7 +209,6 @@ export function DesignDetailSheet({
                   <span className="truncate">
                     {[design.player, getDesignContext(design)].filter(Boolean).join(' · ')}
                   </span>
-                  <PlayerStatusTag status={design.player_status} />
                 </p>
               </div>
 

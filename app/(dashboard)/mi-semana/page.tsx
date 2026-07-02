@@ -24,7 +24,6 @@ import { useMyWeekData } from '@/lib/hooks/use-my-week-data';
 import type { Design, DesignStatus } from '@/lib/types/design';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
-import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 
 const rise = {
   hidden: { opacity: 0, y: 12 },
@@ -164,7 +163,6 @@ export default function MyWeekPage() {
                         >
                           <p className="flex items-center gap-1.5 truncate text-sm font-medium">
                             {d.title}
-                            {d.player_status && <PlayerStatusTag status={d.player_status} />}
                           </p>
                           <p className="truncate text-xs text-muted-foreground">{d.player}</p>
                         </button>

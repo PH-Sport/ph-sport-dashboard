@@ -42,7 +42,6 @@ import { cn } from '@/lib/utils';
 import type { Design } from '@/lib/types/design';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { resolveDesigner } from '@/lib/utils/designer-display';
-import { PlayerStatusTag } from '@/components/features/designs/tags/player-status-tag';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
@@ -215,7 +214,6 @@ export function DesignsTable({
                   <p className="truncate text-sm font-medium">{design.title}</p>
                   <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
                     {design.player}
-                    <PlayerStatusTag status={design.player_status} variant="compact" />
                     <span>
                       ·{' '}
                       {dz.kind === 'active'
@@ -279,7 +277,6 @@ export function DesignsTable({
                     <div className="flex min-w-0 flex-col">
                       <div className="flex min-w-0 items-center gap-2">
                         <span className="truncate font-medium">{design.player}</span>
-                        <PlayerStatusTag status={design.player_status} variant="compact" />
                       </div>
                       <span className="truncate text-xs text-muted-foreground">
                         {getDesignContext(design)}
