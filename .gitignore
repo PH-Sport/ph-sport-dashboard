@@ -38,3 +38,6 @@ Thumbs.db
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Subagent-driven-development scratch state (progress ledger, task briefs/reports)
+.superpowers/
