@@ -90,7 +90,7 @@ export function typeHasMatch(type: DesignType | undefined): boolean {
 
 /**
  * Texto de contexto de un diseño según su tipo: el partido si es matchday,
- * o la etiqueta del tipo (Cumpleaños, Presentación...) en caso contrario.
+ * o la etiqueta del tipo (Cumpleaños, Fichajes...) en caso contrario.
  */
 export function getDesignContext(d: {
   type?: DesignType;

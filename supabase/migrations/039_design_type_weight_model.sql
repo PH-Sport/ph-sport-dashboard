@@ -5,7 +5,10 @@
 -- Postgres (mismo patrón que la migración 034) — no requiere backfill.
 --
 -- `player_status` se elimina: solo 13 de 761 filas (1.7%) lo usaban en
--- producción (verificado 2026-07-02).
+-- producción (verificado 2026-07-02). `drop column if exists` porque esa
+-- columna no la crea ningún archivo de migración local rastreado (divergencia
+-- de tracking ya conocida del proyecto) — sin el guard, un replay desde cero
+-- (001→039) fallaría aquí.
 --
 -- `details` sustituye a player_status como campo libre para lo específico
 -- de cada tipo de pieza (rival, club nuevo, selección, motivo de la
@@ -21,12 +24,12 @@
 -- 2026-07-02). El equipo la ajustará por diseñador cuando la revise; la
 -- consume el reparto de carga y el % de Team page (Fase 2).
 
-alter table public.designs drop column player_status;
+alter table public.designs drop column if exists player_status;
 
-alter table public.designs add column details text;
+alter table public.designs add column if not exists details text;
 comment on column public.designs.details is
   'Texto libre con el detalle específico del tipo de pieza (rival, club, selección, motivo...). Rellenado a mano o por el asistente IA (Fase 4).';
 
-alter table public.profiles add column weekly_capacity integer not null default 10;
+alter table public.profiles add column if not exists weekly_capacity integer not null default 10;
 comment on column public.profiles.weekly_capacity is
   'Capacidad semanal del diseñador, en unidades de peso (Rápida=1/Media=2/Pesada=4). Usada por el reparto de carga y el % de Team page (Fase 2).';
