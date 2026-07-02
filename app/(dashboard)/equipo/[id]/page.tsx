@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useTeamData } from '@/lib/hooks/use-team-data';
+import { sumWeight } from '@/lib/services/designs/weekly-load';
+import { cn } from '@/lib/utils';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
@@ -79,6 +81,9 @@ function DesignerDetailPage() {
   const designs = designer?.designs ?? [];
   const backlog = designs.filter((d) => d.status === 'BACKLOG');
   const delivered = designs.filter((d) => d.status === 'DELIVERED');
+  const loadWeight = sumWeight(backlog);
+  const capacity = designer?.weekly_capacity ?? 10;
+  const loadPct = capacity > 0 ? Math.round((loadWeight / capacity) * 100) : 0;
 
   const showSkeleton = (isLoading && designers.length === 0) || authLoading;
 
@@ -209,6 +214,20 @@ function DesignerDetailPage() {
               <Eyebrow>Entregados</Eyebrow>
               <p className="font-mono tabular text-3xl font-semibold leading-tight text-status-success">
                 {delivered.length}
+              </p>
+            </div>
+            <div>
+              <Eyebrow>Carga</Eyebrow>
+              <p
+                className={cn(
+                  'font-mono tabular text-3xl font-semibold leading-tight',
+                  loadPct > 100 ? 'text-status-warning' : 'text-foreground'
+                )}
+              >
+                {loadPct}%
+              </p>
+              <p className="font-mono tabular text-xs text-muted-foreground">
+                {loadWeight}/{capacity}
               </p>
             </div>
           </div>
