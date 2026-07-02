@@ -19,9 +19,8 @@ import { UserAvatar } from '@/components/ui/user-avatar';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { cn } from '@/lib/utils';
+import { sumWeight } from '@/lib/services/designs/weekly-load';
 import type { Design } from '@/lib/types/design';
-
-const OVERLOAD_THRESHOLD = 5;
 
 const rise = {
   hidden: { opacity: 0, y: 12 },
@@ -48,8 +47,11 @@ function DesignerPlate({
   onDesignClick: (id: string) => void;
 }) {
   const designs = sortDesigns(designer.designs);
-  const active = designer.designs.filter((d) => d.status === 'BACKLOG').length;
-  const overloaded = active > OVERLOAD_THRESHOLD;
+  const backlog = designer.designs.filter((d) => d.status === 'BACKLOG');
+  const loadWeight = sumWeight(backlog);
+  const capacity = designer.weekly_capacity;
+  const loadPct = capacity > 0 ? Math.round((loadWeight / capacity) * 100) : 0;
+  const overloaded = loadPct > 100;
 
   return (
     <motion.section
@@ -73,7 +75,9 @@ function DesignerPlate({
               {designer.display_name}
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground" />
             </h2>
-            <p className="font-mono tabular text-xs text-muted-foreground">{active} activas</p>
+            <p className="font-mono tabular text-xs text-muted-foreground">
+              {loadWeight}/{capacity} · {loadPct}%
+            </p>
           </div>
         </button>
         {overloaded && (

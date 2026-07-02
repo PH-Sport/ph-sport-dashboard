@@ -9,6 +9,7 @@ export interface DesignerWithDesigns {
   full_name: string;
   display_name: string;
   avatar_url?: string | null;
+  weekly_capacity: number;
   designs: Design[];
 }
 
@@ -25,7 +26,7 @@ const fetchTeamData = async ([, weekStart, weekEnd]: [string, Date, Date]): Prom
   // 1. Get all designers
   const { data: designersData, error: designersError } = await supabase
     .from('profiles')
-    .select('id, full_name, display_name, avatar_url')
+    .select('id, full_name, display_name, avatar_url, weekly_capacity')
     .eq('role', 'DESIGNER');
 
   if (designersError) throw designersError;
@@ -48,6 +49,7 @@ const fetchTeamData = async ([, weekStart, weekEnd]: [string, Date, Date]): Prom
       full_name: d.full_name || 'Sin nombre',
       display_name: d.display_name || d.full_name || 'Sin nombre',
       avatar_url: d.avatar_url ?? undefined,
+      weekly_capacity: d.weekly_capacity ?? 10,
       designs: [],
     });
   });
