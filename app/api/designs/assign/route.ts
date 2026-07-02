@@ -7,6 +7,8 @@ import {
   forbiddenResponse,
 } from '@/lib/api/errors';
 import { selectDesignerByLoad } from '@/lib/services/designs/select-designer';
+import { buildWeeklyWeightMaps, loadMapForWeek, weekKeyFor } from '@/lib/services/designs/weekly-load';
+import { getDesignWeightValue } from '@/lib/types/design';
 
 /**
  * Round-robin balanced assignment.
@@ -35,7 +37,7 @@ export async function POST(_request: Request) {
   // 1. Diseños sin asignar.
   const { data: unassigned, error: unassignedError } = await supabase
     .from('designs')
-    .select('id')
+    .select('id, deadline_at, type')
     .is('designer_id', null)
     .eq('status', 'BACKLOG');
 
@@ -62,30 +64,27 @@ export async function POST(_request: Request) {
   // 3. Carga actual.
   const { data: activeDesigns, error: activeError } = await supabase
     .from('designs')
-    .select('designer_id')
+    .select('designer_id, deadline_at, type')
     .neq('status', 'DELIVERED')
     .not('designer_id', 'is', null);
 
   if (activeError) return internalErrorResponse(activeError, 'fetch active designs', reqId);
 
-  const taskCounts = new Map<string, number>();
-  designerIds.forEach((id) => taskCounts.set(id, 0));
-  activeDesigns?.forEach((d) => {
-    if (d.designer_id && taskCounts.has(d.designer_id)) {
-      taskCounts.set(d.designer_id, (taskCounts.get(d.designer_id) || 0) + 1);
-    }
-  });
+  const weekMaps = buildWeeklyWeightMaps(activeDesigns ?? [], designerIds);
+  const cursorByWeek = new Map<string, number>();
 
-  // 4. Round-robin in-memory: agrupar por diseñador asignado.
-  let cursor = 0;
+  // Round-robin in-memory por semana: agrupar por diseñador asignado.
   const assignmentsByDesigner = new Map<string, string[]>();
 
   for (const design of unassigned) {
-    const { id: selectedId, nextIndex } = selectDesignerByLoad(designerIds, taskCounts, cursor);
+    const wk = weekKeyFor(design.deadline_at);
+    const loadMap = loadMapForWeek(weekMaps, wk, designerIds);
+    const cursor = cursorByWeek.get(wk) ?? 0;
+    const { id: selectedId, nextIndex } = selectDesignerByLoad(designerIds, loadMap, cursor);
     if (!selectedId) continue;
-    cursor = nextIndex;
+    cursorByWeek.set(wk, nextIndex);
 
-    taskCounts.set(selectedId, (taskCounts.get(selectedId) || 0) + 1);
+    loadMap.set(selectedId, (loadMap.get(selectedId) ?? 0) + getDesignWeightValue(design.type));
 
     if (!assignmentsByDesigner.has(selectedId)) {
       assignmentsByDesigner.set(selectedId, []);

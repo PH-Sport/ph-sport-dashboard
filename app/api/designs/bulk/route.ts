@@ -8,6 +8,8 @@ import {
   unauthorizedResponse,
 } from '@/lib/api/errors';
 import { selectDesignerByLoad } from '@/lib/services/designs/select-designer';
+import { buildWeeklyWeightMaps, loadMapForWeek, weekKeyFor } from '@/lib/services/designs/weekly-load';
+import { getDesignWeightValue } from '@/lib/types/design';
 
 export async function POST(request: Request) {
   const reqId = crypto.randomUUID();
@@ -57,7 +59,7 @@ export async function POST(request: Request) {
 
     const { data: activeDesigns, error: designsError } = await supabase
       .from('designs')
-      .select('id, designer_id')
+      .select('id, designer_id, deadline_at, type')
       .neq('status', 'DELIVERED')
       .not('designer_id', 'is', null);
 
@@ -66,31 +68,29 @@ export async function POST(request: Request) {
       return internalErrorResponse(designsError, 'fetch active designs', reqId);
     }
 
-    const taskCounts = new Map<string, number>();
-    designerIds.forEach((id) => taskCounts.set(id, 0));
-
-    activeDesigns?.forEach((d) => {
-      if (d.designer_id && taskCounts.has(d.designer_id)) {
-        taskCounts.set(d.designer_id, (taskCounts.get(d.designer_id) || 0) + 1);
-      }
-    });
+    const weekMaps = buildWeeklyWeightMaps(activeDesigns ?? [], designerIds);
+    const cursorByWeek = new Map<string, number>();
 
     // Si hay >1 diseño suprimimos notificaciones individuales y creamos una agregada.
     const shouldAggregate = designs.length > 1;
 
-    let cursor = 0;
     const designsToInsert = designs.map((d) => {
+      const wk = weekKeyFor(d.deadline_at);
+      const loadMap = loadMapForWeek(weekMaps, wk, designerIds);
+
       let designerId: string | null = null;
       if (d.designer_id && d.designer_id !== 'auto') {
         designerId = d.designer_id;
       } else {
-        const selection = selectDesignerByLoad(designerIds, taskCounts, cursor);
+        const cursor = cursorByWeek.get(wk) ?? 0;
+        const selection = selectDesignerByLoad(designerIds, loadMap, cursor);
         designerId = selection.id;
-        cursor = selection.nextIndex;
+        cursorByWeek.set(wk, selection.nextIndex);
       }
 
-      if (designerId && taskCounts.has(designerId)) {
-        taskCounts.set(designerId, (taskCounts.get(designerId) || 0) + 1);
+      // El diseño recién repartido pesa en su semana para los siguientes del lote.
+      if (designerId && loadMap.has(designerId)) {
+        loadMap.set(designerId, (loadMap.get(designerId) ?? 0) + getDesignWeightValue(d.type));
       }
 
       const title = d.title?.trim() || d.player;
