@@ -9,6 +9,6 @@ export default defineConfig({
     environment: 'node',
     env: { TZ: 'UTC' },
     include: ['**/*.test.ts'],
-    exclude: ['node_modules', '.next', 'dist'],
+    exclude: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/.claude/**'],
   },
 });
