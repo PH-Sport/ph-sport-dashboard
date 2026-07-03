@@ -85,3 +85,9 @@ export const updateAssigneeSchema = z
   })
   .strict();
 export type UpdateAssigneeInput = z.infer<typeof updateAssigneeSchema>;
+
+/** POST /api/designs/parse — mensaje en lenguaje natural que el agente interpreta */
+export const parseMessageSchema = z.object({
+  message: z.string().trim().min(1).max(4000),
+}).strict();
+export type ParseMessageInput = z.infer<typeof parseMessageSchema>;
