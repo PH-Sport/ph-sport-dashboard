@@ -53,6 +53,26 @@ describe('autoTitleFor', () => {
     expect(autoTitleFor(card)).toBe('Fichajes — Marc Bernal');
   });
 
+  it('matchday con jugador pero sin visitante cae al fallback de label', () => {
+    const card = makeCard({
+      type: 'matchday',
+      match_home: 'Espanyol',
+      match_away: '',
+      player: 'Joan García',
+    });
+    expect(autoTitleFor(card)).toBe('Matchday — Joan García');
+  });
+
+  it('matchday sin equipos ni jugador cae al fallback de label', () => {
+    const card = makeCard({
+      type: 'matchday',
+      match_home: '',
+      match_away: '',
+      player: '',
+    });
+    expect(autoTitleFor(card)).toBe('Matchday');
+  });
+
   it('tipo null devuelve cadena vacía', () => {
     const card = makeCard({ type: null, player: 'Marc Bernal' });
     expect(autoTitleFor(card)).toBe('');
@@ -233,7 +253,7 @@ describe('designToCard', () => {
     expect(card.title).toBe('Un título muy custom');
   });
 
-  it('details null se convierte en cadena vacía', () => {
+  it('details ausente se convierte en cadena vacía', () => {
     const design: Design = {
       id: 'd3',
       title: 'Fichajes — Marc Bernal',

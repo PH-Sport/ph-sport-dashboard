@@ -51,6 +51,7 @@ export function createEmptyCard(): DesignCard {
  * Título automático de una tarjeta: "Equipo vs Equipo — Jugador" en matchday
  * (o solo "Equipo vs Equipo" sin jugador), o "Etiqueta — Jugador" en el resto
  * de tipos. Cadena vacía si aún no hay tipo elegido.
+ * Si matchday carece de equipos, cae al patrón de fallback: "Matchday" o "Matchday — Jugador".
  */
 export function autoTitleFor(card: DesignCard): string {
   if (!card.type) return '';
@@ -61,7 +62,11 @@ export function autoTitleFor(card: DesignCard): string {
     const home = card.match_home.trim();
     const away = card.match_away.trim();
     const match = home && away ? `${home} vs ${away}` : '';
-    if (!match) return player;
+    if (!match) {
+      // Fallback when teams incomplete: same pattern as other types
+      const label = DESIGN_TYPE_LABELS[card.type];
+      return player ? `${label} — ${player}` : label;
+    }
     return player ? `${match} — ${player}` : match;
   }
 
@@ -108,7 +113,10 @@ export function cardsWeight(cards: DesignCard[]): number {
   );
 }
 
-/** Mapea una tarjeta al payload que espera POST /api/designs/bulk. */
+/**
+ * Mapea una tarjeta al payload que espera POST /api/designs/bulk.
+ * Precondición: la tarjeta debe cumplir isCardValid() (los ! assertions dependen de ello).
+ */
 export function cardToBulkPayload(card: DesignCard) {
   return {
     type: card.type!,
