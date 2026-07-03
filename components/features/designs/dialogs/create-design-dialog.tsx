@@ -27,6 +27,7 @@ import {
   cardsWeight,
 } from '@/lib/utils/design-cards';
 import { DesignCardItem } from '@/components/features/designs/cards/design-card-item';
+import { AgentComposer } from '@/components/features/designs/cards/agent-composer';
 import { useDesignSubmit } from '@/lib/hooks/use-design-submit';
 import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -84,6 +85,22 @@ export function CreateDesignDialog({
 
   const updateCard = (id: string, patch: Partial<DesignCard>) => {
     setCards((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  };
+
+  // Tarjetas propuestas por el agente (F4): si la única tarjeta es la vacía inicial,
+  // la reemplaza; si no, las añade al final. Colapsadas salvo que llegue solo 1.
+  const appendCards = (newCards: DesignCard[]) => {
+    if (newCards.length === 0) return;
+    setCards((prev) => {
+      const shouldReplace = prev.length === 1 && isCardEmpty(prev[0]);
+      return shouldReplace ? newCards : [...prev, ...newCards];
+    });
+    if (newCards.length === 1) {
+      setOpenId(newCards[0].id);
+    }
+    requestAnimationFrame(() => {
+      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
+    });
   };
 
   const removeCard = (id: string) => {
@@ -242,6 +259,8 @@ export function CreateDesignDialog({
                   </button>
                 )}
               </div>
+
+              {!isEditMode && <AgentComposer onCards={appendCards} disabled={loading} />}
             </div>
 
             <DialogFooter
