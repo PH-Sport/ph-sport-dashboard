@@ -303,6 +303,14 @@ export function DesignDetailSheet({
                   </span>
                 </div>
 
+                {/* Detalles — texto libre específico del tipo de pieza */}
+                {design.details && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Detalles</span>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{design.details}</p>
+                  </div>
+                )}
+
                 {/* Acción principal de estado */}
                 {design.status === 'BACKLOG' ? (
                   <button

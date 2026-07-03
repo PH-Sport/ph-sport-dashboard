@@ -69,7 +69,7 @@ export function DesignCardItem({
   outsideWeek,
 }: DesignCardItemProps) {
   const [driveOpen, setDriveOpen] = useState(() => card.folder_url.trim() !== '');
-  const [titleOpen, setTitleOpen] = useState(false);
+  const [titleOpen, setTitleOpen] = useState(() => card.titleEdited);
 
   const title = effectiveTitle(card);
   const hasMatch = card.type === 'matchday';
