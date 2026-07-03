@@ -36,6 +36,14 @@ export function useDesignSubmit({ design, cards, onSuccess }: UseDesignSubmitPar
           return;
         }
 
+        if (!isCardValid(card)) {
+          toast.error(
+            'Completa tipo, jugador y fecha (y los equipos si es matchday) antes de guardar'
+          );
+          setLoading(false);
+          return;
+        }
+
         const deadline = card.deadline_at;
         const isMatchday = card.type === 'matchday';
         const response = await fetch(`/api/designs/${design.id}`, {

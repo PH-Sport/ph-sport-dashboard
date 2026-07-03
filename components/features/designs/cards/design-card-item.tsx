@@ -47,6 +47,21 @@ export interface DesignCardItemProps {
   outsideWeek: boolean;
 }
 
+/** Etiquetas legibles para los códigos de aviso que devuelve el agente. */
+const WARNING_LABELS: Record<string, string> = {
+  agente_no_disponible: 'Agente no disponible',
+  disenador_no_encontrado: 'Diseñador no encontrado',
+  fecha_pasada: 'Fecha pasada',
+  fecha_no_reconocida: 'Fecha no reconocida',
+  tipo_no_reconocido: 'Tipo no reconocido',
+  hora_asumida: 'Hora asumida (12:00)',
+};
+
+/** Traduce un código de aviso a texto legible; si no está mapeado, lo humaniza. */
+function warningLabel(code: string): string {
+  return WARNING_LABELS[code] ?? code.replace(/_/g, ' ');
+}
+
 /** Chip discreto de aviso (fuera de semana, avisos del agente). Tono status-warning. */
 function WarningChip({ children }: { children: React.ReactNode }) {
   return (
@@ -120,7 +135,7 @@ export function DesignCardItem({
             {outsideWeek && <WarningChip>Fuera de semana</WarningChip>}
             {/* Warnings are unique strings (no duplicates expected) */}
             {card.warnings.map((warning) => (
-              <WarningChip key={warning}>{warning}</WarningChip>
+              <WarningChip key={warning}>{warningLabel(warning)}</WarningChip>
             ))}
           </div>
         </div>
