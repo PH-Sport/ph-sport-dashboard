@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Loader2, SendHorizonal, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,7 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const loading = status.kind === 'loading';
   const canSend = message.trim().length > 0 && !loading && !disabled;
@@ -86,9 +87,19 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
     el.style.height = `${el.scrollHeight}px`;
   }, [message]);
 
+  // El diálogo desmonta este componente al cerrarse (sin forceMount). Si hay
+  // una petición en vuelo, abortarla evita que resuelva tras el desmontaje y
+  // cuele tarjetas en una sesión nueva (el diálogo se reabrió mientras tanto).
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
   const send = async () => {
     const trimmed = message.trim();
     if (!trimmed || loading || disabled) return;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setStatus({ kind: 'loading' });
 
@@ -97,12 +108,15 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed }),
+        signal: controller.signal,
       });
 
       if (!response.ok) throw new Error(`parse respondió ${response.status}`);
 
       const data: unknown = await response.json();
       if (!isParseResponse(data)) throw new Error('Respuesta de parseo inesperada');
+
+      if (controller.signal.aborted) return;
 
       if (data.fallback === true) {
         onCards([fallbackCard(trimmed)]);
@@ -112,11 +126,14 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
         onCards(cards);
         setStatus({ kind: 'success', count: cards.length });
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      if (controller.signal.aborted) return;
+
       onCards([fallbackCard(trimmed)]);
       setStatus({ kind: 'fallback' });
     } finally {
-      setMessage('');
+      if (!controller.signal.aborted) setMessage('');
     }
   };
 
@@ -139,7 +156,12 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
         <Textarea
           ref={textareaRef}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            if (status.kind === 'success' || status.kind === 'fallback') {
+              setStatus({ kind: 'idle' });
+            }
+          }}
           onKeyDown={handleKeyDown}
           disabled={disabled || loading}
           placeholder="Pídeselo al agente o pega el mensaje de WhatsApp…"
