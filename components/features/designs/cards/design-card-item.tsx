@@ -26,7 +26,6 @@ import {
   DESIGN_TYPE_LABELS,
   DESIGN_TYPE_WEIGHT,
   getDesignWeightValue,
-  typeHasMatch,
   type DesignType,
 } from '@/lib/types/design';
 import { autoTitleFor, effectiveTitle, type DesignCard } from '@/lib/utils/design-cards';
@@ -73,7 +72,7 @@ export function DesignCardItem({
   const [titleOpen, setTitleOpen] = useState(false);
 
   const title = effectiveTitle(card);
-  const hasMatch = typeHasMatch(card.type ?? undefined);
+  const hasMatch = card.type === 'matchday';
   const designerName = card.designer_id
     ? (designers.find((d) => d.id === card.designer_id)?.displayName ?? 'Auto')
     : 'Auto';
@@ -119,8 +118,9 @@ export function DesignCardItem({
               </span>
             )}
             {outsideWeek && <WarningChip>Fuera de semana</WarningChip>}
-            {card.warnings.map((warning, i) => (
-              <WarningChip key={i}>{warning}</WarningChip>
+            {/* Warnings are unique strings (no duplicates expected) */}
+            {card.warnings.map((warning) => (
+              <WarningChip key={warning}>{warning}</WarningChip>
             ))}
           </div>
         </div>
@@ -167,8 +167,9 @@ export function DesignCardItem({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">Jugador</Label>
+              <Label htmlFor={`player-${card.id}`} className="text-xs">Jugador</Label>
               <Input
+                id={`player-${card.id}`}
                 className="h-9"
                 value={card.player}
                 onChange={(e) => onChange({ player: e.target.value })}
@@ -179,8 +180,9 @@ export function DesignCardItem({
             {hasMatch && (
               <>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Local</Label>
+                  <Label htmlFor={`local-${card.id}`} className="text-xs">Local</Label>
                   <Input
+                    id={`local-${card.id}`}
                     className="h-9"
                     value={card.match_home}
                     onChange={(e) => onChange({ match_home: e.target.value })}
@@ -188,8 +190,9 @@ export function DesignCardItem({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Visitante</Label>
+                  <Label htmlFor={`away-${card.id}`} className="text-xs">Visitante</Label>
                   <Input
+                    id={`away-${card.id}`}
                     className="h-9"
                     value={card.match_away}
                     onChange={(e) => onChange({ match_away: e.target.value })}
@@ -239,8 +242,9 @@ export function DesignCardItem({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Detalles</Label>
+            <Label htmlFor={`details-${card.id}`} className="text-xs">Detalles</Label>
             <Textarea
+              id={`details-${card.id}`}
               rows={2}
               value={card.details}
               onChange={(e) => onChange({ details: e.target.value })}
