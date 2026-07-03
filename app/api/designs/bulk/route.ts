@@ -104,6 +104,7 @@ export async function POST(request: Request) {
         match_away: isMatchday ? d.match_away : null,
         deadline_at: d.deadline_at,
         folder_url: d.folder_url || null,
+        details: d.details || null,
         designer_id: designerId,
         created_by: data.user.id,
         status: 'BACKLOG' as const,
