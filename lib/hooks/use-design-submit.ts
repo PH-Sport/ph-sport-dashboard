@@ -4,27 +4,22 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import type { Design } from '@/lib/types/design';
 import {
-  type BulkDesignRow,
-  type SingleDesignFormData,
-  isRowValid,
-} from '@/lib/utils/design-form';
+  type DesignCard,
+  isCardValid,
+  cardToBulkPayload,
+  effectiveTitle,
+} from '@/lib/utils/design-cards';
 
 interface UseDesignSubmitParams {
   design?: Design | null;
-  formData: SingleDesignFormData;
-  bulkRows: BulkDesignRow[];
+  cards: DesignCard[];
   /** Called after a successful create/edit. Use to refresh data and close. */
   onSuccess: () => void;
 }
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
-export function useDesignSubmit({
-  design,
-  formData,
-  bulkRows,
-  onSuccess,
-}: UseDesignSubmitParams) {
+export function useDesignSubmit({ design, cards, onSuccess }: UseDesignSubmitParams) {
   const [loading, setLoading] = useState(false);
   const isEditMode = !!design;
 
@@ -33,27 +28,29 @@ export function useDesignSubmit({
 
     try {
       if (isEditMode && design) {
-        if (!formData.deadline_at) {
+        const card = cards[0];
+
+        if (!card.deadline_at) {
           toast.error('Selecciona una fecha de entrega');
           setLoading(false);
           return;
         }
 
-        const deadline = formData.deadline_at;
-
-        const isMatchday = formData.type === 'matchday';
+        const deadline = card.deadline_at;
+        const isMatchday = card.type === 'matchday';
         const response = await fetch(`/api/designs/${design.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            type: formData.type,
-            title: formData.title,
-            player: formData.player,
-            match_home: isMatchday ? formData.match_home : null,
-            match_away: isMatchday ? formData.match_away : null,
-            folder_url: formData.folder_url || null,
+            type: card.type ?? 'matchday',
+            title: effectiveTitle(card) || card.player.trim(),
+            player: card.player.trim(),
+            match_home: isMatchday ? card.match_home : null,
+            match_away: isMatchday ? card.match_away : null,
+            folder_url: card.folder_url.trim() || null,
             deadline_at: deadline.toISOString(),
-            designer_id: formData.designer_id || null,
+            designer_id: card.designer_id || null,
+            details: card.details.trim() || null,
           }),
         });
 
@@ -64,17 +61,17 @@ export function useDesignSubmit({
 
         toast.success('Diseño actualizado exitosamente');
       } else {
-        const validRows = bulkRows.filter(isRowValid);
-        if (validRows.length === 0) {
+        const validCards = cards.filter(isCardValid);
+        if (validCards.length === 0) {
           toast.error('Añade al menos un diseño completo');
           setLoading(false);
           return;
         }
 
         const oneHourAgo = new Date(Date.now() - ONE_HOUR_MS);
-        for (const row of validRows) {
-          if (row.deadline_at && row.deadline_at < oneHourAgo) {
-            toast.error(`"${row.title}": la fecha no puede ser tan antigua`);
+        for (const card of validCards) {
+          if (card.deadline_at && card.deadline_at < oneHourAgo) {
+            toast.error(`"${effectiveTitle(card) || card.player}": la fecha no puede ser tan antigua`);
             setLoading(false);
             return;
           }
@@ -84,16 +81,7 @@ export function useDesignSubmit({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            designs: validRows.map((r) => ({
-              type: r.type,
-              title: r.title || undefined,
-              player: r.player,
-              match_home: r.type === 'matchday' ? r.match_home : undefined,
-              match_away: r.type === 'matchday' ? r.match_away : undefined,
-              deadline_at: r.deadline_at!.toISOString(),
-              designer_id: r.designer_id || undefined,
-              folder_url: r.folder_url || undefined,
-            })),
+            designs: validCards.map(cardToBulkPayload),
           }),
         });
 
