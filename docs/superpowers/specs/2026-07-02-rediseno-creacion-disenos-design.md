@@ -111,9 +111,11 @@ spec (ver más abajo).
 - `designer_id` — diseñador (automático u explícito).
 - `folder_url` — carpeta Drive, opcional (se conserva aunque hoy no se use:
   es un enlace, no añade fricción de escritura).
-- `context` **(campo nuevo)** — texto libre opcional con lo específico del
-  tipo (rival, club nuevo, selección, motivo de la firma...). Es el campo que
-  la IA rellena a partir del mensaje pegado sin que nadie lo escriba a mano.
+- `details` **(campo nuevo; la spec lo llamaba `context`, renombrado en la
+  Fase 1 para no chocar con `getDesignContext()`)** — texto libre opcional
+  con lo específico del tipo (rival, club nuevo, selección, motivo de la
+  firma...). Es el campo que la IA rellena a partir del mensaje pegado sin
+  que nadie lo escriba a mano.
 - `title` — pasa a **autogenerarse** a partir de `type` + `player` (+
   `match_home`/`match_away` si aplica), editable si se quiere personalizar.
   Un campo obligatorio menos que rellenar o que la IA tenga que acertar.
@@ -127,32 +129,41 @@ retira por completo (ver "Ficheros afectados").
 
 ### 3. Flujo de entrada unificado
 
-Mismo punto de entrada de hoy (botón "Crear Diseños"). Por dentro, un único
-flujo de tarjetas sustituye a los tabs "Manual"/"Asistente" + tabla de lote:
+Mismo punto de entrada de hoy (botón "Crear Diseños"). Por dentro, un
+**taller de tarjetas** sustituye a los tabs "Manual"/"Asistente" + tabla de
+lote. Modelo validado con mockups interactivos el 2026-07-03 (patrón
+"lienzo + compositor", como Notion AI / ChatGPT; sustituye al modelo
+anterior de "dos acciones de entrada"):
 
-1. **Estado inicial:** dos acciones con el mismo peso visual — "Pegar
-   mensaje" y "Añadir diseño en blanco" — ninguna por defecto. Ambas
-   desembocan en la misma lista de tarjetas.
-2. **Parseo IA** (si se eligió "Pegar mensaje"): el texto se envía a un
-   endpoint propio (`/api/designs/parse`, Claude Haiku) que devuelve N
-   diseños candidatos con `type`, `player`, `match_home`/`match_away` (si
-   aplica), `deadline_at` (infiriendo año cuando falta), `designer_id` (solo
-   si el mensaje nombra a alguien y coincide con un diseñador real),
-   `context`. **Nada se persiste en este paso.**
-3. **Revisión en tarjetas:** cada diseño (generado por IA o añadido a mano)
-   es una tarjeta editable: tipo (chip coloreado según peso), título
-   autogenerado editable, jugador, fecha (con el aviso ya existente de
-   "fuera de la semana visible"), diseñador, contexto colapsable. Campos que
-   la IA no pudo resolver con confianza se marcan como aviso, sin bloquear.
+1. **Centro — lista de tarjetas (Fase 3):** cada diseño es una tarjeta;
+   colapsada muestra título autogenerado, chip de tipo+peso, diseñador y
+   fecha; al pulsarla se despliega su editor. "Añadir diseño" crea una
+   tarjeta en blanco. El centro es completo por sí solo: añadir, editar y
+   confirmar sin IA. La Fase 3 se entrega así, **sin barra ni teasers**.
+2. **Barra del agente (llega con la Fase 4):** compositor persistente bajo
+   la lista, integrado en la estética clara del resto del diálogo — nada
+   de contraste charcoal; referencia: la entrada de ChatGPT en iOS. Doble
+   uso: instrucción en lenguaje natural o mensaje de WhatsApp pegado. El
+   texto va a `/api/designs/parse` (Claude Haiku), que devuelve N diseños
+   candidatos con `type`, `player`, `match_home`/`match_away` (si aplica),
+   `deadline_at` (infiriendo año cuando falta), `designer_id` (solo si el
+   mensaje nombra a alguien y coincide con un diseñador real) y `details`.
+   **Nada se persiste en este paso.**
+3. **Revisión en tarjetas:** las propuestas del agente caen en la misma
+   lista con sello "Agente" y se editan exactamente igual que las
+   manuales. Campos que la IA no pudo resolver con confianza se marcan
+   como aviso, sin bloquear. **Ruido mínimo** en el editor desplegado:
+   tipo, jugador, partido (solo matchday), entrega, diseñador y detalles;
+   el título vive como cabecera autogenerada con edición bajo demanda, y
+   la carpeta de Drive queda tras un enlace discreto.
 4. **Confirmar:** mismo patrón actual — diálogo de confirmación antes de
    crear los N diseños.
 5. El modo edición de un diseño existente pasa a ser "una lista de una sola
    tarjeta", mismo componente que la revisión en lote — sustituye a
    `design-form-single.tsx` como pieza aparte.
 
-El prototipado visual concreto (composición exacta de las dos acciones,
-diseño de la tarjeta) se hace al arrancar la implementación con el sistema de
-diseño real, no como parte de este documento.
+El detalle visual fino se ajusta en la app real con el sistema de diseño
+(los mockups fijan interacción y jerarquía, no el pixel final).
 
 ### 4. Asignación de diseñador
 
@@ -192,7 +203,7 @@ ayuda aparte, vive en el propio flujo.
 ## Manejo de errores
 
 - **Parseo IA falla, timeout o respuesta inválida:** cae a una tarjeta manual
-  con el texto pegado tal cual dentro de `context` — no se pierde lo escrito.
+  con el texto pegado tal cual dentro de `details` — no se pierde lo escrito.
 - **Campo ambiguo** (fecha poco clara, nombre de diseñador sin match): se
   marca como aviso en la tarjeta, nunca bloquea el guardado — mismo criterio
   que el aviso de "fecha fuera de semana" ya existente.
@@ -239,9 +250,10 @@ ayuda aparte, vive en el propio flujo.
 2. **Asignación ponderada + Team page:** algoritmo por peso y ventana
    semanal, % en Team page. Validable de forma aislada, sin tocar el flujo
    de alta todavía.
-3. **Flujo de entrada unificado (sin IA):** tarjetas + entrada dual,
-   sustituye tabs/grid, modo manual mejorado por sí solo.
-4. **Endpoint de parseo IA** integrado en el flujo de tarjetas.
+3. **Taller de tarjetas (sin IA):** el centro manual completo sustituye
+   tabs/tabla; sin barra del agente todavía.
+4. **Agente:** endpoint de parseo IA + compositor integrado en la estética
+   clara; las propuestas caen como tarjetas.
 5. **`InfoTip`** en los puntos nuevos del flujo.
 
 ## Criterios de aceptación
