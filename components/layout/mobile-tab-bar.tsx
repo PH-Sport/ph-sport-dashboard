@@ -95,13 +95,14 @@ export function MobileTabBar() {
           </ul>
         </nav>
 
-        {/* Círculo de acción separado (trailing) — el CTA primario de la app */}
+        {/* Acción separada (trailing) — el CTA primario de la app. Misma esquina
+            2xl que la píldora: pieza de la misma familia, no un círculo ajeno. */}
         <button
           type="button"
           onClick={openCreate}
           aria-label="Crear diseños"
           className={cn(
-            'flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-overlay',
+            'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-overlay',
             'outline-none transition-transform duration-200 ease-out-expo active:scale-95',
             'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
           )}
