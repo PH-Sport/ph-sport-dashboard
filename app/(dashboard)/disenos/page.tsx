@@ -209,10 +209,12 @@ function DesignsPageContent() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          {/* En móvil crear vive en el «+» de la tab bar inferior. */}
           <CreateDesignButton
             onDesignCreated={() => mutate()}
             activeWeekStart={filters.weekStartFilter}
             activeWeekEnd={filters.weekEndFilter}
+            className="hidden md:inline-flex"
           />
         </>
       }

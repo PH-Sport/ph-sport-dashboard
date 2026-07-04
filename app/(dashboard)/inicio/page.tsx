@@ -89,7 +89,14 @@ export default function Dashboard() {
     <DashboardPage
       title={title}
       subtitle={`Semana del ${dateRangeLabel}`}
-      actions={<CreateDesignButton onDesignCreated={() => mutate()} variant="outline" />}
+      // En móvil crear vive en el «+» de la tab bar inferior; este botón es de escritorio.
+      actions={
+        <CreateDesignButton
+          onDesignCreated={() => mutate()}
+          variant="outline"
+          className="hidden md:inline-flex"
+        />
+      }
       loading={showSkeleton}
       skeleton={<DashboardSkeleton variant={profile?.role === 'ADMIN' ? 'admin' : 'designer'} />}
     >
