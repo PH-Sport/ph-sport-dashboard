@@ -7,6 +7,7 @@ import { SPRINGS } from '@/components/ui/animations';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { AppSidebar, SidebarProvider, useSidebar } from './app-sidebar';
+import { MobileTabBar } from './mobile-tab-bar';
 import { Header } from './header';
 
 interface AppLayoutProps {
@@ -45,12 +46,14 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* El shell se renderiza en SSR; el contenido de datos (SWR persistido,
           solo-cliente) se difiere a la hidratación para evitar mismatches. */}
       <MainArea>{hydrated ? children : null}</MainArea>
+      {/* Navegación móvil: tab bar inferior flotante (en escritorio no existe). */}
+      <MobileTabBar />
     </SidebarProvider>
   );
 }
 
 function MainArea({ children }: { children: React.ReactNode }) {
-  const { contentPadLeft, setMobileOpen } = useSidebar();
+  const { contentPadLeft } = useSidebar();
   return (
     <motion.div
       initial={false}
@@ -58,7 +61,7 @@ function MainArea({ children }: { children: React.ReactNode }) {
       transition={SPRINGS.smooth}
       className="min-h-svh"
     >
-      <Header onMenuClick={() => setMobileOpen(true)} />
+      <Header />
       <main id="main-content" className="animate-page-enter">
         {children}
       </main>

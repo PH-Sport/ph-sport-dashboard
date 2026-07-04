@@ -36,6 +36,14 @@ Lo que NO funciona:
 4. Escritorio pixel-idéntico salvo mejoras deliberadas (targets, wrap).
 5. La rama NO se mergea a main: el usuario valida en Vercel Preview.
 
+## Ronda 2 — feedback del usuario (2026-07-04)
+
+Tres cambios tras revisar la Preview en DevTools:
+
+1. **Filtros de Diseños plegables en móvil**: búsqueda siempre visible + botón de filtros (punto dorado si hay activos) que despliega estado/diseñador/fechas con `Collapse`. Escritorio intacto. Además el botón de crear pasa a "Crear" en móvil para que tabs+crear compartan fila. Nuevo hook `useIsMobile` (`lib/hooks/use-is-mobile.ts`) como única fuente del corte 767px en JS.
+2. **Piel PHSPORT para FullCalendar**: botones tipo placa neutra con activo dorado (idioma del WeekNav), título mono tabular uppercase, cabeceras de día estilo eyebrow, horas en mono. Vale para la vista agenda (móvil) y el mes (escritorio).
+3. **Tab bar inferior en móvil** (patrón PWA, ref. Apple Music): placa flotante `glass-sidebar` con pill dorada deslizante (`layoutId`), 4 secciones (Inicio · Semana · Diseños · Ajustes), safe-area inferior. Sustituye al hamburger+Sheet en móvil (eliminados); escritorio sigue con la sidebar. Si se quisiera SOLO en la app instalada, gatear el componente con `@media (display-mode: standalone)`.
+
 ## Nota de convivencia con `worktree-rediseno-creacion-disenos-fase3-4`
 
 Esa rama elimina `design-form-single/bulk` (−571 líneas). Aquí se les aplica el mínimo para que no estén rotos en móvil; el conflicto al mergear será trivial (borrado gana).

@@ -42,7 +42,13 @@ export function CreateDesignButton({
         onClick={() => setDialogOpen(true)}
       >
         <Plus className="mr-2 h-4 w-4" />
-        {editDesign ? 'Editar Diseño' : 'Crear Diseños'}
+        {editDesign ? (
+          'Editar Diseño'
+        ) : (
+          <>
+            Crear<span className="hidden sm:inline">&nbsp;Diseños</span>
+          </>
+        )}
       </Button>
 
       <CreateDesignDialog

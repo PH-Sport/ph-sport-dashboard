@@ -32,7 +32,6 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { SPRINGS, TWEENS } from '@/components/ui/animations';
 import { CalendarRange, Home, Palette, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-react';
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { Hint } from '@/components/ui/tooltip';
 import { useAuth } from '@/lib/auth/auth-context';
 import { PhSportMark } from '@/components/layout/ph-sport-mark';
@@ -52,8 +51,6 @@ type SidebarApi = {
   expanded: boolean;
   toggle: () => void;
   isMobile: boolean;
-  mobileOpen: boolean;
-  setMobileOpen: (open: boolean) => void;
   /** Padding-left (px) que el contenido reserva para esquivar la placa + gap. */
   contentPadLeft: number;
 };
@@ -75,7 +72,6 @@ export function SidebarProvider({
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [isMobile, setIsMobile] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const restored = useRef(false);
 
   // Restaurar de cookie una sola vez
@@ -96,10 +92,8 @@ export function SidebarProvider({
   }, []);
 
   const toggle = useCallback(() => {
-    if (isMobile) {
-      setMobileOpen((v) => !v);
-      return;
-    }
+    // En móvil no hay placa que plegar: la navegación vive en la tab bar inferior.
+    if (isMobile) return;
     setExpanded((prev) => {
       const next = !prev;
       document.cookie = `${COOKIE_KEY}=${next ? '1' : '0'}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
@@ -125,11 +119,9 @@ export function SidebarProvider({
       expanded,
       toggle,
       isMobile,
-      mobileOpen,
-      setMobileOpen,
       contentPadLeft: isMobile ? 0 : w + SIDE_INSET + GAP,
     };
-  }, [expanded, toggle, isMobile, mobileOpen]);
+  }, [expanded, toggle, isMobile]);
 
   return <SidebarCtx.Provider value={api}>{children}</SidebarCtx.Provider>;
 }
@@ -142,7 +134,7 @@ type NavItem = {
   icon: ComponentType<{ className?: string }>;
 };
 
-function buildNavItems(role: 'ADMIN' | 'DESIGNER' | undefined): NavItem[] {
+export function buildNavItems(role: 'ADMIN' | 'DESIGNER' | undefined): NavItem[] {
   return [
     { href: '/inicio', label: 'Inicio', icon: Home },
     // Vista semanal de trabajo: el equipo (mánager) o la cola propia (diseñador).
@@ -153,39 +145,19 @@ function buildNavItems(role: 'ADMIN' | 'DESIGNER' | undefined): NavItem[] {
   ];
 }
 
-function isItemActive(pathname: string, href: string): boolean {
+export function isItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + '/');
 }
 
 // ─── AppSidebar (entry point) ────────────────────────────────
 
 export function AppSidebar() {
-  const { isMobile, mobileOpen, setMobileOpen, expanded } = useSidebar();
+  const { expanded } = useSidebar();
   const { profile } = useAuth();
   const pathname = usePathname() ?? '';
   const items = buildNavItems(profile?.role);
 
-  if (isMobile) {
-    return (
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent
-          side="left"
-          className="glass-sidebar w-[16rem] p-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pt-[env(safe-area-inset-top)]"
-        >
-          <SheetTitle className="sr-only">Navegación PHSPORT</SheetTitle>
-          <SheetDescription className="sr-only">Menú principal del producto</SheetDescription>
-          <SidebarBody
-            items={items}
-            pathname={pathname}
-            expanded
-            onItemClick={() => setMobileOpen(false)}
-            showToggle={false}
-          />
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
+  // Solo escritorio (hidden md:flex): en móvil la navegación es la MobileTabBar.
   return (
     <motion.aside
       initial={false}

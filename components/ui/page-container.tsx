@@ -31,8 +31,9 @@ export function PageContainer({
   return (
     <div
       className={cn(
-        // Móvil: p-4 + safe-area inferior (home indicator); crece a p-6/p-8 con la pantalla
-        'flex flex-col gap-4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:gap-6 sm:p-6 sm:pb-6 md:p-8 md:pb-8 mx-auto w-full',
+        // Móvil (<md): p-4 + holgura inferior para la MobileTabBar flotante
+        // (h-14 + inset + aire) más la safe-area del home indicator
+        'flex flex-col gap-4 p-4 pb-[calc(env(safe-area-inset-bottom)+5.25rem)] sm:gap-6 sm:p-6 sm:pb-[calc(env(safe-area-inset-bottom)+5.25rem)] md:p-8 md:pb-8 mx-auto w-full',
         MAX_WIDTH_CLASS[maxWidth],
         className
       )}

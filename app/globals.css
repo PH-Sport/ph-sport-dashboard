@@ -313,55 +313,151 @@
   }
 }
 
-/* FullCalendar Compat */
+/* ───────────────────────────────────────────────────────────────────────────
+   FullCalendar — piel PHSPORT. FullCalendar trae su propio tema (botones
+   rellenos, tipografías propias); aquí se re-viste con los tokens del sistema
+   para que el calendario hable el mismo idioma que el resto de la app:
+   botones tipo placa (como el WeekNav), título en mono tabular, cabeceras de
+   día estilo eyebrow y celdas sobre --border/--muted.
+   ─────────────────────────────────────────────────────────────────────────── */
 .fc {
   --fc-border-color: hsl(var(--border));
-  --fc-button-text-color: hsl(var(--primary-foreground));
-  --fc-button-bg-color: hsl(var(--primary));
-  --fc-button-border-color: hsl(var(--primary));
-  --fc-button-hover-bg-color: hsl(var(--primary) / 0.9);
-  --fc-button-hover-border-color: hsl(var(--primary) / 0.9);
-  --fc-button-active-bg-color: hsl(var(--primary) / 0.8);
-  --fc-button-active-border-color: hsl(var(--primary) / 0.8);
-  --fc-today-bg-color: hsl(var(--accent));
+  --fc-button-text-color: hsl(var(--muted-foreground));
+  --fc-button-bg-color: hsl(var(--card));
+  --fc-button-border-color: hsl(var(--border));
+  --fc-button-hover-bg-color: hsl(var(--muted) / 0.6);
+  --fc-button-hover-border-color: hsl(var(--border));
+  --fc-button-active-bg-color: hsl(var(--primary) / 0.15);
+  --fc-button-active-border-color: hsl(var(--primary) / 0.35);
+  --fc-today-bg-color: hsl(var(--primary) / 0.06);
   --fc-page-bg-color: hsl(var(--background));
   --fc-neutral-bg-color: hsl(var(--muted));
   --fc-list-event-hover-bg-color: hsl(var(--accent));
+  font-size: 0.875rem;
 }
 
 .fc-theme-standard .fc-scrollgrid {
   border-color: hsl(var(--border));
 }
 
+/* Toolbar — el título habla el idioma del WeekNav (mono, tabular, eyebrow) */
 .fc .fc-toolbar-title {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Botones — placa neutra con acento dorado solo en el estado activo */
+.fc .fc-button,
+.fc .fc-button-primary {
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: capitalize;
+  box-shadow: none !important;
+  transition: color 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out;
+}
+.fc .fc-button-primary:hover:not(:disabled) {
   color: hsl(var(--foreground));
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.15);
+  border-color: hsl(var(--primary) / 0.35);
+}
+.fc .fc-button-primary:disabled {
+  color: hsl(var(--muted-foreground) / 0.5);
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.6);
+  opacity: 1;
+}
+.fc .fc-button:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.6);
+  outline-offset: 1px;
+}
+.fc .fc-icon {
+  font-size: 1.1em;
+  vertical-align: -0.12em;
+}
+
+/* Rejilla mensual (escritorio) */
+.fc .fc-col-header-cell-cushion {
+  padding: 0.5rem 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.fc .fc-daygrid-day-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+.fc .fc-daygrid-more-link {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
 }
 
 .fc-event {
   cursor: pointer;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
 }
 
-/* Móvil: toolbar compacta — el título mensual/semanal no debe empujar los botones */
-@media (max-width: 767px) {
-  .fc .fc-toolbar.fc-header-toolbar {
-    flex-wrap: wrap;
-    row-gap: 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-  .fc .fc-toolbar-title {
-    font-size: 1.05rem;
-  }
-  .fc .fc-button {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* Vista agenda (listWeek) — misma superficie que las cards del sistema */
+/* Vista agenda (móvil) — cabeceras de día como eyebrows, horas en mono */
 .fc-theme-standard .fc-list {
   border-color: hsl(var(--border));
   border-radius: 0.75rem;
+  overflow: hidden;
+}
+.fc .fc-list-day-cushion {
+  background: hsl(var(--muted) / 0.55);
+  padding: 0.5rem 0.875rem;
+}
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.fc .fc-list-event td {
+  padding: 0.625rem 0.875rem;
+}
+.fc .fc-list-event-time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+.fc .fc-list-event-title {
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 .fc .fc-list-empty {
   background: hsl(var(--muted) / 0.4);
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
 }
