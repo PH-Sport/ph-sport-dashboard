@@ -33,7 +33,7 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
         type="button"
         onClick={onPrev}
         aria-label="Semana anterior"
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-7 md:w-7"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -60,7 +60,7 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
         type="button"
         onClick={onNext}
         aria-label="Semana siguiente"
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-7 md:w-7"
       >
         <ChevronRight className="h-4 w-4" />
       </button>

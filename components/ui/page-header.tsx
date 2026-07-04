@@ -28,16 +28,16 @@ export function PageHeader({
       )}
     >
       <div className="min-w-0">
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          {Icon ? <Icon className="h-8 w-8 text-primary" aria-hidden /> : null}
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+          {Icon ? <Icon className="h-7 w-7 md:h-8 md:w-8 text-primary" aria-hidden /> : null}
           <span className="truncate">{title}</span>
         </h1>
         {subtitle ? (
-          <p className="text-muted-foreground">{subtitle}</p>
+          <p className="text-sm md:text-base text-muted-foreground">{subtitle}</p>
         ) : null}
       </div>
       {actions ? (
-        <div className="flex items-center gap-2 shrink-0">{actions}</div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>
       ) : null}
     </div>
   );

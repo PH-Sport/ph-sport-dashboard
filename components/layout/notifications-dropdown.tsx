@@ -70,7 +70,10 @@ export function NotificationsDropdown() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-80 sm:w-96 p-0 z-50">
+      <DropdownMenuContent
+        align="end"
+        className="w-[min(20rem,calc(100vw-1.5rem))] sm:w-96 p-0 z-50"
+      >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h4 className="font-semibold text-sm">Notificaciones</h4>
           <div className="flex items-center gap-2">
@@ -93,7 +96,7 @@ export function NotificationsDropdown() {
           </div>
         </div>
 
-        <ScrollArea className="h-[350px]">
+        <ScrollArea className="h-[min(350px,55dvh)]">
           {loading ? (
             <div className="flex justify-center py-8">
               <Loader />
@@ -131,7 +134,8 @@ export function NotificationsDropdown() {
                   <Hint label="Eliminar">
                     <button
                       onClick={(e) => handleDelete(e, notification.id)}
-                      className="mt-1 p-1 rounded hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Eliminar notificación"
+                      className="mt-1 p-2 -m-1 rounded-lg hover:bg-destructive/10 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
                     >
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </button>

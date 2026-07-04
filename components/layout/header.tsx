@@ -26,23 +26,24 @@ export function Header({ onMenuClick }: HeaderProps) {
   const sectionLabel = SECTION_LABELS[segment] ?? '';
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm">
-      <div className="flex h-12 items-center justify-between gap-4 px-4 md:px-6">
-        <div className="flex items-center gap-3">
-          {/* Mobile: abre el sidebar en Sheet. Desktop usa el toggle interno. */}
+    <header className="sticky top-0 z-30 border-b border-border bg-background/90 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] backdrop-blur-sm">
+      <div className="flex h-12 items-center justify-between gap-2 px-3 md:gap-4 md:px-6">
+        <div className="flex min-w-0 items-center gap-2 md:gap-3">
+          {/* Mobile: abre el sidebar en Sheet. Desktop usa el toggle interno.
+              p-2.5 + icono 20px = objetivo táctil de 40px. */}
           <button
             onClick={onMenuClick}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
+            className="-ml-1 rounded-lg p-2.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
             aria-label="Abrir menú"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <span className="font-mono text-eyebrow uppercase text-muted-foreground">
+          <span className="truncate font-mono text-eyebrow uppercase text-muted-foreground">
             {sectionLabel}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
           <RolePill />
           <ThemeToggle />
           <NotificationsDropdown />

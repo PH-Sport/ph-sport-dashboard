@@ -170,7 +170,7 @@ export function AppSidebar() {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="glass-sidebar w-[16rem] p-0"
+          className="glass-sidebar w-[16rem] p-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pt-[env(safe-area-inset-top)]"
         >
           <SheetTitle className="sr-only">Navegación PHSPORT</SheetTitle>
           <SheetDescription className="sr-only">Menú principal del producto</SheetDescription>
@@ -293,7 +293,8 @@ function NavRow({
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'relative flex h-10 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors',
+        // h-11 en táctil (objetivo ≥44px); h-10 con puntero de escritorio
+        'relative flex h-11 items-center overflow-hidden rounded-xl px-[10px] outline-none transition-colors md:h-10',
         'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
         active
           ? 'text-primary'

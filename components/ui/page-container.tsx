@@ -31,7 +31,8 @@ export function PageContainer({
   return (
     <div
       className={cn(
-        'flex flex-col gap-6 p-6 md:p-8 mx-auto w-full',
+        // Móvil: p-4 + safe-area inferior (home indicator); crece a p-6/p-8 con la pantalla
+        'flex flex-col gap-4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:gap-6 sm:p-6 sm:pb-6 md:p-8 md:pb-8 mx-auto w-full',
         MAX_WIDTH_CLASS[maxWidth],
         className
       )}
