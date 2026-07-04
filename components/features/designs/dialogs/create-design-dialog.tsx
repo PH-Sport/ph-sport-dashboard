@@ -169,10 +169,10 @@ export function CreateDesignDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className={cn(
-          "max-h-[90vh]",
+          "max-h-[90dvh]",
           isEditMode
             ? "max-w-2xl overflow-y-auto"
-            : "w-[90vw] max-w-[1100px] h-[78vh] max-h-[760px] overflow-hidden flex flex-col"
+            : "w-full h-[85dvh] max-w-[1100px] overflow-hidden flex flex-col md:w-[90vw] md:h-[78vh] md:max-h-[760px]"
         )}>
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-3">

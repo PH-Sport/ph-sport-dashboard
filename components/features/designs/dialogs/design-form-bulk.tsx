@@ -144,8 +144,14 @@ export function DesignFormBulk({
             </div>
           </div>
         )}
-        <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges]">
-          <table className="w-full caption-bottom text-sm table-fixed">
+        {/* Móvil: la tabla mantiene un ancho mínimo usable y se desplaza en horizontal */}
+        <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable_both-edges]">
+          <table
+            className={cn(
+              'w-full caption-bottom text-sm table-fixed',
+              hasMatch ? 'min-w-[720px]' : 'min-w-[560px]'
+            )}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10" aria-label="Expandir" />
