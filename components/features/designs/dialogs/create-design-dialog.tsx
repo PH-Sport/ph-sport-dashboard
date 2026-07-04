@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Hint } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -11,22 +10,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Edit, Save, Layers, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Edit, Save, Layers, Loader2, Info } from 'lucide-react';
 import { useDesigners } from '@/lib/hooks/use-designers';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SPRINGS } from '@/components/ui/animations';
 
 import type { Design } from '@/lib/types/design';
+import { isOutsideWeek } from '@/lib/utils/design-form';
 import {
-  type BulkDesignRow,
-  type SingleDesignFormData,
-  createEmptyRow,
-  isRowValid,
-  isRowEmpty,
-  isOutsideWeek,
-} from '@/lib/utils/design-form';
-import { DesignFormSingle } from './design-form-single';
-import { DesignFormBulk } from './design-form-bulk';
+  type DesignCard,
+  createEmptyCard,
+  designToCard,
+  isCardValid,
+  isCardEmpty,
+  cardsWeight,
+} from '@/lib/utils/design-cards';
+import { DesignCardItem } from '@/components/features/designs/cards/design-card-item';
+import { AgentComposer } from '@/components/features/designs/cards/agent-composer';
 import { useDesignSubmit } from '@/lib/hooks/use-design-submit';
 import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -55,82 +56,78 @@ export function CreateDesignDialog({
   const { designers, loading: loadingDesigners } = useDesigners();
   const isEditMode = !!design;
 
-  // Datos del formulario individual
-  const [formData, setFormData] = useState<SingleDesignFormData>({
-    type: 'matchday',
-    title: '',
-    player: '',
-    match_home: '',
-    match_away: '',
-    deadline_at: undefined,
-    folder_url: '',
-    designer_id: null,
-  });
-
-  // Datos para modo lote (filas completas)
-  const [bulkRows, setBulkRows] = useState<BulkDesignRow[]>([createEmptyRow()]);
+  // Taller de tarjetas: N tarjetas en creación, 1 sola (no removible) en edición.
+  const [cards, setCards] = useState<DesignCard[]>(() => [createEmptyCard()]);
+  // Solo una tarjeta abierta a la vez; togglear la abierta la cierra.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (design) {
-      setFormData({
-        type: design.type || 'matchday',
-        title: design.title || '',
-        player: design.player || '',
-        match_home: design.match_home || '',
-        match_away: design.match_away || '',
-        deadline_at: design.deadline_at ? new Date(design.deadline_at) : undefined,
-        folder_url: design.folder_url || '',
-        designer_id: design.designer_id || null,
-      });
+      const card = designToCard(design);
+      setCards([card]);
+      setOpenId(card.id);
     } else {
-      setFormData({
-        type: 'matchday',
-        title: '',
-        player: '',
-        match_home: '',
-        match_away: '',
-        deadline_at: undefined,
-        folder_url: '',
-        designer_id: null,
-      });
-      setBulkRows([createEmptyRow()]);
+      const card = createEmptyCard();
+      setCards([card]);
+      setOpenId(card.id);
     }
   }, [design, open]);
 
-  // Las filas nuevas heredan el tipo del lote (todas comparten tipo).
-  const addBulkRow = () => {
-    setBulkRows([...bulkRows, createEmptyRow(bulkRows[0]?.type)]);
+  const addCard = () => {
+    const card = createEmptyCard();
+    setCards((prev) => [...prev, card]);
+    setOpenId(card.id);
+    requestAnimationFrame(() => {
+      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
+    });
   };
 
-  const addMultipleBulkRows = (count: number) => {
-    const newRows = Array.from({ length: count }, () => createEmptyRow(bulkRows[0]?.type));
-    setBulkRows([...bulkRows, ...newRows]);
+  const updateCard = (id: string, patch: Partial<DesignCard>) => {
+    setCards((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  };
+
+  // Tarjetas propuestas por el agente (F4): si la única tarjeta es la vacía inicial,
+  // la reemplaza; si no, las añade al final. Colapsadas salvo que llegue solo 1.
+  const appendCards = (newCards: DesignCard[]) => {
+    if (newCards.length === 0) return;
+    setCards((prev) => {
+      const shouldReplace = prev.length === 1 && isCardEmpty(prev[0]);
+      return shouldReplace ? newCards : [...prev, ...newCards];
+    });
+    if (newCards.length === 1) {
+      setOpenId(newCards[0].id);
+    }
+    requestAnimationFrame(() => {
+      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
+    });
+  };
+
+  const removeCard = (id: string) => {
+    setCards((prev) => prev.filter((c) => c.id !== id));
+    setOpenId((prev) => (prev === id ? null : prev));
+  };
+
+  const toggleCard = (id: string) => {
+    setOpenId((prev) => (prev === id ? null : id));
   };
 
   const { confirm, isOpen: confirmOpen, options: confirmOptions, handleConfirm, handleCancel } = useConfirm();
 
   const { loading, submit } = useDesignSubmit({
     design,
-    formData,
-    bulkRows,
+    cards,
     onSuccess: () => {
-      setFormData({
-        type: 'matchday',
-        title: '',
-        player: '',
-        match_home: '',
-        match_away: '',
-        deadline_at: undefined,
-        folder_url: '',
-        designer_id: null,
-      });
-      setBulkRows([createEmptyRow()]);
+      const card = createEmptyCard();
+      setCards([card]);
+      setOpenId(card.id);
       onDesignCreated();
       onOpenChange(false);
     },
   });
 
-  const validBulkCount = bulkRows.filter(isRowValid).length;
+  const validCount = cards.filter(isCardValid).length;
+  const incompleteCount = cards.filter((c) => !isCardValid(c) && !isCardEmpty(c)).length;
 
   // Toda creación/edición pasa por una confirmación antes de impactar la base.
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -145,12 +142,12 @@ export function CreateDesignDialog({
       });
       if (!ok) return;
     } else {
-      if (validBulkCount === 0) return;
-      const plural = validBulkCount !== 1;
+      if (validCount === 0) return;
+      const plural = validCount !== 1;
       const ok = await confirm({
         title: 'Confirmar creación',
-        description: `Se ${plural ? 'crearán' : 'creará'} ${validBulkCount} diseño${plural ? 's' : ''}. ¿Continuar?`,
-        confirmText: `Crear ${validBulkCount} diseño${plural ? 's' : ''}`,
+        description: `Se ${plural ? 'crearán' : 'creará'} ${validCount} diseño${plural ? 's' : ''}. ¿Continuar?`,
+        confirmText: `Crear ${validCount} diseño${plural ? 's' : ''}`,
         cancelText: 'Cancelar',
         variant: 'info',
       });
@@ -158,12 +155,18 @@ export function CreateDesignDialog({
     }
     await submit();
   };
-  const hasIncompleteRows = bulkRows.some((r) => !isRowValid(r) && !isRowEmpty(r));
-  const editDeadlineOutsideWeek = isEditMode && isOutsideWeek(formData.deadline_at, activeWeekStart, activeWeekEnd);
 
   const weekRangeLabel = (activeWeekStart && activeWeekEnd)
     ? `${activeWeekStart.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} – ${activeWeekEnd.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`
     : null;
+
+  // Banner agregado: cuántas tarjetas válidas caen fuera de la semana visible.
+  const outsideWeekCount = useMemo(() => {
+    if (!activeWeekStart || !activeWeekEnd) return 0;
+    return cards.filter(
+      (c) => isCardValid(c) && isOutsideWeek(c.deadline_at, activeWeekStart, activeWeekEnd)
+    ).length;
+  }, [cards, activeWeekStart, activeWeekEnd]);
 
   return (
     <>
@@ -172,7 +175,7 @@ export function CreateDesignDialog({
           "max-h-[90dvh]",
           isEditMode
             ? "max-w-2xl overflow-y-auto"
-            : "w-full h-[85dvh] max-w-[1100px] overflow-hidden flex flex-col md:w-[90vw] md:h-[78vh] md:max-h-[760px]"
+            : "w-full h-[85dvh] max-w-[920px] overflow-hidden flex flex-col md:w-[92vw] md:h-[80vh] md:max-h-[780px]"
         )}>
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-3">
@@ -193,115 +196,81 @@ export function CreateDesignDialog({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Modo de entrada: Manual (activo) · Asistente IA (próximamente) */}
-          {!isEditMode && (
-            <div className="mt-2 flex w-fit items-center gap-0.5 rounded-xl border border-border bg-background p-1">
-              <span className="flex h-8 items-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground shadow-sm">
-                Manual
-              </span>
-              <Hint label="Asistente con IA — próximamente">
-                <span
-                  aria-disabled
-                  className="flex h-8 cursor-not-allowed items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground/50"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Asistente
-                  <span className="ml-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[9px] uppercase tracking-wider">
-                    Pronto
-                  </span>
-                </span>
-              </Hint>
-            </div>
-          )}
-
           <form
             onSubmit={handleFormSubmit}
             className={cn(!isEditMode && "mt-4 flex flex-1 min-h-0 flex-col")}
           >
-            <div className={cn("space-y-6 mt-4", !isEditMode && "mt-0 flex-1 min-h-0")}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={isEditMode ? 'edit' : 'batch'}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className={cn("space-y-6", !isEditMode && "h-full")}
+            <div className={cn("mt-4", !isEditMode && "mt-0 flex flex-1 min-h-0 flex-col gap-3")}>
+              {outsideWeekCount > 0 && weekRangeLabel && (
+                <div className="flex shrink-0 items-start gap-2 rounded-md border border-status-warning/30 bg-status-warning/5 p-3 text-sm text-status-warning">
+                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-medium">
+                      {outsideWeekCount} diseño{outsideWeekCount !== 1 ? 's' : ''}
+                    </span>{' '}
+                    con fecha fuera de la semana visible ({weekRangeLabel}).{' '}
+                    <span className="text-status-warning/90">
+                      Se crearán correctamente, pero no aparecerán en la vista actual hasta que cambies el filtro de semana.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div
+                ref={listRef}
+                className={cn(
+                  "space-y-3",
+                  !isEditMode && "flex-1 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]"
+                )}
               >
-              {isEditMode ? (
-                <DesignFormSingle
-                  formData={formData}
-                  onChange={setFormData}
-                  designers={designers}
-                  loadingDesigners={loadingDesigners}
-                  deadlineOutsideWeek={editDeadlineOutsideWeek}
-                  weekRangeLabel={weekRangeLabel}
-                />
-              ) : (
-                <DesignFormBulk
-                  bulkRows={bulkRows}
-                  onChange={setBulkRows}
-                  designers={designers}
-                  loadingDesigners={loadingDesigners}
-                  activeWeekStart={activeWeekStart}
-                  activeWeekEnd={activeWeekEnd}
-                  weekRangeLabel={weekRangeLabel}
-                />
-            )}
-              </motion.div>
-            </AnimatePresence>
+                <AnimatePresence initial={false}>
+                  {cards.map((card, index) => (
+                    <motion.div
+                      key={card.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={SPRINGS.smooth}
+                    >
+                      <DesignCardItem
+                        card={card}
+                        index={index + 1}
+                        open={openId === card.id}
+                        onToggle={() => toggleCard(card.id)}
+                        onChange={(patch) => updateCard(card.id, patch)}
+                        onRemove={() => removeCard(card.id)}
+                        canRemove={!isEditMode && cards.length > 1}
+                        designers={designers}
+                        loadingDesigners={loadingDesigners}
+                        outsideWeek={isOutsideWeek(card.deadline_at, activeWeekStart, activeWeekEnd)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+
+                {!isEditMode && (
+                  <button
+                    type="button"
+                    onClick={addCard}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Añadir diseño
+                  </button>
+                )}
+              </div>
+
+              {!isEditMode && <AgentComposer onCards={appendCards} disabled={loading} />}
             </div>
 
-          <DialogFooter
-            className={cn(
-              'mt-6 shrink-0',
-              !isEditMode && 'border-t border-border bg-card pt-4 sm:justify-between sm:space-x-0'
-            )}
-          >
-            {isEditMode ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading || (!isEditMode && validBulkCount === 0)}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Guardando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Guardar Cambios
-                    </>
-                  )}
-                </Button>
-              </>
-            ) : (
-              <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={addBulkRow}>
-                    <Plus className="mr-1 h-4 w-4" />
-                    +1 Fila
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => addMultipleBulkRows(5)}>
-                    +5 Filas
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => addMultipleBulkRows(10)}>
-                    +10 Filas
-                  </Button>
-                  {hasIncompleteRows && (
-                    <span className="text-sm text-amber-600">Hay filas incompletas</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-end gap-2">
+            <DialogFooter
+              className={cn(
+                'mt-6 shrink-0',
+                !isEditMode && 'border-t border-border bg-card pt-4 sm:justify-between sm:space-x-0'
+              )}
+            >
+              {isEditMode ? (
+                <>
                   <Button
                     type="button"
                     variant="outline"
@@ -311,7 +280,7 @@ export function CreateDesignDialog({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={loading || validBulkCount === 0}
+                    disabled={loading}
                   >
                     {loading ? (
                       <>
@@ -320,18 +289,56 @@ export function CreateDesignDialog({
                       </>
                     ) : (
                       <>
-                        <Layers className="mr-2 h-4 w-4" />
-                        Crear {validBulkCount} Diseño{validBulkCount !== 1 ? 's' : ''}
+                        <Save className="mr-2 h-4 w-4" />
+                        Guardar Cambios
                       </>
                     )}
                   </Button>
-                </div>
-              </>
-            )}
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                    <span>
+                      <span className="font-mono">{cards.length}</span> diseño{cards.length !== 1 ? 's' : ''} · peso{' '}
+                      <span className="font-mono">{cardsWeight(cards)}</span>
+                    </span>
+                    {incompleteCount > 0 && (
+                      <span className="text-status-warning">
+                        · <span className="font-mono">{incompleteCount}</span> incompleto{incompleteCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => onOpenChange(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading || validCount === 0}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <Layers className="mr-2 h-4 w-4" />
+                          Crear {validCount} Diseño{validCount !== 1 ? 's' : ''}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {confirmOptions && (
         <ConfirmDialog

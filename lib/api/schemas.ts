@@ -35,6 +35,7 @@ const bulkDesignItemSchema = z
     deadline_at: isoDateTime,
     designer_id: z.union([uuid, z.literal('auto')]).nullish(),
     folder_url: z.string().url().max(2000).optional().or(z.literal('')),
+    details: z.string().trim().max(2000).optional(),
   })
   .strict()
   .superRefine((d, ctx) => {
@@ -64,6 +65,7 @@ export const updateDesignSchema = z
     deadline_at: isoDateTime.optional(),
     folder_url: z.string().url().max(2000).nullable().optional(),
     designer_id: z.union([uuid, z.literal('auto')]).nullable().optional(),
+    details: z.string().trim().max(2000).nullable().optional(),
   })
   .strict();
 export type UpdateDesignInput = z.infer<typeof updateDesignSchema>;
@@ -83,3 +85,9 @@ export const updateAssigneeSchema = z
   })
   .strict();
 export type UpdateAssigneeInput = z.infer<typeof updateAssigneeSchema>;
+
+/** POST /api/designs/parse — mensaje en lenguaje natural que el agente interpreta */
+export const parseMessageSchema = z.object({
+  message: z.string().trim().min(1).max(4000),
+}).strict();
+export type ParseMessageInput = z.infer<typeof parseMessageSchema>;
