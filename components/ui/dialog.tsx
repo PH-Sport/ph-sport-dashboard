@@ -38,16 +38,28 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & MotionProps;
+type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> &
+  MotionProps & {
+    /** Móvil: hoja a pantalla completa (el wrapper pierde el padding y el
+     * contenido puede ocupar 100dvh). En escritorio no cambia nada. */
+    fullscreenOnMobile?: boolean;
+  };
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, ...props }, ref) => (
+>(({ className, children, fullscreenOnMobile = false, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content asChild>
-      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
+      <div
+        className={cn(
+          'pointer-events-none fixed inset-0 z-50 flex items-center justify-center',
+          fullscreenOnMobile
+            ? 'md:p-4 md:pb-[max(1rem,env(safe-area-inset-bottom))] md:pt-[max(1rem,env(safe-area-inset-top))]'
+            : 'p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]'
+        )}
+      >
         <motion.div
           ref={ref as unknown as React.Ref<HTMLDivElement>}
           className={cn(

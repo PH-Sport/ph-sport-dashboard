@@ -171,27 +171,35 @@ export function CreateDesignDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className={cn(
-          "max-h-[90dvh]",
-          isEditMode
-            ? "max-w-2xl overflow-y-auto"
-            : "w-full h-[85dvh] max-w-[920px] overflow-hidden flex flex-col md:w-[92vw] md:h-[80vh] md:max-h-[780px]"
-        )}>
+        <DialogContent
+          // Móvil: hoja a pantalla completa — todo el vertical para las tarjetas.
+          fullscreenOnMobile={!isEditMode}
+          className={cn(
+            isEditMode
+              ? "max-h-[90dvh] max-w-2xl overflow-y-auto"
+              : cn(
+                  "flex h-[100dvh] max-h-none w-full max-w-none flex-col overflow-hidden rounded-none border-0",
+                  "p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]",
+                  "md:h-[80vh] md:max-h-[780px] md:w-[92vw] md:max-w-[920px] md:rounded-2xl md:border md:p-6"
+                )
+          )}
+        >
           <DialogHeader>
-            <DialogTitle className="text-2xl flex items-center gap-3">
+            <DialogTitle className="text-xl md:text-2xl flex items-center gap-3">
               {isEditMode ? (
                 <>
-                  <Edit className="h-6 w-6 text-primary" />
+                  <Edit className="h-5 w-5 md:h-6 md:w-6 text-primary" />
                   Editar Diseño
                 </>
               ) : (
                 <>
-                  <Plus className="h-6 w-6 text-primary" />
+                  <Plus className="h-5 w-5 md:h-6 md:w-6 text-primary" />
                   Crear Diseños
                 </>
               )}
             </DialogTitle>
-            <DialogDescription>
+            {/* El subtítulo repite el título: en móvil no gana su sitio. */}
+            <DialogDescription className="hidden md:block">
               {isEditMode ? 'Modifica los datos del diseño.' : 'Añade uno o varios diseños al equipo.'}
             </DialogDescription>
           </DialogHeader>
@@ -265,8 +273,11 @@ export function CreateDesignDialog({
 
             <DialogFooter
               className={cn(
-                'mt-6 shrink-0',
-                !isEditMode && 'border-t border-border bg-card pt-4 sm:justify-between sm:space-x-0'
+                'mt-4 shrink-0 md:mt-6',
+                // Creación: meta arriba (caption) y CTA debajo en móvil;
+                // en escritorio meta a la izquierda, botones a la derecha.
+                !isEditMode &&
+                  'flex-col gap-2 border-t border-border bg-card pt-3 md:flex-row md:items-center md:justify-between md:pt-4 sm:space-x-0'
               )}
             >
               {isEditMode ? (
@@ -297,7 +308,7 @@ export function CreateDesignDialog({
                 </>
               ) : (
                 <>
-                  <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center justify-center gap-1 text-xs text-muted-foreground md:justify-start">
                     <span>
                       <span className="font-mono">{cards.length}</span> diseño{cards.length !== 1 ? 's' : ''} · peso{' '}
                       <span className="font-mono">{cardsWeight(cards)}</span>
@@ -309,16 +320,19 @@ export function CreateDesignDialog({
                     )}
                   </div>
                   <div className="flex items-center justify-end gap-2">
+                    {/* En móvil la salida es la X del header; un solo CTA manda. */}
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => onOpenChange(false)}
+                      className="hidden md:inline-flex"
                     >
                       Cancelar
                     </Button>
                     <Button
                       type="submit"
                       disabled={loading || validCount === 0}
+                      className="w-full md:w-auto"
                     >
                       {loading ? (
                         <>
@@ -328,7 +342,10 @@ export function CreateDesignDialog({
                       ) : (
                         <>
                           <Layers className="mr-2 h-4 w-4" />
-                          Crear {validCount} Diseño{validCount !== 1 ? 's' : ''}
+                          {/* Nunca «Crear 0»: sin válidas, el CTA descansa desactivado. */}
+                          {validCount === 0
+                            ? 'Crear diseños'
+                            : `Crear ${validCount} diseño${validCount !== 1 ? 's' : ''}`}
                         </>
                       )}
                     </Button>
