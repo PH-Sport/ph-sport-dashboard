@@ -237,7 +237,7 @@ export function MembersPanel() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
                 transition={SPRINGS.smooth}
-                className="pointer-events-auto w-full max-w-sm rounded-2xl border border-border bg-card shadow-overlay"
+                className="pointer-events-auto max-h-full w-full max-w-sm overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card shadow-overlay"
               >
                 <div className="flex items-start justify-between p-lg pb-0">
                   <UserAvatar

@@ -47,11 +47,12 @@ const DialogContent = React.forwardRef<
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content asChild>
-      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
         <motion.div
           ref={ref as unknown as React.Ref<HTMLDivElement>}
           className={cn(
-            'pointer-events-auto relative w-full max-w-lg border border-border bg-card text-card-foreground p-6 shadow-overlay sm:rounded-lg',
+            // max-h + scroll interno: en pantallas bajas (o con teclado) el modal no se corta
+            'pointer-events-auto relative max-h-full w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card text-card-foreground p-6 shadow-overlay',
             className
           )}
           initial={contentAnimation.initial}
@@ -61,7 +62,7 @@ const DialogContent = React.forwardRef<
           {...props}
         >
           {children}
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+          <DialogPrimitive.Close className="absolute right-3 top-3 rounded-lg p-2 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
