@@ -64,13 +64,15 @@ export function CreateDesignDialog({
 
   useEffect(() => {
     if (design) {
+      // Edición: viniste a editar ESTE diseño — abierto, sin tap de peaje.
       const card = designToCard(design);
       setCards([card]);
       setOpenId(card.id);
     } else {
-      const card = createEmptyCard();
-      setCards([card]);
-      setOpenId(card.id);
+      // Creación: primera impresión comprimida — la fila resumen basta y el
+      // compositor del agente queda como protagonista. Un tap abre la tarjeta.
+      setCards([createEmptyCard()]);
+      setOpenId(null);
     }
   }, [design, open]);
 
@@ -88,16 +90,14 @@ export function CreateDesignDialog({
   };
 
   // Tarjetas propuestas por el agente (F4): si la única tarjeta es la vacía inicial,
-  // la reemplaza; si no, las añade al final. Colapsadas salvo que llegue solo 1.
+  // la reemplaza; si no, las añade al final. SIEMPRE comprimidas: la fila resumen
+  // es la vista de revisión; se abre la que quieras inspeccionar.
   const appendCards = (newCards: DesignCard[]) => {
     if (newCards.length === 0) return;
     setCards((prev) => {
       const shouldReplace = prev.length === 1 && isCardEmpty(prev[0]);
       return shouldReplace ? newCards : [...prev, ...newCards];
     });
-    if (newCards.length === 1) {
-      setOpenId(newCards[0].id);
-    }
     requestAnimationFrame(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
     });
