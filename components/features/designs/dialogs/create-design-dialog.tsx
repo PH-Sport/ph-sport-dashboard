@@ -76,10 +76,10 @@ export function CreateDesignDialog({
     }
   }, [design, open]);
 
+  // La tarjeta nueva también llega comprimida (decisión de producto: TODA
+  // primera aparición es la fila resumen); un tap la abre.
   const addCard = () => {
-    const card = createEmptyCard();
-    setCards((prev) => [...prev, card]);
-    setOpenId(card.id);
+    setCards((prev) => [...prev, createEmptyCard()]);
     requestAnimationFrame(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
     });
