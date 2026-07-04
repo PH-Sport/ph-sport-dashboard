@@ -136,9 +136,20 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Táctil: sin flash gris de WebKit al tocar; el feedback lo dan los estados propios */
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "cv11";
+    /* Guard móvil: ningún desborde puntual convierte la página en scroll horizontal.
+       clip (no hidden): no crea scroll-container, así que sticky sigue funcionando. */
+    overflow-x: clip;
+  }
+  /* Sin pausa de double-tap-zoom sobre controles: el tap responde al instante */
+  button, [role='button'], a, label {
+    touch-action: manipulation;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;

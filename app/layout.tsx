@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
@@ -21,6 +21,18 @@ import {
   accentInitScript,
   ACCENT_STORAGE_KEY,
 } from '@/lib/theme/accent-colors';
+
+// viewport-fit=cover: la app dibuja bajo el notch/home-indicator (las safe-areas
+// se compensan con env(safe-area-inset-*) en shell y overlays). Base del porteo PWA.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f9f8f5' }, // --background light (cream)
+    { media: '(prefers-color-scheme: dark)', color: '#121317' },  // --background dark (charcoal)
+  ],
+};
 
 export const metadata: Metadata = {
   title: 'PH Sport Dashboard',

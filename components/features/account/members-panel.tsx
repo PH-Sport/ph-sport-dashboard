@@ -264,7 +264,7 @@ export function MembersPanel() {
                       <input
                         value={givenDraft}
                         onChange={(e) => setGivenDraft(e.target.value)}
-                        className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-base focus:outline-none md:text-sm focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
@@ -274,7 +274,7 @@ export function MembersPanel() {
                       <input
                         value={familyDraft}
                         onChange={(e) => setFamilyDraft(e.target.value)}
-                        className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-base focus:outline-none md:text-sm focus:ring-2 focus:ring-ring"
                       />
                     </div>
                   </div>
@@ -286,7 +286,7 @@ export function MembersPanel() {
                       value={aliasDraft}
                       onChange={(e) => setAliasDraft(e.target.value)}
                       placeholder={givenDraft || 'Nombre para mostrar'}
-                      className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-4 text-base focus:outline-none md:text-sm focus:ring-2 focus:ring-ring"
                     />
                     <p className="mt-1 text-[11px] text-muted-foreground">
                       Si lo rellenas, se mostrará en vez del nombre.
