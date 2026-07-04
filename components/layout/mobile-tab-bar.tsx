@@ -15,7 +15,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Settings } from 'lucide-react';
 import { SPRINGS } from '@/components/ui/animations';
 import { useAuth } from '@/lib/auth/auth-context';
 import { buildNavItems, isItemActive } from './app-sidebar';
@@ -24,17 +23,15 @@ import { cn } from '@/lib/utils';
 export function MobileTabBar() {
   const { profile } = useAuth();
   const pathname = usePathname() ?? '';
-  const items = [
-    ...buildNavItems(profile?.role),
-    { href: '/ajustes', label: 'Ajustes', icon: Settings },
-  ];
+  // Solo las 3 secciones principales: Ajustes ya vive en el dropdown del perfil.
+  const items = buildNavItems(profile?.role);
 
   return (
     <nav
       aria-label="Navegación principal"
       className="glass-sidebar fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 rounded-2xl shadow-overlay md:hidden"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-3">
         {items.map(({ href, label, icon: Icon }) => {
           const active = isItemActive(pathname, href);
           return (
