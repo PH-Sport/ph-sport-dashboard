@@ -127,7 +127,7 @@ export default function MyWeekPage() {
           {/* Pendientes */}
           <motion.section
             variants={rise}
-            className="rounded-2xl border border-border bg-card p-lg shadow-raised"
+            className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
           >
             <div className="mb-2 flex items-center gap-2">
               <h2 className="text-base font-semibold">Pendientes</h2>
@@ -203,7 +203,7 @@ export default function MyWeekPage() {
           {deliveredCount > 0 && (
             <motion.section
               variants={rise}
-              className="rounded-2xl border border-border bg-card p-lg shadow-raised"
+              className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
             >
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-semibold">Entregadas</h2>

@@ -38,7 +38,7 @@ function Section({
     <section>
       <p className="font-mono text-eyebrow uppercase text-primary">{label}</p>
       <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
-      <div className="mt-3 rounded-2xl border border-border bg-card p-lg shadow-raised">
+      <div className="mt-3 rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
         {children}
       </div>
     </section>

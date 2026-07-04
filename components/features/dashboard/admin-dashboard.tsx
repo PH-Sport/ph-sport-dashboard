@@ -59,9 +59,9 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+    <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
       <p className="font-mono text-eyebrow uppercase text-muted-foreground">{label}</p>
-      <p className={cn('mt-2 font-mono tabular text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
+      <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
       <p className="mt-2 text-xs text-muted-foreground">{note}</p>
@@ -143,9 +143,9 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
     <div className="flex flex-col gap-4">
       {/* Triage — única superficie de acción: avisos + reparto */}
       <Collapse open={hasAlerts}>
-        <section className="flex flex-col gap-4 rounded-2xl border border-primary/20 bg-card p-lg shadow-raised md:flex-row md:items-center md:justify-between">
+        <section className="flex flex-col gap-4 rounded-2xl border border-primary/20 bg-card p-md shadow-raised sm:p-lg md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-5">
-            <span className="font-mono tabular text-5xl font-semibold leading-none text-primary">
+            <span className="font-mono tabular text-4xl sm:text-5xl font-semibold leading-none text-primary">
               {String(totalAlerts).padStart(2, '0')}
             </span>
             <div>
@@ -208,7 +208,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
       </Collapse>
 
       {/* KPIs */}
-      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <KpiPlate label="Activas" value={activeCount} note="Pendientes esta semana" />
         <KpiPlate
           label="Entregados"
@@ -232,7 +232,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
 
       {/* Dos columnas: vencimientos + carga */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <section className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
               <p className="font-mono text-eyebrow uppercase text-muted-foreground">
@@ -315,7 +315,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
           )}
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <section className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <p className="font-mono text-eyebrow uppercase text-muted-foreground">Carga del equipo</p>
           <h2 className="text-base font-semibold">Trabajo activo</h2>
 

@@ -10,7 +10,7 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Form panel — cream warm, form centrado vertical */}
-      <div className="flex flex-1 flex-col justify-center bg-background px-8 py-12 lg:px-16 xl:px-24">
+      <div className="flex flex-1 flex-col justify-center bg-background px-6 py-10 sm:px-8 sm:py-12 lg:px-16 xl:px-24">
         <div className="mx-auto w-full max-w-md">{children}</div>
       </div>
 

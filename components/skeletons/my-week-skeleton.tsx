@@ -19,7 +19,7 @@ export function MyWeekSkeleton() {
 
       <div className="space-y-4">
         {/* Placa Pendientes */}
-        <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <div className="mb-2 flex items-center gap-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-7 rounded-full" />
@@ -40,7 +40,7 @@ export function MyWeekSkeleton() {
         </div>
 
         {/* Placa Entregadas — grupos por semana plegados */}
-        <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-7 rounded-full" />

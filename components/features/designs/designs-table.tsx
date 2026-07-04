@@ -351,7 +351,7 @@ export function DesignsTable({
 
       {/* Paginación */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
           <p className="text-sm text-muted-foreground">
             Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
           </p>

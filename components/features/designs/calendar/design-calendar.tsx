@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
 import type { EventInput, EventClickArg } from '@fullcalendar/core';
@@ -17,8 +18,23 @@ interface DesignCalendarProps {
   onEventClick?: (item: Design) => void;
 }
 
+const MOBILE_QUERY = '(max-width: 767px)';
+
 function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
+
+  // Móvil: la rejilla mensual es ilegible a 360px; la vista agenda (listWeek)
+  // es el patrón nativo de calendario en teléfono. Se carga con dynamic
+  // (ssr: false), así que window existe ya en el primer render.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const sync = () => setIsMobile(mq.matches);
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
 
   const events: EventInput[] = items.map((item) => {
     const statusColor = STATUS_COLORS[item.status] || STATUS_COLORS.BACKLOG;
@@ -44,11 +60,13 @@ function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 md:p-6">
+    <div className="rounded-lg border border-border bg-card p-2 sm:p-4 md:p-6">
       <FullCalendar
+        // Remonta al cruzar el breakpoint: initialView solo aplica al montar
+        key={isMobile ? 'mobile-list' : 'desktop-month'}
         ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
+        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+        initialView={isMobile ? 'listWeek' : 'dayGridMonth'}
         events={events}
         eventClick={handleEventClick}
         headerToolbar={{
@@ -78,6 +96,3 @@ function DesignCalendar({ items, onEventClick }: DesignCalendarProps) {
 }
 
 export default DesignCalendar;
-
-
-

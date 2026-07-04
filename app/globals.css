@@ -340,3 +340,28 @@
 .fc-event {
   cursor: pointer;
 }
+
+/* Móvil: toolbar compacta — el título mensual/semanal no debe empujar los botones */
+@media (max-width: 767px) {
+  .fc .fc-toolbar.fc-header-toolbar {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.05rem;
+  }
+  .fc .fc-button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Vista agenda (listWeek) — misma superficie que las cards del sistema */
+.fc-theme-standard .fc-list {
+  border-color: hsl(var(--border));
+  border-radius: 0.75rem;
+}
+.fc .fc-list-empty {
+  background: hsl(var(--muted) / 0.4);
+}

@@ -7,7 +7,7 @@ function SectionSkeleton({ children }: { children: ReactNode }) {
     <section>
       <Skeleton className="h-3 w-24" />
       <Skeleton className="mt-1.5 h-4 w-48" />
-      <div className="mt-3 rounded-2xl border border-border bg-card p-lg shadow-raised">
+      <div className="mt-3 rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
         {children}
       </div>
     </section>

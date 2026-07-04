@@ -27,7 +27,7 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
       {/* KPIs */}
       <div className={isAdmin ? 'grid grid-cols-2 gap-4 xl:grid-cols-4' : 'grid grid-cols-3 gap-4'}>
         {[...Array(isAdmin ? 4 : 3)].map((_, i) => (
-          <div key={i} className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+          <div key={i} className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
             <Skeleton className="h-3 w-16" />
             <Skeleton className="mt-2 h-9 w-14" />
             <Skeleton className="mt-2 h-3 w-24" />
@@ -38,7 +38,7 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
       {/* Dos columnas: lista principal (2fr) + panel lateral (1fr) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
         {/* Izquierda: vencimientos / tu cola */}
-        <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div className="space-y-2">
               <Skeleton className="h-3 w-28" />
@@ -65,7 +65,7 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
         </div>
 
         {/* Derecha: carga del equipo / compañeros */}
-        <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <div className="space-y-2">
             <Skeleton className="h-3 w-28" />
             <Skeleton className="h-5 w-32" />

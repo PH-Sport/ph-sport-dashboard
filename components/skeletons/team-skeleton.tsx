@@ -31,7 +31,7 @@ export function TeamSkeleton() {
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-border bg-card p-lg shadow-raised"
+            className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
           >
             <div className="mb-3 flex items-center gap-3">
               <Skeleton className="h-9 w-9 shrink-0 rounded-full" />

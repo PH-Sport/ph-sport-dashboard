@@ -56,7 +56,7 @@ function DesignerPlate({
   return (
     <motion.section
       variants={rise}
-      className="rounded-2xl border border-border bg-card p-lg shadow-raised"
+      className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
     >
       <div className="mb-3 flex items-center gap-3">
         <button

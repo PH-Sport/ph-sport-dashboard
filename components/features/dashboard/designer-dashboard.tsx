@@ -38,9 +38,9 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+    <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
       <p className="font-mono text-eyebrow uppercase text-muted-foreground">{label}</p>
-      <p className={cn('mt-2 font-mono tabular text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
+      <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
       <p className="mt-2 text-xs text-muted-foreground">{note}</p>
@@ -93,9 +93,9 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
       {/* Hero de urgencia — la entrega más próxima manda cuando vence en <24 h */}
       <Collapse open={isUrgent}>
         {nextDeadline && (
-          <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-lg shadow-raised md:flex-row md:items-center md:justify-between">
+          <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-md shadow-raised sm:p-lg md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-5">
-              <span className="font-mono tabular text-5xl font-semibold leading-none text-destructive">
+              <span className="font-mono tabular text-4xl sm:text-5xl font-semibold leading-none text-destructive">
                 {Math.floor(hoursUntilNext!)} h
               </span>
               <div>
@@ -119,7 +119,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
       </Collapse>
 
       {/* KPIs personales */}
-      <section className="grid grid-cols-3 gap-4">
+      <section className="grid grid-cols-3 gap-2 sm:gap-4">
         <KpiPlate
           label="Pendientes"
           value={activeDesigns}
@@ -137,7 +137,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
 
       {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <section className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
               <p className="font-mono text-eyebrow uppercase text-muted-foreground">Tu cola</p>
@@ -191,7 +191,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
           )}
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-lg shadow-raised">
+        <section className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
           <p className="font-mono text-eyebrow uppercase text-muted-foreground">Compañeros</p>
           <h2 className="text-base font-semibold">El resto del equipo</h2>
           {teammates.length === 0 ? (
