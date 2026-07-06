@@ -9,21 +9,17 @@ export interface ServerAuth {
 }
 
 /**
- * Resuelve sesión + perfil EN EL SERVIDOR — Fase 2 del "caching inteligente".
+ * Resuelve sesión + perfil EN EL SERVIDOR → el AuthProvider arranca ya
+ * autenticado, sin spinner en cliente (Fase 2). `cache()` lo resuelve una sola
+ * vez por render aunque lo llamen el layout y un `loading.tsx`.
  *
- * Se llama desde el root layout para que el AuthProvider arranque ya
- * AUTHENTICATED con datos verificados por el servidor. Así:
- *   - No hay spinner de auth en cliente (el HTML llega ya autenticado).
- *   - Se elimina el getUser() + profile bloqueante que se hacía en cliente
- *     en cada arranque en frío.
+ * NOTA: este `getUser()` + el del middleware validan la sesión dos veces por
+ * request. Es intencionado (patrón SSR de Supabase); no lo "optimices":
+ *   · getSession() → emite el aviso "insecure" de Supabase en cada request.
+ *   · pasar el user por cabecera → no ahorra: la query de perfil (RLS) necesita
+ *     la sesión cargada igualmente.
  *
- * Envuelto en React `cache()`: si en un mismo render del servidor lo llaman
- * varios consumidores (p. ej. el root layout y el `loading.tsx` de una sección
- * en una carga completa), se resuelve UNA sola vez en lugar de repetir el
- * getUser() + query de perfil.
- *
- * Fallo seguro: ante cualquier error → { null, null }; el AuthProvider cae al
- * flujo de inicialización en cliente (comportamiento previo a Fase 2).
+ * Fallo seguro: ante error → { null, null } (el cliente reintenta en su init).
  */
 export const getServerAuth = cache(async function getServerAuth(): Promise<ServerAuth> {
   try {
