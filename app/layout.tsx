@@ -16,6 +16,8 @@ import { AccentSync } from '@/components/providers/accent-sync';
 import { AuthProvider } from '@/lib/auth/auth-context';
 import { getServerAuth } from '@/lib/auth/get-server-auth';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 import {
   accentThemeCss,
   accentInitScript,
@@ -35,8 +37,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'PH Sport Dashboard',
-  description: 'Plataforma de gestión para el equipo de diseño de PH Sport',
+  title: 'PHSPORT Dashboard',
+  description: 'Plataforma de gestión para el equipo de diseño de PHSPORT',
+  // Modo standalone limpio al «Añadir a inicio» en iOS (Fase A del porteo PWA).
+  appleWebApp: {
+    capable: true,
+    title: 'PHSPORT',
+    statusBarStyle: 'default',
+  },
+  // Next 15 emite el estándar moderno `mobile-web-app-capable`; añadimos la meta
+  // clásica de Apple como seguro para iOS antiguos (el manifest ya cubre 16.4+).
+  other: {
+    'apple-mobile-web-app-capable': 'yes',
+  },
   icons: {
     icon: [
       {
@@ -49,7 +62,8 @@ export const metadata: Metadata = {
         type: 'image/png',
       },
     ],
-    apple: '/images/apple-touch-icon.png?v=3',
+    // v=4: nuevo arte white-on-black (antes el logo dorado).
+    apple: '/images/apple-touch-icon.png?v=4',
   },
 };
 
@@ -84,9 +98,11 @@ export default async function RootLayout({
             <MotionProvider>
               <AuthProvider initialUser={user} initialProfile={profile}>
                 <AccentSync />
+                <ServiceWorkerRegister />
                 <SWRProvider>
                   {children}
                 </SWRProvider>
+                <InstallPrompt />
               </AuthProvider>
             </MotionProvider>
           </TooltipProvider>
