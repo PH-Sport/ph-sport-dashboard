@@ -1,7 +1,7 @@
 'use client';
 
 import { Switch } from '@/components/ui/switch';
-import { Mail, BellRing, Smartphone } from 'lucide-react';
+import { Mail, Smartphone } from 'lucide-react';
 import type {
   NotificationChannel,
   NotificationEvent,
@@ -44,7 +44,8 @@ export function NotificationsTab({ preferences, onToggle }: NotificationsTabProp
       <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
         <h3 className="text-sm font-medium text-foreground mb-1">Preferencias de canales</h3>
         <p className="text-xs text-muted-foreground">
-          Elige cómo quieres recibir las notificaciones para cada tipo de evento.
+          Elige cómo quieres recibir cada tipo de aviso. Los avisos dentro de la app (la
+          campana) están siempre activos.
         </p>
       </div>
 
@@ -53,24 +54,20 @@ export function NotificationsTab({ preferences, onToggle }: NotificationsTabProp
 
       <div className="space-y-6">
         {/* Headers */}
-        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-2 pb-2 border-b border-border/50">
+        <div className="grid grid-cols-[1.6fr_1fr_1fr] gap-2 pb-2 border-b border-border/50">
           <span className="text-sm font-medium text-muted-foreground">Evento</span>
           <div className="flex flex-col items-center justify-center">
             <Mail className="h-4 w-4 mb-1 text-primary" />
             <span className="text-xs font-medium text-muted-foreground">Email</span>
           </div>
           <div className="flex flex-col items-center justify-center">
-            <BellRing className="h-4 w-4 mb-1 text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">In-App</span>
-          </div>
-          <div className="flex flex-col items-center justify-center">
             <Smartphone className="h-4 w-4 mb-1 text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">Push</span>
+            <span className="text-xs font-medium text-muted-foreground">Dispositivo</span>
           </div>
         </div>
 
         {EVENT_ROWS.map((row) => (
-          <div key={row.type} className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-2 items-center">
+          <div key={row.type} className="grid grid-cols-[1.6fr_1fr_1fr] gap-2 items-center">
             <div className="flex flex-col">
               <span className="text-sm font-medium text-foreground">{row.label}</span>
               <span className="text-xs text-muted-foreground">{row.description}</span>
@@ -79,12 +76,6 @@ export function NotificationsTab({ preferences, onToggle }: NotificationsTabProp
               <Switch
                 checked={preferences.email[row.type]}
                 onCheckedChange={() => onToggle('email', row.type)}
-              />
-            </div>
-            <div className="flex justify-center">
-              <Switch
-                checked={preferences.in_app[row.type]}
-                onCheckedChange={() => onToggle('in_app', row.type)}
               />
             </div>
             <div className="flex justify-center">
