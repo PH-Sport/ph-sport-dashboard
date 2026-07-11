@@ -112,7 +112,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
 
       if (assignmentCount && assignmentCount > 1) {
         return {
-          subject: `Tienes ${assignmentCount} nuevos diseños en PH Sport`,
+          subject: `Tienes ${assignmentCount} nuevos diseños en PHSPORT`,
           preview: `Se te han asignado ${assignmentCount} diseños para esta semana`,
           headline: `Tienes ${assignmentCount} nuevos diseños`,
           bodyMessage:
@@ -125,7 +125,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
       if (designTitle) {
         return {
           subject: `Nuevo diseño asignado: ${designTitle}`,
-          preview: `Tienes un nuevo diseño pendiente en PH Sport`,
+          preview: `Tienes un nuevo diseño pendiente en PHSPORT`,
           headline: "Te han asignado un nuevo diseño",
           bodyMessage:
             notification.message || `Ya tienes disponible el diseño "${designTitle}".`,
@@ -135,7 +135,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
       }
 
       return {
-        subject: "Nueva asignación en PH Sport",
+        subject: "Nueva asignación en PHSPORT",
         preview: "Tienes nuevas tareas pendientes por revisar",
         headline: "Tienes una nueva asignación",
         bodyMessage: notification.message || "Revisa tu panel para ver los detalles.",
@@ -167,7 +167,7 @@ const buildEmailCopy = (notification: NotificationPayload): EmailCopy => {
     default:
       return {
         subject: `Notificación: ${notification.title}`,
-        preview: "Tienes una nueva notificación en PH Sport",
+        preview: "Tienes una nueva notificación en PHSPORT",
         headline: "Tienes una nueva notificación",
         bodyMessage: notification.message || notification.title,
         ctaText: "Ir al dashboard",
@@ -223,7 +223,7 @@ const EmailLayout = ({
               src="https://phsport.app/images/logo-ph-sport-gold.svg"
               width="120"
               height="96"
-              alt="PH Sport"
+              alt="PHSPORT"
               className="mx-auto"
               style={{ height: 'auto' }}
             />
@@ -234,7 +234,7 @@ const EmailLayout = ({
           <Hr className="border border-solid border-gray-200 my-[28px] mx-0 w-full" />
 
           <Text className="text-gray-500 text-[12px] leading-[20px] text-center m-0">
-            Recibes este correo porque tienes notificaciones activas en tu cuenta de PH Sport.
+            Recibes este correo porque tienes notificaciones activas en tu cuenta de PHSPORT.
           </Text>
         </Container>
       </Body>
@@ -489,7 +489,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `PH Sport <${FROM_EMAIL}>`,
+        from: `PHSPORT <${FROM_EMAIL}>`,
         to: [userEmail],
         subject: subject,
         html: emailHtml,
