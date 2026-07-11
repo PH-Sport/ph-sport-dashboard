@@ -28,13 +28,13 @@ export function useNotifications() {
     try {
       setLoading(true);
       
-      // Fetch latest 20 notifications
+      // Fetch latest 30 notifications
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(30);
 
       if (error) throw error;
       
