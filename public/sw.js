@@ -14,7 +14,7 @@
  * En la Fase B este mismo fichero ganará los handlers `push` y `notificationclick`.
  */
 
-const CACHE = 'phsport-v1';
+const CACHE = 'phsport-v2';
 const OFFLINE_URL = '/offline';
 
 // Precache mínimo: la propia pantalla offline (para que exista sin red desde ya).
@@ -101,4 +101,54 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Resto de GET (RSC de datos, etc.) → red directa, sin cachear.
+});
+
+// ========================================
+// Web Push (Fase B)
+// ========================================
+
+// Un push entrante → notificación del SO. El payload lo manda la edge function
+// send-push-notification como JSON { title, body, url, tag }.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = {};
+  }
+  const title = data.title || 'PHSPORT';
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: data.tag || 'phsport',
+      data: { url: data.url || '/inicio' },
+    })
+  );
+});
+
+// Clic en la notificación → enfoca una ventana abierta de la app (navegándola al
+// destino) o abre una nueva.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/inicio';
+  event.waitUntil(
+    (async () => {
+      const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of all) {
+        if ('focus' in client) {
+          if ('navigate' in client) {
+            try {
+              await client.navigate(url);
+            } catch {
+              /* algunos navegadores no permiten navigate cross-origin; ignoramos */
+            }
+          }
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })()
+  );
 });
