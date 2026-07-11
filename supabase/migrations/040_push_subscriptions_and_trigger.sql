@@ -45,11 +45,17 @@ declare
   project_url text;
   auth_key text;
 begin
-  -- Reutiliza los secretos de vault ya configurados para el email.
+  -- Reutiliza los secretos de vault ya configurados para el email. El proyecto
+  -- guarda anon_key (no service_role_key), así que replicamos el fallback del
+  -- dispatcher de email (migración 018): service_role si existe, si no anon.
   select decrypted_secret into project_url
     from vault.decrypted_secrets where name = 'notify_email_project_url' limit 1;
   select decrypted_secret into auth_key
     from vault.decrypted_secrets where name = 'notify_email_service_role_key' limit 1;
+  if auth_key is null then
+    select decrypted_secret into auth_key
+      from vault.decrypted_secrets where name = 'notify_email_anon_key' limit 1;
+  end if;
 
   if project_url is null or auth_key is null then
     return NEW; -- sin secretos: no-op silencioso
