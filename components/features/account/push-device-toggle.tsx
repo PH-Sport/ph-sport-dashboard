@@ -14,6 +14,7 @@ import { usePushSubscription } from '@/lib/push/use-push-subscription';
 export function PushDeviceToggle() {
   const {
     isSupported,
+    isConfigured,
     permission,
     isSubscribed,
     canPromptOnThisDevice,
@@ -49,6 +50,8 @@ export function PushDeviceToggle() {
   if (!loading) {
     if (!isSupported) {
       unavailable = 'Tu navegador no admite notificaciones push.';
+    } else if (!isConfigured) {
+      unavailable = 'Las notificaciones push aún no están configuradas en este entorno.';
     } else if (!canPromptOnThisDevice) {
       unavailable =
         'En iPhone/iPad, instala la app en tu pantalla de inicio para activar los avisos push.';
