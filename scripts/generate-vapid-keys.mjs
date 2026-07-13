@@ -14,7 +14,7 @@ console.log('VAPID_PUBLIC_KEY  =', keys.publicKey);
 console.log('VAPID_PRIVATE_KEY =', keys.privateKey);
 console.log('\n--- Dónde pegarlas ---');
 console.log('1) Vercel (Production + Preview):');
-console.log('     NEXT_PUBLIC_VAPID_PUBLIC_KEY = <la pública>');
+console.log('     NEXT_PUBLIC_VAPID_KEY = <la pública>');
 console.log('2) Supabase → Edge Functions → send-push-notification → Secrets:');
 console.log('     VAPID_PUBLIC_KEY  = <la pública>');
 console.log('     VAPID_PRIVATE_KEY = <la privada>');

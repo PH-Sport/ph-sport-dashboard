@@ -1,5 +1,5 @@
 /** Clave pública VAPID (base64url), inyectada en build por Vercel. Vacía si no está configurada. */
-export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
+export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_KEY ?? '';
 
 /**
  * Convierte la clave pública VAPID (base64url) al Uint8Array que espera

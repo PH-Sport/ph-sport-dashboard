@@ -24,7 +24,7 @@ function isStandalone(): boolean {
 export interface UsePushSubscriptionResult {
   /** El navegador soporta service worker + Push API + Notification. */
   isSupported: boolean;
-  /** La clave pública VAPID llegó al build (NEXT_PUBLIC_VAPID_PUBLIC_KEY). */
+  /** La clave pública VAPID llegó al build (NEXT_PUBLIC_VAPID_KEY). */
   isConfigured: boolean;
   /** Estado del permiso del SO: 'default' | 'granted' | 'denied'. */
   permission: NotificationPermission;
