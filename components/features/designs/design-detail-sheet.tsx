@@ -154,7 +154,11 @@ export function DesignDetailSheet({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md gap-0 overflow-hidden rounded-2xl p-0 sm:rounded-2xl">
+        {/* Móvil: bottom sheet con asa y swipe (patrón nativo); escritorio: modal centrado. */}
+        <DialogContent
+          mobileSheet
+          className="max-w-md gap-0 overflow-hidden overflow-y-auto rounded-2xl p-0 sm:rounded-2xl"
+        >
           {isLoading ? (
             <>
               <DialogTitle className="sr-only">Cargando diseño</DialogTitle>

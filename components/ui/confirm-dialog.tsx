@@ -72,7 +72,8 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      {/* Móvil: hoja inferior con asa (patrón action-sheet); escritorio: modal centrado. */}
+      <DialogContent mobileSheet className="max-w-md">
         <DialogHeader className="flex flex-col items-center text-center gap-4 pb-2">
           {customIcon ? (
             <Image

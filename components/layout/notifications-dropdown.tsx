@@ -8,15 +8,16 @@ import { es } from 'date-fns/locale';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Hint } from '@/components/ui/tooltip';
 import { useNotifications, Notification } from '@/lib/hooks/use-notifications';
 import { groupNotificationsByDay } from '@/lib/utils/group-notifications';
+import { useIsMobile } from '@/lib/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
 import { Loader } from '@/components/ui/loader';
 
@@ -26,6 +27,8 @@ export function NotificationsDropdown() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   // Borrar TODAS es destructivo e irreversible: pide confirmación siempre.
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  // Móvil: hoja completa (patrón centro de notificaciones); escritorio: dropdown.
+  const isMobile = useIsMobile();
   const router = useRouter();
 
   const visible = filter === 'unread' ? notifications.filter((n) => !n.read) : notifications;
@@ -35,7 +38,7 @@ export function NotificationsDropdown() {
     if (!notification.read) {
       await markAsRead(notification.id);
     }
-    
+
     if (notification.link) {
       setOpen(false);
       router.push(notification.link);
@@ -55,12 +58,22 @@ export function NotificationsDropdown() {
     }
   };
 
+  // Fila de notificación — div-botón (no item de menú): así vive igual en el
+  // dropdown de escritorio y en la hoja móvil, y marcar como leída no cierra.
   const renderNotification = (notification: Notification) => (
-    <DropdownMenuItem
+    <div
       key={notification.id}
+      role="button"
+      tabIndex={0}
       onClick={() => handleNotificationClick(notification)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          void handleNotificationClick(notification);
+        }
+      }}
       className={cn(
-        "flex items-start gap-3 px-4 py-3 cursor-pointer group",
+        "flex cursor-pointer items-start gap-3 px-4 py-3 outline-none transition-colors group hover:bg-accent focus-visible:bg-accent",
         !notification.read ? "bg-primary/5" : ""
       )}
     >
@@ -87,120 +100,152 @@ export function NotificationsDropdown() {
           <Trash2 className="h-4 w-4 text-destructive" />
         </button>
       </Hint>
-    </DropdownMenuItem>
+    </div>
   );
+
+  const trigger = (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="relative text-muted-foreground hover:text-foreground"
+      aria-label={
+        unreadCount > 0
+          ? `Notificaciones (${unreadCount} sin leer)`
+          : 'Notificaciones'
+      }
+    >
+      <Bell className="h-5 w-5" />
+      {unreadCount > 0 && (
+        <span className="absolute right-1.5 top-1.5 flex h-2.5 w-2.5" aria-hidden>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+        </span>
+      )}
+    </Button>
+  );
+
+  const headerActions = (
+    <div className="flex items-center gap-1">
+      {unreadCount > 0 && (
+        <button
+          onClick={() => markAllAsRead()}
+          className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary md:min-h-0 md:py-1"
+        >
+          <Check className="h-3.5 w-3.5" /> Leído
+        </button>
+      )}
+      {notifications.length > 0 && (
+        <button
+          onClick={() => {
+            setOpen(false);
+            setConfirmClearOpen(true);
+          }}
+          className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive md:min-h-0 md:py-1"
+        >
+          <Trash2 className="h-3.5 w-3.5" /> Borrar
+        </button>
+      )}
+    </div>
+  );
+
+  const filterBar = (
+    <div className="flex items-center gap-1 border-b border-border px-3 py-2">
+      {(['all', 'unread'] as const).map((value) => (
+        <button
+          key={value}
+          onClick={() => setFilter(value)}
+          className={cn(
+            'rounded-md px-3 py-2.5 text-xs font-medium transition-colors md:px-2.5 md:py-1',
+            filter === value
+              ? 'bg-primary/10 text-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          {value === 'all' ? 'Todo' : 'No leídas'}
+        </button>
+      ))}
+    </div>
+  );
+
+  const listBody = loading ? (
+    <div className="flex justify-center py-8">
+      <Loader />
+    </div>
+  ) : visible.length === 0 ? (
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-muted-foreground">
+      <Bell className="h-8 w-8 mb-3 opacity-20" />
+      <p className="text-sm">
+        {filter === 'unread' ? 'No tienes notificaciones sin leer' : 'No tienes notificaciones'}
+      </p>
+    </div>
+  ) : (
+    <div className="py-1">
+      {groups.map((group) => (
+        <div key={group.label}>
+          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {group.label}
+          </p>
+          {group.items.map(renderNotification)}
+        </div>
+      ))}
+    </div>
+  );
+
+  const confirmClear = (
+    <ConfirmDialog
+      open={confirmClearOpen}
+      onOpenChange={setConfirmClearOpen}
+      onConfirm={() => {
+        setConfirmClearOpen(false);
+        void deleteAllNotifications();
+      }}
+      title="¿Borrar todas las notificaciones?"
+      description="Se eliminarán todas tus notificaciones. Esta acción no se puede deshacer."
+      confirmLabel="Borrar todas"
+      cancelLabel="Cancelar"
+      variant="danger"
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>{trigger}</DialogTrigger>
+          <DialogContent mobileSheet className="flex h-[85dvh] flex-col gap-0 p-0">
+            <div className="flex items-center justify-between border-b border-border py-1 pl-4 pr-2">
+              <DialogTitle className="text-sm font-semibold">Notificaciones</DialogTitle>
+              {headerActions}
+            </div>
+            {filterBar}
+            <ScrollArea className="min-h-0 flex-1">{listBody}</ScrollArea>
+          </DialogContent>
+        </Dialog>
+        {confirmClear}
+      </>
+    );
+  }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative text-muted-foreground hover:text-foreground"
-          aria-label={
-            unreadCount > 0
-              ? `Notificaciones (${unreadCount} sin leer)`
-              : 'Notificaciones'
-          }
+    <>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="end"
+          className="w-[min(20rem,calc(100vw-1.5rem))] sm:w-96 p-0 z-50"
         >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute right-1.5 top-1.5 flex h-2.5 w-2.5" aria-hidden>
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
-            </span>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent
-        align="end"
-        className="w-[min(20rem,calc(100vw-1.5rem))] sm:w-96 p-0 z-50"
-      >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h4 className="font-semibold text-sm">Notificaciones</h4>
-          <div className="flex items-center gap-1">
-            {unreadCount > 0 && (
-              <button
-                onClick={() => markAllAsRead()}
-                className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary md:min-h-0 md:py-1"
-              >
-                <Check className="h-3.5 w-3.5" /> Leído
-              </button>
-            )}
-            {notifications.length > 0 && (
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  setConfirmClearOpen(true);
-                }}
-                className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive md:min-h-0 md:py-1"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Borrar
-              </button>
-            )}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <h4 className="font-semibold text-sm">Notificaciones</h4>
+            {headerActions}
           </div>
-        </div>
 
-        {/* Filtro Todo / No leídas */}
-        <div className="flex items-center gap-1 px-3 py-2 border-b border-border">
-          {(['all', 'unread'] as const).map((value) => (
-            <button
-              key={value}
-              onClick={() => setFilter(value)}
-              className={cn(
-                'rounded-md px-3 py-2.5 text-xs font-medium transition-colors md:px-2.5 md:py-1',
-                filter === value
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {value === 'all' ? 'Todo' : 'No leídas'}
-            </button>
-          ))}
-        </div>
+          {filterBar}
 
-        <ScrollArea className="h-[min(350px,55dvh)]">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader />
-            </div>
-          ) : visible.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-muted-foreground">
-              <Bell className="h-8 w-8 mb-3 opacity-20" />
-              <p className="text-sm">
-                {filter === 'unread' ? 'No tienes notificaciones sin leer' : 'No tienes notificaciones'}
-              </p>
-            </div>
-          ) : (
-            <div className="py-1">
-              {groups.map((group) => (
-                <div key={group.label}>
-                  <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {group.label}
-                  </p>
-                  {group.items.map(renderNotification)}
-                </div>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-      </DropdownMenuContent>
-
-      <ConfirmDialog
-        open={confirmClearOpen}
-        onOpenChange={setConfirmClearOpen}
-        onConfirm={() => {
-          setConfirmClearOpen(false);
-          void deleteAllNotifications();
-        }}
-        title="¿Borrar todas las notificaciones?"
-        description="Se eliminarán todas tus notificaciones. Esta acción no se puede deshacer."
-        confirmLabel="Borrar todas"
-        cancelLabel="Cancelar"
-        variant="danger"
-      />
-    </DropdownMenu>
+          <ScrollArea className="h-[min(350px,55dvh)]">{listBody}</ScrollArea>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {confirmClear}
+    </>
   );
 }
-

@@ -1,10 +1,11 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { motion, type MotionProps } from 'framer-motion';
+import { motion, useDragControls, type MotionProps, type PanInfo } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
-import { animations, TRANSITIONS } from './animations';
+import { useIsMobile } from '@/lib/hooks/use-is-mobile';
+import { animations, SPRINGS, TRANSITIONS } from './animations';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -43,48 +44,98 @@ type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.
     /** Móvil: hoja a pantalla completa (el wrapper pierde el padding y el
      * contenido puede ocupar 100dvh). En escritorio no cambia nada. */
     fullscreenOnMobile?: boolean;
+    /** Móvil: bottom sheet nativa — anclada abajo, asa de arrastre y
+     * swipe-para-cerrar (el cierre es asa/gesto/scrim, sin X). En escritorio
+     * no cambia nada: modal centrado con X, como siempre. */
+    mobileSheet?: boolean;
   };
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, fullscreenOnMobile = false, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content asChild>
-      <div
-        className={cn(
-          'pointer-events-none fixed inset-0 z-50 flex items-center justify-center',
-          fullscreenOnMobile
-            ? 'md:p-4 md:pb-[max(1rem,env(safe-area-inset-bottom))] md:pt-[max(1rem,env(safe-area-inset-top))]'
-            : 'p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]'
-        )}
-      >
-        <motion.div
-          ref={ref as unknown as React.Ref<HTMLDivElement>}
+>(({ className, children, fullscreenOnMobile = false, mobileSheet = false, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  const sheetMode = mobileSheet && isMobile;
+  // El arrastre solo escucha en el asa (dragControls): así el scroll interno
+  // del contenido no pelea con el gesto de cierre.
+  const dragControls = useDragControls();
+  const closeRef = React.useRef<HTMLButtonElement>(null);
+
+  const handleDragEnd = (_e: unknown, info: PanInfo) => {
+    if (info.offset.y > 100 || info.velocity.y > 500) closeRef.current?.click();
+  };
+
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content asChild>
+        <div
           className={cn(
-            // max-h + scroll interno: en pantallas bajas (o con teclado) el modal no se corta
-            'pointer-events-auto relative max-h-full w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card text-card-foreground p-6 shadow-overlay',
-            className
+            'pointer-events-none fixed inset-0 z-50 flex',
+            sheetMode
+              ? 'items-end justify-center'
+              : fullscreenOnMobile
+                ? 'items-center justify-center md:p-4 md:pb-[max(1rem,env(safe-area-inset-bottom))] md:pt-[max(1rem,env(safe-area-inset-top))]'
+                : 'items-center justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]'
           )}
-          initial={contentAnimation.initial}
-          animate={contentAnimation.animate}
-          exit={contentAnimation.exit}
-          transition={TRANSITIONS.modal}
-          {...props}
         >
-          {children}
-          {/* Táctil: 44px de área (p-3.5) con el icono en la MISMA posición visual
-              que el compacto de escritorio (1.5+3.5 = 3+2 = 20px del borde). */}
-          <DialogPrimitive.Close className="absolute right-1.5 top-1.5 rounded-lg p-3.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none md:right-3 md:top-3 md:p-2">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
-        </motion.div>
-      </div>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
+          <motion.div
+            ref={ref as unknown as React.Ref<HTMLDivElement>}
+            className={cn(
+              // max-h + scroll interno: en pantallas bajas (o con teclado) el modal no se corta
+              'pointer-events-auto relative max-h-full w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card text-card-foreground p-6 shadow-overlay',
+              className,
+              // Hoja: full-bleed abajo, esquinas solo arriba, aire para el home indicator.
+              // Van tras className para ganar los merges (p. ej. rounded/max-w del consumidor).
+              sheetMode &&
+                'max-h-[88dvh] w-full max-w-none rounded-b-none rounded-t-2xl border-x-0 border-b-0 pt-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]'
+            )}
+            initial={sheetMode ? { y: '100%' } : contentAnimation.initial}
+            animate={sheetMode ? { y: 0 } : contentAnimation.animate}
+            exit={sheetMode ? { y: '100%' } : contentAnimation.exit}
+            transition={sheetMode ? SPRINGS.smooth : TRANSITIONS.modal}
+            {...props}
+            drag={sheetMode ? 'y' : false}
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 1 }}
+            onDragEnd={sheetMode ? handleDragEnd : undefined}
+          >
+            {sheetMode && (
+              <div
+                className="flex cursor-grab touch-none justify-center pb-2 pt-3 active:cursor-grabbing"
+                onPointerDown={(e) => dragControls.start(e)}
+                aria-hidden
+              >
+                <div className="h-1 w-10 rounded-full bg-muted-foreground/25" />
+              </div>
+            )}
+            {children}
+            {sheetMode ? (
+              // Cierre programático del swipe (la hoja no lleva X: asa/gesto/scrim).
+              <DialogPrimitive.Close
+                ref={closeRef}
+                tabIndex={-1}
+                aria-hidden
+                className="sr-only"
+              >
+                <span>Close</span>
+              </DialogPrimitive.Close>
+            ) : (
+              /* Táctil: 44px de área (p-3.5) con el icono en la MISMA posición visual
+                 que el compacto de escritorio (1.5+3.5 = 3+2 = 20px del borde). */
+              <DialogPrimitive.Close className="absolute right-1.5 top-1.5 rounded-lg p-3.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none md:right-3 md:top-3 md:p-2">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </DialogPrimitive.Close>
+            )}
+          </motion.div>
+        </div>
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
