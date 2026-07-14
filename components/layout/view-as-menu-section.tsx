@@ -43,7 +43,7 @@ export function ViewAsMenuSection() {
         className="cursor-pointer text-muted-foreground hover:bg-accent focus:bg-accent"
       >
         <Eye className="mr-2 h-4 w-4" />
-        <span className="flex-1 truncate text-[10px] font-semibold uppercase tracking-wider">
+        <span className="flex-1 truncate text-[11px] md:text-[10px] font-semibold uppercase tracking-wider">
           Ver como
           {activeLabel && (
             <span className="ml-1 normal-case text-muted-foreground/80">· {activeLabel}</span>

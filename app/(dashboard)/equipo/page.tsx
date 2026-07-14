@@ -81,7 +81,7 @@ function DesignerPlate({
           </div>
         </button>
         {overloaded && (
-          <span className="shrink-0 rounded-full bg-status-warning/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-status-warning">
+          <span className="shrink-0 rounded-full bg-status-warning/15 px-2.5 py-1 text-[11px] md:text-[10px] font-semibold uppercase tracking-wider text-status-warning">
             Sobrecarga
           </span>
         )}

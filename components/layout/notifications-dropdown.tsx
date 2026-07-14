@@ -87,7 +87,7 @@ export function NotificationsDropdown() {
         <p className="text-xs text-muted-foreground line-clamp-2">
           {notification.message}
         </p>
-        <p className="text-[10px] text-muted-foreground mt-1">
+        <p className="text-[11px] md:text-[10px] text-muted-foreground mt-1">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: es })}
         </p>
       </div>
@@ -182,7 +182,7 @@ export function NotificationsDropdown() {
     <div className="py-1">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="px-4 pt-3 pb-1 text-[11px] md:text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {group.label}
           </p>
           {group.items.map(renderNotification)}

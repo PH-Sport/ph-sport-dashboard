@@ -193,7 +193,7 @@ export function MembersPanel() {
               </p>
               <span
                 className={cn(
-                  'mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
+                  'mt-3 inline-block rounded-full px-2.5 py-1 text-[11px] md:text-[10px] font-semibold uppercase tracking-wider',
                   ROLE_ACCENT[m.role]
                 )}
               >
@@ -295,7 +295,7 @@ export function MembersPanel() {
                   <p className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span
                       className={cn(
-                        'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                        'rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-semibold uppercase tracking-wider',
                         ROLE_ACCENT[member.role]
                       )}
                     >

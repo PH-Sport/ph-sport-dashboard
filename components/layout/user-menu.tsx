@@ -115,7 +115,7 @@ export function UserMenu() {
                     {realRole && (
                       <span
                         className={cn(
-                          'mt-1 inline-block w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                          'mt-1 inline-block w-fit rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-semibold uppercase tracking-wider',
                           ROLE_ACCENT[realRole]
                         )}
                       >

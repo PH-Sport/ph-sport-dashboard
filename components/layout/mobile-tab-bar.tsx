@@ -87,7 +87,7 @@ export function MobileTabBar() {
                       />
                     )}
                     <Icon className="relative z-10 h-5 w-5" aria-hidden />
-                    <span className="relative z-10 text-[10px] font-medium">{label}</span>
+                    <span className="relative z-10 text-[11px] font-medium">{label}</span>
                   </Link>
                 </li>
               );

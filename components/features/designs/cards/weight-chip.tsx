@@ -41,7 +41,7 @@ export function WeightChip({ type }: { type: DesignType | null }) {
       )}
     >
       {DESIGN_TYPE_LABELS[type]}
-      <span className="font-mono text-[10px]">{getDesignWeightValue(type)}</span>
+      <span className="font-mono text-[11px] md:text-[10px]">{getDesignWeightValue(type)}</span>
     </span>
   );
 }

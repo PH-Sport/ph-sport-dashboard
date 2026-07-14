@@ -65,7 +65,7 @@ function warningLabel(code: string): string {
 /** Chip discreto de aviso (fuera de semana, avisos del agente). Tono status-warning. */
 function WarningChip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-status-warning/50 bg-status-warning/15 px-2 py-0.5 text-[10px] font-medium text-status-warning">
+    <span className="inline-flex items-center rounded-full border border-status-warning/50 bg-status-warning/15 px-2 py-0.5 text-[11px] md:text-[10px] font-medium text-status-warning">
       {children}
     </span>
   );
@@ -128,7 +128,7 @@ export function DesignCardItem({
             <span className="text-xs text-muted-foreground">{designerName}</span>
             <span className="font-mono text-xs text-muted-foreground">{dateLabel}</span>
             {card.source === 'ia' && (
-              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] md:text-[10px] font-medium text-muted-foreground">
                 Agente
               </span>
             )}
@@ -171,7 +171,7 @@ export function DesignCardItem({
                           )}
                         />
                         {DESIGN_TYPE_LABELS[t]}
-                        <span className="font-mono text-[10px] text-muted-foreground">
+                        <span className="font-mono text-[11px] md:text-[10px] text-muted-foreground">
                           · {getDesignWeightValue(t)}
                         </span>
                       </span>
@@ -322,7 +322,7 @@ export function DesignCardItem({
                 }}
                 placeholder={autoTitleFor(card) || 'Título'}
               />
-              <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+              <span className="shrink-0 font-mono text-[11px] md:text-[10px] text-muted-foreground">
                 {card.titleEdited ? 'editado' : 'auto'}
               </span>
             </div>

@@ -25,7 +25,7 @@ export function RolePill() {
           type="button"
           onClick={exitToManager}
           aria-label={`Viendo como Diseñador ${simulatedDesignerName} — volver a Mánager`}
-          className="flex items-center gap-1.5 rounded-full bg-role-designer/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-role-designer transition-colors hover:bg-role-designer/25"
+          className="flex items-center gap-1.5 rounded-full bg-role-designer/15 px-2.5 py-1 text-[11px] md:text-[10px] font-semibold uppercase tracking-wider text-role-designer transition-colors hover:bg-role-designer/25"
         >
           <Eye className="h-3 w-3" />
           <span className="hidden sm:inline">Viendo como </span>
@@ -38,7 +38,7 @@ export function RolePill() {
   return (
     <span
       className={cn(
-        'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
+        'rounded-full px-2.5 py-1 text-[11px] md:text-[10px] font-semibold uppercase tracking-wider',
         ROLE_ACCENT[profile.role]
       )}
     >
