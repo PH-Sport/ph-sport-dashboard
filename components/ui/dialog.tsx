@@ -103,8 +103,9 @@ const DialogContent = React.forwardRef<
             onDragEnd={sheetMode ? handleDragEnd : undefined}
           >
             {sheetMode && (
+              // sticky: si el contenido de la hoja scrollea, el asa no se pierde.
               <div
-                className="flex cursor-grab touch-none justify-center pb-2 pt-3 active:cursor-grabbing"
+                className="sticky top-0 z-10 flex cursor-grab touch-none justify-center bg-card pb-2 pt-3 active:cursor-grabbing"
                 onPointerDown={(e) => dragControls.start(e)}
                 aria-hidden
               >

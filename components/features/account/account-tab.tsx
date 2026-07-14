@@ -77,9 +77,13 @@ export function AccountTab({
             className="h-24 w-24 border-2 border-border group-hover:border-primary transition-colors"
             fallbackClassName="text-2xl font-bold bg-primary/10 text-primary"
           />
-          <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="absolute inset-0 hidden rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 md:flex items-center justify-center">
             <Camera className="h-6 w-6 text-white" />
           </div>
+          {/* Táctil: el hover no existe — badge de cámara siempre visible (patrón WhatsApp). */}
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground md:hidden">
+            <Camera className="h-4 w-4" />
+          </span>
           <input
             type="file"
             ref={fileInputRef}

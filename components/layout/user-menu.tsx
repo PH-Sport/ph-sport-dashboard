@@ -59,14 +59,22 @@ export function UserMenu() {
 
   const authLoading = status === 'INITIALIZING';
 
+  // Placeholders con la MISMA huella que el trigger real (44px móvil / 32px
+  // escritorio): al resolver la auth no hay salto de layout en el header.
   if (authLoading) {
-    return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
+    return (
+      <div className="flex h-11 w-11 items-center justify-center md:h-8 md:w-8">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+      </div>
+    );
   }
 
   if (!realEmail) {
     return (
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground text-sm">
-        ?
+      <div className="flex h-11 w-11 items-center justify-center md:h-8 md:w-8">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground">
+          ?
+        </span>
       </div>
     );
   }
