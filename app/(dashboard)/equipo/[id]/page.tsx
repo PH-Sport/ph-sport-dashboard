@@ -105,7 +105,7 @@ function DesignerDetailPage() {
             <p className="mt-1 text-xs text-muted-foreground">{getDesignContext(design)}</p>
           </div>
           {design.folder_url && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+            <Button variant="ghost" size="icon" className="h-11 w-11 md:h-8 md:w-8" asChild>
               <a
                 href={design.folder_url}
                 target="_blank"

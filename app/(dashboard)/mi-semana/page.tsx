@@ -181,7 +181,7 @@ export default function MyWeekPage() {
                           type="button"
                           onClick={() => handleStatusChange(d, 'DELIVERED')}
                           disabled={busy}
-                          className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs font-medium text-muted-foreground opacity-100 transition-all hover:border-status-success/40 hover:bg-status-success/10 hover:text-status-success focus-visible:opacity-100 disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100"
+                          className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 text-xs font-medium text-muted-foreground opacity-100 transition-all hover:border-status-success/40 hover:bg-status-success/10 hover:text-status-success focus-visible:opacity-100 disabled:opacity-50 md:h-8 md:px-2.5 md:opacity-0 md:group-hover:opacity-100"
                         >
                           {busy ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -223,7 +223,7 @@ export default function MyWeekPage() {
                             open ? ws.filter((x) => x !== w.key) : [...ws, w.key]
                           )
                         }
-                        className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40"
+                        className="flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40 md:min-h-0"
                       >
                         <motion.span
                           initial={false}
@@ -266,7 +266,7 @@ export default function MyWeekPage() {
                                   type="button"
                                   onClick={() => handleStatusChange(d, 'BACKLOG')}
                                   disabled={busy}
-                                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-100 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100"
+                                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-100 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 disabled:opacity-50 md:h-7 md:w-7 md:opacity-0 md:group-hover:opacity-100"
                                 >
                                   {busy ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

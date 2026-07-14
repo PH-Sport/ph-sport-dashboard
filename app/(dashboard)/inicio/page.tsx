@@ -13,6 +13,7 @@ import { CreateDesignButton } from '@/components/features/designs/dialogs/create
 import { useAuth } from '@/lib/auth/auth-context';
 import { DesignerDashboard } from '@/components/features/dashboard/designer-dashboard';
 import { AdminDashboard } from '@/components/features/dashboard/admin-dashboard';
+import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { useDashboard } from '@/lib/hooks/use-dashboard';
 import { fillGreeting, getDailyTemplate, pickRotatingTemplate } from '@/lib/utils/greeting';
 
@@ -28,6 +29,14 @@ export default function Dashboard() {
   const { user, profile } = useAuth();
   const { items, isLoading, mutate, error } = useDashboard();
   const [assigning, setAssigning] = useState(false);
+
+  // Detalle de diseño al tocar una fila del dashboard (mismo patrón que Equipo).
+  const [selectedDesignId, setSelectedDesignId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const openDetail = (id: string) => {
+    setSelectedDesignId(id);
+    setDetailOpen(true);
+  };
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
@@ -121,10 +130,25 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       ) : profile?.role === 'ADMIN' ? (
-        <AdminDashboard items={items} onAssign={handleAssign} assigning={assigning} />
+        <AdminDashboard
+          items={items}
+          onAssign={handleAssign}
+          assigning={assigning}
+          onDesignClick={openDetail}
+        />
       ) : user ? (
-        <DesignerDashboard items={items} userId={user.id} />
+        <DesignerDashboard items={items} userId={user.id} onDesignClick={openDetail} />
       ) : null}
+
+      <DesignDetailSheet
+        designId={selectedDesignId}
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setTimeout(() => setSelectedDesignId(null), 300);
+        }}
+        onDesignUpdated={() => mutate()}
+      />
     </DashboardPage>
   );
 }

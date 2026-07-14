@@ -18,6 +18,8 @@ interface AdminDashboardProps {
   items: Design[];
   onAssign: () => void;
   assigning: boolean;
+  /** Abre el detalle del diseño al tocar una fila de "Vencimientos". */
+  onDesignClick: (id: string) => void;
 }
 
 interface DesignerLoad {
@@ -69,7 +71,7 @@ function KpiPlate({
   );
 }
 
-export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardProps) {
+export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: AdminDashboardProps) {
   const { designers } = useDesigners();
 
   const nowMs = Date.now();
@@ -190,7 +192,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
               <button
                 onClick={onAssign}
                 disabled={assigning}
-                className="flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                className="flex h-11 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 md:h-9"
               >
                 <Users className="h-3.5 w-3.5" />
                 {assigning ? 'Repartiendo…' : 'Repartir sin asignar'}
@@ -198,7 +200,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
             )}
             <Link
               href="/equipo"
-              className="flex h-9 items-center gap-2 rounded-xl border border-border px-4 text-xs font-medium transition-colors hover:bg-muted/40"
+              className="flex h-11 items-center gap-2 rounded-xl border border-border px-4 text-xs font-medium transition-colors hover:bg-muted/40 md:h-9"
             >
               Ver equipo
               <ArrowRight className="h-3.5 w-3.5" />
@@ -242,7 +244,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
             </div>
             <Link
               href="/disenos"
-              className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="flex min-h-11 shrink-0 items-center text-xs font-medium text-muted-foreground transition-colors hover:text-primary md:min-h-0"
             >
               Ver todos →
             </Link>
@@ -266,9 +268,12 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                   : null;
 
                 return (
-                  <li
-                    key={design.id}
-                    className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
+                  <li key={design.id}>
+                  {/* Fila-botón: el hover ya prometía interacción; ahora abre el detalle. */}
+                  <button
+                    type="button"
+                    onClick={() => onDesignClick(design.id)}
+                    className="flex min-h-14 w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40 md:min-h-0"
                   >
                     {designerName ? (
                       <UserAvatar
@@ -308,6 +313,7 @@ export function AdminDashboard({ items, onAssign, assigning }: AdminDashboardPro
                           : getDeadlineLabel(deadline)}
                       </span>
                     </span>
+                  </button>
                   </li>
                 );
               })}

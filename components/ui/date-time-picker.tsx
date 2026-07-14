@@ -113,7 +113,7 @@ export function DateTimePicker({
               value={selectedHour.toString()}
               onValueChange={handleHourChange}
             >
-              <SelectTrigger className="w-[70px] h-8">
+              <SelectTrigger className="h-11 w-[76px] md:h-8 md:w-[70px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -129,7 +129,7 @@ export function DateTimePicker({
               value={selectedMinute.toString()}
               onValueChange={handleMinuteChange}
             >
-              <SelectTrigger className="w-[70px] h-8">
+              <SelectTrigger className="h-11 w-[76px] md:h-8 md:w-[70px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

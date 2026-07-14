@@ -15,6 +15,8 @@ import { useDesigners } from '@/lib/hooks/use-designers';
 interface DesignerDashboardProps {
   items: Design[];
   userId: string;
+  /** Abre el detalle del diseño al tocar una fila de "Tu cola". */
+  onDesignClick: (id: string) => void;
 }
 
 const UPCOMING_LIMIT = 5;
@@ -48,7 +50,7 @@ function KpiPlate({
   );
 }
 
-export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
+export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDashboardProps) {
   const { designers } = useDesigners();
 
   const myDesigns = useMemo(() => items.filter((d) => d.designer_id === userId), [items, userId]);
@@ -109,7 +111,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
             </div>
             <Link
               href="/mi-semana"
-              className="flex h-9 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 md:h-9"
             >
               Ver mi semana
               <ArrowRight className="h-3.5 w-3.5" />
@@ -145,7 +147,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
             </div>
             <Link
               href="/mi-semana"
-              className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="flex min-h-11 shrink-0 items-center text-xs font-medium text-muted-foreground transition-colors hover:text-primary md:min-h-0"
             >
               Ver mi semana →
             </Link>
@@ -165,9 +167,12 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
                     ? 'Atrasada'
                     : `${format(deadline, 'd MMM', { locale: es })} · ${format(deadline, 'HH:mm')}`;
                 return (
-                  <li
-                    key={design.id}
-                    className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
+                  <li key={design.id}>
+                  {/* Fila-botón: el hover ya prometía interacción; ahora abre el detalle. */}
+                  <button
+                    type="button"
+                    onClick={() => onDesignClick(design.id)}
+                    className="flex min-h-14 w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40 md:min-h-0"
                   >
                     <UrgencyDot level={urgency} />
                     <div className="min-w-0 flex-1">
@@ -184,6 +189,7 @@ export function DesignerDashboard({ items, userId }: DesignerDashboardProps) {
                     >
                       {label}
                     </span>
+                  </button>
                   </li>
                 );
               })}

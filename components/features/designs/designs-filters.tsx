@@ -92,7 +92,7 @@ export function DesignsFilters({
               aria-expanded={mobileFiltersOpen}
               aria-label={mobileFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
               className={cn(
-                'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border outline-none transition-colors md:hidden',
+                'relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border outline-none transition-colors md:hidden',
                 'focus-visible:ring-2 focus-visible:ring-ring',
                 mobileFiltersOpen
                   ? 'border-primary/40 bg-primary/10 text-primary'

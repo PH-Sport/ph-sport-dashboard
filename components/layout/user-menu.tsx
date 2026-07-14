@@ -78,10 +78,12 @@ export function UserMenu() {
   return (
     <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger asChild>
+        {/* Táctil: el botón mide 44px aunque el avatar siga viéndose de 32px;
+            en escritorio vuelve a ceñirse al avatar. El ring abraza al avatar. */}
         <button
           type="button"
           aria-label={`Menú de usuario — ${label}`}
-          className="rounded-full outline-none ring-primary/40 transition-shadow hover:ring-2 focus-visible:ring-2 data-[state=open]:ring-2 data-[state=open]:ring-primary/60"
+          className="flex h-11 w-11 items-center justify-center rounded-full outline-none md:h-8 md:w-8 [&>span]:ring-primary/40 [&>span]:transition-shadow hover:[&>span]:ring-2 focus-visible:[&>span]:ring-2 data-[state=open]:[&>span]:ring-2 data-[state=open]:[&>span]:ring-primary/60"
         >
           <UserAvatar
             name={avatarName}
@@ -100,7 +102,7 @@ export function UserMenu() {
                 animate={{ opacity: 1, height: menuHeight }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={SPRINGS.smooth}
-                className="z-50 w-56 overflow-hidden rounded-md shadow-xl"
+                className="z-50 w-72 overflow-hidden rounded-md shadow-xl md:w-56"
               >
                 <div
                   ref={measureRef}

@@ -157,7 +157,7 @@ export function DesignCardItem({
                 value={card.type ?? ''}
                 onValueChange={(value) => onChange({ type: value as DesignType })}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-10 md:h-9">
                   <SelectValue placeholder="Elegir tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -185,7 +185,7 @@ export function DesignCardItem({
               <Label htmlFor={`player-${card.id}`} className="text-xs">Jugador</Label>
               <Input
                 id={`player-${card.id}`}
-                className="h-9"
+                className="h-10 md:h-9"
                 value={card.player}
                 onChange={(e) => onChange({ player: e.target.value })}
                 placeholder="Nombre del jugador"
@@ -198,7 +198,7 @@ export function DesignCardItem({
                   <Label htmlFor={`local-${card.id}`} className="text-xs">Local</Label>
                   <Input
                     id={`local-${card.id}`}
-                    className="h-9"
+                    className="h-10 md:h-9"
                     value={card.match_home}
                     onChange={(e) => onChange({ match_home: e.target.value })}
                     placeholder="Equipo local"
@@ -208,7 +208,7 @@ export function DesignCardItem({
                   <Label htmlFor={`away-${card.id}`} className="text-xs">Visitante</Label>
                   <Input
                     id={`away-${card.id}`}
-                    className="h-9"
+                    className="h-10 md:h-9"
                     value={card.match_away}
                     onChange={(e) => onChange({ match_away: e.target.value })}
                     placeholder="Equipo visitante"
@@ -220,7 +220,7 @@ export function DesignCardItem({
             <div className="space-y-1.5">
               <Label className="text-xs">Entrega</Label>
               <DateTimePicker
-                className="h-9"
+                className="h-10 md:h-9"
                 value={card.deadline_at}
                 onChange={(date) => onChange({ deadline_at: date })}
                 placeholder="Fecha y hora"
@@ -235,7 +235,7 @@ export function DesignCardItem({
                   onChange({ designer_id: value === 'auto' ? null : value })
                 }
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-10 md:h-9">
                   <SelectValue placeholder="Automático" />
                 </SelectTrigger>
                 <SelectContent>
@@ -304,7 +304,7 @@ export function DesignCardItem({
           <Collapse open={driveOpen}>
             <Input
               type="url"
-              className="h-9"
+              className="h-10 md:h-9"
               value={card.folder_url}
               onChange={(e) => onChange({ folder_url: e.target.value })}
               placeholder="https://drive.google.com/..."
@@ -314,7 +314,7 @@ export function DesignCardItem({
           <Collapse open={titleOpen}>
             <div className="flex items-center gap-2">
               <Input
-                className="h-9"
+                className="h-10 md:h-9"
                 value={titleInputValue}
                 onChange={(e) => {
                   const value = e.target.value;

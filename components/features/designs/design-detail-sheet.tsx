@@ -190,7 +190,7 @@ export function DesignDetailSheet({
               {!notFound && (
                 <button
                   onClick={() => mutate()}
-                  className="flex h-9 items-center gap-2 rounded-xl border border-border px-4 text-sm font-medium transition-colors hover:bg-muted/40"
+                  className="flex h-11 items-center gap-2 rounded-xl border border-border px-4 text-sm font-medium transition-colors hover:bg-muted/40 md:h-9"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Reintentar
@@ -232,7 +232,7 @@ export function DesignDetailSheet({
                     <span className="text-sm text-muted-foreground">Diseñador</span>
                     <button
                       onClick={() => setAssignOpen((v) => !v)}
-                      className="-mr-2 flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40"
+                      className="-mr-2 flex min-h-11 items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/40 md:min-h-0"
                     >
                       {dz.kind === 'active' ? (
                         <>
@@ -266,13 +266,13 @@ export function DesignDetailSheet({
                     </button>
                   </div>
                   <Collapse open={assignOpen}>
-                    <div className="flex flex-wrap gap-1.5 pt-3">
+                    <div className="flex flex-wrap gap-2 pt-3 md:gap-1.5">
                       {designers.map((m) => (
                         <button
                           key={m.id}
                           onClick={() => handleAssign(m.id)}
                           className={cn(
-                            'h-8 rounded-full border px-3 text-xs font-medium transition-colors',
+                            'h-10 rounded-full border px-3.5 text-xs font-medium transition-colors md:h-8 md:px-3',
                             design.designer_id === m.id
                               ? 'border-primary/40 bg-primary/10 text-foreground'
                               : 'border-border bg-background text-muted-foreground hover:text-foreground'
@@ -340,7 +340,7 @@ export function DesignDetailSheet({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setIsEditDialogOpen(true)}
-                    className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40 md:h-10"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Editar
@@ -350,13 +350,13 @@ export function DesignDetailSheet({
                       href={design.folder_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40"
+                      className="flex h-11 items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium transition-colors hover:bg-muted/40 md:h-10"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                       Drive
                     </a>
                   ) : (
-                    <span className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/60 text-sm font-medium text-muted-foreground/50">
+                    <span className="flex h-11 items-center justify-center gap-2 rounded-xl border border-border/60 text-sm font-medium text-muted-foreground/50 md:h-10">
                       <ExternalLink className="h-3.5 w-3.5" />
                       Sin Drive
                     </span>
@@ -372,7 +372,7 @@ export function DesignDetailSheet({
                       onOpenChange(false);
                       onRequestDelete(design);
                     }}
-                    className="flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                    className="flex h-11 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 md:h-9"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Eliminar diseño

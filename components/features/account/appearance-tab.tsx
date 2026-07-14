@@ -50,7 +50,7 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
                 onClick={() => setTheme(value)}
                 aria-pressed={active}
                 className={cn(
-                  'flex items-center justify-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition-colors',
+                  'flex items-center justify-center gap-2 rounded-md border px-3 py-3 text-sm font-medium transition-colors md:py-2.5',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background',
                   active
                     ? 'border-primary/50 bg-primary/10 text-foreground'
@@ -83,7 +83,7 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
                 onClick={() => setAccent(color.key)}
                 style={{ backgroundColor: accentSwatch(color, isDark) }}
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full transition-transform',
+                  'flex h-11 w-11 items-center justify-center rounded-full transition-transform md:h-8 md:w-8',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background',
                   active
                     ? 'ring-2 ring-foreground/80 ring-offset-2 ring-offset-background'

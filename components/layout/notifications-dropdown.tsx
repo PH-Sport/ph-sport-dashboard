@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Hint } from '@/components/ui/tooltip';
 import { useNotifications, Notification } from '@/lib/hooks/use-notifications';
@@ -23,6 +24,8 @@ export function NotificationsDropdown() {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification, deleteAllNotifications } = useNotifications();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  // Borrar TODAS es destructivo e irreversible: pide confirmación siempre.
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const router = useRouter();
 
   const visible = filter === 'unread' ? notifications.filter((n) => !n.read) : notifications;
@@ -79,9 +82,9 @@ export function NotificationsDropdown() {
         <button
           onClick={(e) => handleDelete(e, notification.id)}
           aria-label="Eliminar notificación"
-          className="mt-1 p-2 -m-1 rounded-lg hover:bg-destructive/10 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
+          className="-my-1.5 -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-destructive/10 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
         >
-          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+          <Trash2 className="h-4 w-4 text-destructive" />
         </button>
       </Hint>
     </DropdownMenuItem>
@@ -116,21 +119,24 @@ export function NotificationsDropdown() {
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h4 className="font-semibold text-sm">Notificaciones</h4>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllAsRead()}
-                className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+                className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary md:min-h-0 md:py-1"
               >
-                <Check className="h-3 w-3" /> Leído
+                <Check className="h-3.5 w-3.5" /> Leído
               </button>
             )}
             {notifications.length > 0 && (
               <button
-                onClick={() => deleteAllNotifications()}
-                className="text-xs text-destructive hover:text-destructive/80 font-medium flex items-center gap-1"
+                onClick={() => {
+                  setOpen(false);
+                  setConfirmClearOpen(true);
+                }}
+                className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive md:min-h-0 md:py-1"
               >
-                <Trash2 className="h-3 w-3" /> Borrar
+                <Trash2 className="h-3.5 w-3.5" /> Borrar
               </button>
             )}
           </div>
@@ -143,7 +149,7 @@ export function NotificationsDropdown() {
               key={value}
               onClick={() => setFilter(value)}
               className={cn(
-                'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                'rounded-md px-3 py-2.5 text-xs font-medium transition-colors md:px-2.5 md:py-1',
                 filter === value
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -180,6 +186,20 @@ export function NotificationsDropdown() {
           )}
         </ScrollArea>
       </DropdownMenuContent>
+
+      <ConfirmDialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        onConfirm={() => {
+          setConfirmClearOpen(false);
+          void deleteAllNotifications();
+        }}
+        title="¿Borrar todas las notificaciones?"
+        description="Se eliminarán todas tus notificaciones. Esta acción no se puede deshacer."
+        confirmLabel="Borrar todas"
+        cancelLabel="Cancelar"
+        variant="danger"
+      />
     </DropdownMenu>
   );
 }

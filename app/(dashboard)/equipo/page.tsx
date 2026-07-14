@@ -101,7 +101,7 @@ function DesignerPlate({
                 <button
                   type="button"
                   onClick={() => onDesignClick(d.id)}
-                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40"
+                  className="flex min-h-11 w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40 md:min-h-0"
                 >
                   {delivered ? (
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />

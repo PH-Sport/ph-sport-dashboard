@@ -102,7 +102,7 @@ function SettingsContent() {
               type="button"
               onClick={() => setTab(t.id)}
               className={cn(
-                'h-8 rounded-lg px-3.5 text-xs font-medium transition-colors',
+                'h-11 rounded-lg px-4 text-xs font-medium transition-colors md:h-8 md:px-3.5',
                 activeTab === t.id
                   ? 'bg-muted text-foreground'
                   : 'text-muted-foreground hover:text-foreground'

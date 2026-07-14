@@ -33,7 +33,7 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
         type="button"
         onClick={onPrev}
         aria-label="Semana anterior"
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-7 md:w-7"
+        className="flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-7 md:w-7"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -43,7 +43,7 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
           onClick={labelInteractive ? onCurrent : undefined}
           disabled={!labelInteractive}
           className={cn(
-            'rounded-lg px-2.5 py-1 font-mono tabular text-xs transition-colors',
+            'min-h-11 rounded-lg px-2.5 py-1 font-mono tabular text-xs transition-colors md:min-h-0',
             isCurrent
               ? 'bg-primary/15 font-medium text-primary'
               : labelInteractive
@@ -60,7 +60,7 @@ export function WeekNav({ label, onPrev, onNext, onCurrent, isCurrent, className
         type="button"
         onClick={onNext}
         aria-label="Semana siguiente"
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-7 md:w-7"
+        className="flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-7 md:w-7"
       >
         <ChevronRight className="h-4 w-4" />
       </button>

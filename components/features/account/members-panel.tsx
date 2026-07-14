@@ -249,7 +249,7 @@ export function MembersPanel() {
                   <button
                     type="button"
                     onClick={closeMember}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground md:h-8 md:w-8"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -310,7 +310,7 @@ export function MembersPanel() {
                       <button
                         type="button"
                         onClick={() => setAdvancedOpen((v) => !v)}
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40"
+                        className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 md:min-h-0"
                       >
                         <ShieldAlert className="h-3.5 w-3.5" />
                         <span className="flex-1">Zona avanzada</span>
@@ -327,14 +327,14 @@ export function MembersPanel() {
                           <button
                             type="button"
                             onClick={() => setConfirmRole(true)}
-                            className="flex h-9 w-full items-center justify-between rounded-lg border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                            className="flex h-11 w-full items-center justify-between rounded-lg border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground md:h-9"
                           >
                             <span>Cambiar rol a {ROLE_LABELS[nextRole]}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => setConfirmDelete(true)}
-                            className="flex h-9 w-full items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                            className="flex h-11 w-full items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 md:h-9"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                             Eliminar usuario
@@ -349,7 +349,7 @@ export function MembersPanel() {
                   <button
                     type="button"
                     onClick={closeMember}
-                    className="flex h-9 items-center rounded-xl px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                    className="flex h-11 items-center rounded-xl px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground md:h-9"
                   >
                     Cancelar
                   </button>
@@ -357,7 +357,7 @@ export function MembersPanel() {
                     type="button"
                     onClick={handleSaveName}
                     disabled={busy === 'save'}
-                    className="flex h-9 items-center gap-1.5 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                    className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 md:h-9"
                   >
                     {busy === 'save' && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                     Guardar

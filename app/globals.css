@@ -356,11 +356,12 @@
   margin-bottom: 0.75rem;
 }
 
-/* Botones — placa neutra con acento dorado solo en el estado activo */
+/* Botones — placa neutra con acento dorado solo en el estado activo.
+   Táctil: ≥44px en móvil; a partir de md vuelve la placa compacta. */
 .fc .fc-button,
 .fc .fc-button-primary {
-  height: 2rem;
-  padding: 0 0.6rem;
+  height: 2.75rem;
+  padding: 0 0.875rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
@@ -368,6 +369,13 @@
   text-transform: capitalize;
   box-shadow: none !important;
   transition: color 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out;
+}
+@media (min-width: 768px) {
+  .fc .fc-button,
+  .fc .fc-button-primary {
+    height: 2rem;
+    padding: 0 0.6rem;
+  }
 }
 .fc .fc-button-primary:hover:not(:disabled) {
   color: hsl(var(--foreground));
@@ -444,7 +452,13 @@
   color: hsl(var(--muted-foreground));
 }
 .fc .fc-list-event td {
-  padding: 0.625rem 0.875rem;
+  /* Táctil: filas de agenda ≥48px en móvil; compactas a partir de md */
+  padding: 0.875rem;
+}
+@media (min-width: 768px) {
+  .fc .fc-list-event td {
+    padding: 0.625rem 0.875rem;
+  }
 }
 .fc .fc-list-event-time {
   font-family: var(--font-mono);

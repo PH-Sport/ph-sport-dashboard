@@ -175,7 +175,7 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
           type="button"
           onClick={() => void send()}
           disabled={!canSend}
-          className="mb-0.5 size-9 shrink-0 rounded-xl p-0"
+          className="mb-0.5 size-11 shrink-0 rounded-xl p-0 md:size-9"
           aria-label="Enviar mensaje al agente"
         >
           {loading ? (

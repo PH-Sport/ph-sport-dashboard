@@ -99,7 +99,7 @@ function RowActions({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-11 w-11 md:h-8 md:w-8"
           aria-label={`Acciones — ${design.title}`}
         >
           <MoreHorizontal className="h-4 w-4" />
@@ -205,11 +205,11 @@ export function DesignsTable({
         {paginatedItems.map((design) => {
           const dz = resolveDesigner(design, designers);
           return (
-            <li key={design.id} className="rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/40">
+            <li key={design.id} className="rounded-xl px-2 py-3 transition-colors hover:bg-muted/40">
               <div className="flex items-start justify-between gap-2">
                 <button
                   onClick={() => onOpenDetail(design.id)}
-                  className="min-w-0 flex-1 text-left"
+                  className="min-h-11 min-w-0 flex-1 text-left"
                 >
                   <p className="truncate text-sm font-medium">{design.title}</p>
                   <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
