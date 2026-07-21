@@ -164,7 +164,7 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
           }}
           onKeyDown={handleKeyDown}
           disabled={disabled || loading}
-          placeholder="Pídeselo al agente o pega el mensaje de WhatsApp…"
+          placeholder="Escribe o pega un mensaje…"
           rows={1}
           className={cn(
             'min-h-0 max-h-36 resize-none overflow-y-auto border-0 bg-transparent px-1 py-1.5 shadow-none',
@@ -186,18 +186,21 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
         </Button>
       </div>
 
-      <p className={cn('px-1 text-xs text-muted-foreground', status.kind === 'fallback' && 'text-status-warning')}>
-        {status.kind === 'loading' && (
-          <span className="inline-flex items-center gap-1.5">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            El agente está leyendo el mensaje…
-          </span>
-        )}
-        {status.kind === 'success' &&
-          `${status.count} tarjeta${status.count !== 1 ? 's' : ''} propuesta${status.count !== 1 ? 's' : ''} — revísalas antes de crear.`}
-        {status.kind === 'fallback' && 'El agente no está disponible — tu texto quedó en una tarjeta.'}
-        {status.kind === 'idle' && 'El agente propone tarjetas; tú revisas y confirmas.'}
-      </p>
+      {/* Solo habla cuando tiene algo que reportar (trabajando/hecho/falló).
+          En reposo calla: el icono y el placeholder ya explican el campo. */}
+      {status.kind !== 'idle' && (
+        <p className={cn('px-1 text-xs text-muted-foreground', status.kind === 'fallback' && 'text-status-warning')}>
+          {status.kind === 'loading' && (
+            <span className="inline-flex items-center gap-1.5">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Leyendo el mensaje…
+            </span>
+          )}
+          {status.kind === 'success' &&
+            `${status.count} tarjeta${status.count !== 1 ? 's' : ''} añadida${status.count !== 1 ? 's' : ''}.`}
+          {status.kind === 'fallback' && 'El agente no está disponible — tu texto quedó en una tarjeta.'}
+        </p>
+      )}
     </div>
   );
 }
