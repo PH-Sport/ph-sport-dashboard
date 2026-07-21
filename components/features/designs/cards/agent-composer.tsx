@@ -148,11 +148,14 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
     <div className="shrink-0 space-y-1.5">
       <div
         className={cn(
-          'flex items-end gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm',
+          // items-center: icono, texto y botón comparten centro (simétrico en el
+          // caso de una línea, el habitual). Sin márgenes de compensación: el p-2
+          // deja el mismo aire arriba/abajo e izq/der (icono y botón a 8px del borde).
+          'flex items-center gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm',
           'transition-shadow focus-within:ring-2 focus-within:ring-primary/20'
         )}
       >
-        <Sparkles className="mb-2 ml-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <Sparkles className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
         <Textarea
           ref={textareaRef}
           value={message}
@@ -167,7 +170,8 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
           placeholder="Escribe o pega un mensaje…"
           rows={1}
           className={cn(
-            'min-h-0 max-h-36 resize-none overflow-y-auto border-0 bg-transparent px-1 py-1.5 shadow-none',
+            // overflow-x-hidden: el texto envuelve hacia abajo, nunca se desliza de lado.
+            'min-h-0 max-h-36 resize-none overflow-y-auto overflow-x-hidden border-0 bg-transparent px-1 py-1.5 shadow-none',
             'focus-visible:ring-0 focus-visible:ring-offset-0'
           )}
         />
@@ -175,7 +179,7 @@ export function AgentComposer({ onCards, disabled }: AgentComposerProps) {
           type="button"
           onClick={() => void send()}
           disabled={!canSend}
-          className="mb-0.5 size-11 shrink-0 rounded-xl p-0 md:size-9"
+          className="size-11 shrink-0 rounded-xl p-0 md:size-9"
           aria-label="Enviar mensaje al agente"
         >
           {loading ? (
