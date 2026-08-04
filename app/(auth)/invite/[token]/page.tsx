@@ -176,7 +176,7 @@ export default function InvitePage() {
 
   return (
     <div>
-      <AuthHeading title="Has sido invitado" subtitle="Crea tu cuenta en PH Sport" />
+      <AuthHeading title="Has sido invitado" subtitle="Crea tu cuenta en PHSPORT" />
       <div className="mb-8 -mt-4">
         <Badge variant="outline" className="text-sm">
           Rol: {ROLE_LABELS[invitation?.role || 'DESIGNER']}
