@@ -2,9 +2,11 @@
   PHSPORT — Confirmación de cuenta (Supabase Auth › Emails › Confirm sign up)
   Fuente de verdad de la plantilla: editarla aquí y pegarla en el dashboard.
 
-  Se dispara al crear cuenta desde una invitación. El signUp de
-  app/(auth)/invite/[token]/page.tsx no pasa emailRedirectTo, así que aquí
-  RedirectTo viene vacío y la base es SiteURL.
+  Se dispara al crear cuenta desde una invitación.
+
+  El dominio del href va literal: con {{ .SiteURL }} delante, html/template
+  deja el token en contexto ambiguo dentro de la URL y el envío falla con un
+  500. Ver la explicación completa en recovery.html.
 -->
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#FAFAFA;margin:0;padding:0;">
   <tr>
@@ -34,7 +36,7 @@
 
         <tr>
           <td align="center" style="padding:24px 32px 0;">
-            <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/login"
+            <a href="https://phsport.app/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/login"
                style="display:inline-block;background-color:#d6b25e;border-radius:8px;color:#0d0f12;font-size:14px;font-weight:600;text-decoration:none;padding:12px 28px;">
               Confirmar mi cuenta
             </a>

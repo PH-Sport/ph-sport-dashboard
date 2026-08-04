@@ -7,11 +7,16 @@
   el correo como phishing —lo mandan a spam y llegan a quitarle el href—.
   Lo resuelve la ruta /auth/confirm, que verifica el token_hash.
 
-  NO metas condicionales ({{ if .RedirectTo }}…) en el href: GoTrue renderiza
-  con html/template y rechaza las ramas que acaban en contextos de URL
-  distintos, así que el envío entero revienta con un 500 «Error sending
-  recovery email». Se probó y tumbó la recuperación en producción.
-  Con SiteURL fijo el enlace siempre resuelve.
+  El dominio del href va literal, NO con {{ .SiteURL }} delante. GoTrue
+  renderiza con html/template, y una URL que empieza por una acción deja el
+  resto en contexto ambiguo —no puede saber si lo que sigue es ruta o query—:
+
+    html/template: {{.TokenHash}} appears in an ambiguous context within a URL
+
+  El error no se queda en el enlace: revienta el envío entero con un 500
+  «Error sending recovery email», sin llegar a intentar el SMTP. Tumbó la
+  recuperación de contraseña en producción hasta que se puso el dominio
+  literal. Lo mismo aplica a cualquier condicional dentro del href.
 -->
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#FAFAFA;margin:0;padding:0;">
   <tr>
@@ -42,7 +47,7 @@
 
         <tr>
           <td align="center" style="padding:24px 32px 0;">
-            <a href="{{ if .RedirectTo }}{{ .RedirectTo }}&{{ else }}{{ .SiteURL }}/auth/confirm?next=/reset-password&{{ end }}token_hash={{ .TokenHash }}&type=recovery"
+            <a href="https://phsport.app/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password"
                style="display:inline-block;background-color:#d6b25e;border-radius:8px;color:#0d0f12;font-size:14px;font-weight:600;text-decoration:none;padding:12px 28px;">
               Elegir nueva contraseña
             </a>
