@@ -1,0 +1,68 @@
+<!--
+  PHSPORT — Confirmación de cuenta (Supabase Auth › Emails › Confirm sign up)
+  Fuente de verdad de la plantilla: editarla aquí y pegarla en el dashboard.
+
+  Se dispara al crear cuenta desde una invitación. El signUp de
+  app/(auth)/invite/[token]/page.tsx no pasa emailRedirectTo, así que aquí
+  RedirectTo viene vacío y la base es SiteURL.
+-->
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#FAFAFA;margin:0;padding:0;">
+  <tr>
+    <td align="center" style="padding:40px 16px;">
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background-color:#ffffff;border:1px solid #E5E5E5;border-radius:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+        <tr>
+          <td style="padding:32px 32px 0;">
+            <div style="height:4px;width:100%;border-radius:9999px;background-color:#d6b25e;line-height:4px;font-size:0;">&nbsp;</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:26px 32px 0;">
+            <img src="https://phsport.app/images/apple-touch-icon.png" width="96" alt="PHSPORT" style="width:96px;height:auto;display:block;margin:0 auto;border:0;" />
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:22px 32px 0;">
+            <p style="margin:0 0 10px;font-size:14px;line-height:22px;color:#737373;">Te damos la bienvenida</p>
+            <h1 style="margin:0;font-size:28px;line-height:34px;font-weight:600;color:#0A0A0A;">Confirma tu cuenta</h1>
+            <p style="margin:18px 0 0;font-size:15px;line-height:26px;color:#737373;">
+              Ya casi está. Confirma esta dirección para activar tu acceso al panel de PHSPORT.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:24px 32px 0;">
+            <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/login"
+               style="display:inline-block;background-color:#d6b25e;border-radius:8px;color:#0d0f12;font-size:14px;font-weight:600;text-decoration:none;padding:12px 28px;">
+              Confirmar mi cuenta
+            </a>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:24px 32px 0;">
+            <p style="margin:0;font-size:13px;line-height:22px;color:#737373;">
+              Si no esperabas esta invitación, puedes ignorar este correo.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:28px 32px 0;">
+            <hr style="border:none;border-top:1px solid #E5E5E5;margin:0;" />
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:20px 32px 32px;">
+            <p style="margin:0;font-size:12px;line-height:20px;color:#737373;">
+              Recibes este correo porque se ha creado una cuenta con {{ .Email }} en PHSPORT.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
