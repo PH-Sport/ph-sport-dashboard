@@ -6,7 +6,7 @@ type PhSportMarkProps = {
   decorative?: boolean;
 };
 
-/** Monograma PH Sport (vector); color vía `text-*` / `currentColor`. */
+/** Monograma PHSPORT (vector); color vía `text-*` / `currentColor`. */
 export function PhSportMark({ className, decorative }: PhSportMarkProps) {
   return (
     <svg
@@ -17,7 +17,7 @@ export function PhSportMark({ className, decorative }: PhSportMarkProps) {
       aria-hidden={decorative ? true : undefined}
       role={decorative ? 'presentation' : 'img'}
     >
-      {!decorative ? <title>PH Sport</title> : null}
+      {!decorative ? <title>PHSPORT</title> : null}
       <polyline points="0 206.1 58.2 206.1 57.9 145.5 158.1 45.4 112.7 0 0 0 0 52.6 76.9 52.6 0 128.7" />
       <polyline points="122.6 206.1 200.1 206.1 152.2 157.8 173 137.1 182.4 146.4 259.8 146.4 169.6 55.6 130.5 94.2 131.8 95.6 141.1 105.4 120.3 125.8 109.8 115.4 70.8 153.9" />
     </svg>

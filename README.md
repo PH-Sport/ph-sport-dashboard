@@ -1,6 +1,6 @@
-# PH Sport Dashboard
+# PHSPORT Dashboard
 
-Dashboard para el equipo de diseño de PH Sport.
+Dashboard para el equipo de diseño de PHSPORT.
 
 ## Características
 

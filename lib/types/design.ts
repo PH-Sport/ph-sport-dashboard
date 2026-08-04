@@ -1,4 +1,4 @@
-// Tipos unificados para la aplicación PH Sport
+// Tipos unificados para la aplicación PHSPORT
 // Estos tipos se usan tanto en modo demo como en producción
 
 import type { DesignStatus } from './filters';

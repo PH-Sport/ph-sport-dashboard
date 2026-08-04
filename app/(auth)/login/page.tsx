@@ -147,7 +147,7 @@ export default function LoginPage() {
 
   return (
     <div>
-      <AuthHeading title="Iniciar Sesión" subtitle="Accede a tu cuenta de PH Sport" />
+      <AuthHeading title="Iniciar Sesión" subtitle="Accede a tu cuenta de PHSPORT" />
 
       <form className="space-y-5" onSubmit={handleLogin}>
         <div className="space-y-2">

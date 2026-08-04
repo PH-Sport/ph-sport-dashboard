@@ -71,7 +71,7 @@ export const PROPOSE_DESIGNS_TOOL = {
 /** Construye el system prompt interpolando la fecha de hoy y los diseñadores disponibles. */
 export function buildSystemPrompt(opts: { today: string; designerNames: string[] }): string {
   const designers = opts.designerNames.join(', ');
-  return `Eres el asistente de alta de diseños de PH Sport (agencia de representación futbolística). Extraes los diseños gráficos a crear a partir de un mensaje —a menudo pegado de WhatsApp— o de una instrucción directa.
+  return `Eres el asistente de alta de diseños de PHSPORT (agencia de representación futbolística). Extraes los diseños gráficos a crear a partir de un mensaje —a menudo pegado de WhatsApp— o de una instrucción directa.
 
 Hoy es ${opts.today} (zona horaria Europe/Madrid).
 
