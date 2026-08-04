@@ -219,10 +219,11 @@ const EmailLayout = ({
             <div className="h-[4px] w-full rounded-full bg-primary" />
           </Section>
           <Section className="mt-[6px] mb-[20px] text-center">
+            {/* PNG, no SVG: los clientes de correo no lo renderizan y el logo no llegaba a verse. */}
             <Img
-              src="https://phsport.app/images/logo-ph-sport-gold.svg"
+              src="https://phsport.app/images/logo-ph-sport-gold-240.png"
               width="120"
-              height="96"
+              height="95"
               alt="PHSPORT"
               className="mx-auto"
               style={{ height: 'auto' }}
