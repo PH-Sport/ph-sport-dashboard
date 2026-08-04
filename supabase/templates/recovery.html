@@ -7,8 +7,11 @@
   el correo como phishing —lo mandan a spam y llegan a quitarle el href—.
   Lo resuelve la ruta /auth/confirm, que verifica el token_hash.
 
-  El `if` cubre el caso de disparar la recuperación desde el panel de Supabase,
-  donde RedirectTo viene vacío.
+  NO metas condicionales ({{ if .RedirectTo }}…) en el href: GoTrue renderiza
+  con html/template y rechaza las ramas que acaban en contextos de URL
+  distintos, así que el envío entero revienta con un 500 «Error sending
+  recovery email». Se probó y tumbó la recuperación en producción.
+  Con SiteURL fijo el enlace siempre resuelve.
 -->
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#FAFAFA;margin:0;padding:0;">
   <tr>
