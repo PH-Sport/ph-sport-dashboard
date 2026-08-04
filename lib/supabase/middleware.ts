@@ -45,8 +45,13 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
+  // Handlers que canjean un token de email (recuperación, invitación, cambio de email).
+  // Tener sesión abierta no puede desviarlos: el enlace debe llegar a su destino aunque
+  // el usuario siga logueado en ese navegador —el caso típico de "olvidé la contraseña".
+  const isAuthHandler = path.startsWith('/auth')
+
   // Rutas públicas que no requieren auth
-  const isPublicRoute = path === '/login' || path.startsWith('/invite') || path.startsWith('/auth')
+  const isPublicRoute = path === '/login' || path.startsWith('/invite') || isAuthHandler
 
   // Redirecciones
   if (!user && !isPublicRoute) {
@@ -58,7 +63,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     // Si hay usuario y trata de ir a login/register -> redirigir según rol
-    if (isPublicRoute) {
+    if (isPublicRoute && !isAuthHandler) {
        // Obtener perfil para saber rol
        const { data: profile } = await supabase
         .from('profiles')
