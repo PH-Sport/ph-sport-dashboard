@@ -108,6 +108,9 @@ const config: Config = {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        // Superficie agrupada iOS — exterior del modelo concentrico (22px).
+        // El interior se deriva restando el padding: ver concentricRadius().
+        surface: '22px',
       },
       keyframes: {
         'accordion-down': {
