@@ -10,7 +10,8 @@
     Acento dorado Champions reservado: CTAs, focus, item activo, badges premium.
   */
   :root {
-    /* Tipografía — Geist (display + body) + JetBrains Mono (datos, dotted zero) */
+    /* Tipografía — Geist (display + body) + Azeret Mono (datos y textos técnicos).
+       Pila única: Tailwind (sans/heading/mono) referencia estas dos variables. */
     --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
     --font-mono: var(--font-mono-base), ui-monospace, SFMono-Regular, monospace;
 
@@ -160,8 +161,8 @@
     font-variant-numeric: tabular-nums;
   }
   /* Mono accent — datos, IDs, deadlines, eyebrows técnicos.
-     JetBrains Mono lleva dotted zero por defecto; no activar la feature `zero`
-     porque convierte el 0 en slashed. */
+     Azeret Mono trae el 0 limpio por defecto; no activar la feature `zero`,
+     que lo convierte en slashed. */
   .mono {
     font-family: var(--font-mono);
   }

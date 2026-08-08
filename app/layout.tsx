@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
-import { JetBrains_Mono } from 'next/font/google';
+import { Azeret_Mono } from 'next/font/google';
 import './globals.css';
 
-const fontMono = JetBrains_Mono({
+const fontMono = Azeret_Mono({
   subsets: ['latin'],
   variable: '--font-mono-base',
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
 });
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SWRProvider } from '@/components/providers/swr-provider';

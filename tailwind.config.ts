@@ -10,10 +10,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Las pilas completas (con sus fallbacks) viven en globals.css: --font-sans
+      // y --font-mono son la única fuente de verdad. Aquí solo se referencian.
       fontFamily: {
-        sans: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        sans: ['var(--font-sans)'],
+        heading: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
       },
       // Escala de espaciado semántica (4pt) — p-md, gap-lg, space-y-sm…
       // Regla: cards default=lg(24), cards compact=md(16). Fin del p-4/5/6 ad-hoc.
