@@ -219,13 +219,15 @@ const EmailLayout = ({
             <div className="h-[4px] w-full rounded-full bg-primary" />
           </Section>
           <Section className="mt-[6px] mb-[20px] text-center">
+            {/* Blanco sobre negro: en comunicaciones la marca va así, el dorado solo como
+                acento (aquí, la barra de arriba). PNG y no SVG porque los clientes de
+                correo no renderizan SVG y el logo no llegaba a verse. */}
             <Img
-              src="https://phsport.app/images/logo-ph-sport-gold.svg"
-              width="120"
+              src="https://phsport.app/images/logo-ph-sport-email-192.png"
+              width="96"
               height="96"
               alt="PHSPORT"
               className="mx-auto"
-              style={{ height: 'auto' }}
             />
           </Section>
 
