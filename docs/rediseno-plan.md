@@ -55,9 +55,11 @@ Resultado: atrás del navegador funciona, URLs compartibles, fin de los modales-
 - `overlay`: la sombra intencional de la sidebar `0 2px 24px -12px rgb(0 0 0 / 0.22)`.
 - **Frosted glass** (acento raro, **anclado en marca** — los diseñadores PHSPORT lo usan en plantillas): charcoal ahumado, `bg hsl(var(--panel) / .72)` + `backdrop-blur(12px) saturate(120%)` + borde sutil. **Solo en overlays flotantes** (command palette, dialog, popover). Nunca sobre datos/cards/tablas.
 
-**Tipografía** — Geist + JetBrains Mono. Escala fija (rem), **un peso de heading (semibold 600)**:
+**Tipografía** — Geist + **Azeret Mono** (la secundaria era JetBrains Mono hasta 2026-08-08; el equipo eligió Azeret tras probar las combinaciones sobre la UI real). Escala fija (rem), **un peso de heading (semibold 600)**:
 - page-title 28px · section 20px · card-title 16px · body 14px · caption 12px · eyebrow 11px mono uppercase `tracking .18em`.
 - Tabular nums en datos. `<Eyebrow>` tokenizado (hoy copy-pasteado 9×).
+- **Dónde vive**: `app/layout.tsx` declara las dos fuentes (Azeret entra por `next/font/google` **sin `weight`**, a propósito, para que cargue el corte variable y el 500 de eyebrow y el 600 de KPI sean reales y no sintetizados). `globals.css` define `--font-sans`/`--font-mono` con sus fallbacks — **única fuente de verdad**; `tailwind.config.ts` solo las referencia. Cambiar de fuente = tocar esos dos archivos, nunca los ~70 `font-mono` repartidos por la app.
+- ⚠️ **Restricción de ancho**: Azeret es ~6% más ancha que JetBrains (un eyebrow de 23 caracteres pasa de 197px a 210px). Con `tracking .18em`, una etiqueta de 10 caracteres mide 91px y **no cabe en una tarjeta de 3 columnas en móvil** (~82px útiles). Si un eyebrow va en contenedor estrecho, aflojar el tracking y el padding **solo en móvil** (ver `KpiPlate` en `designer-dashboard.tsx`: `p-sm` + `tracking-[0.08em]`, ambos restaurados desde `sm:`).
 
 **Espaciado** — escala 4pt semántica: `2xs 4 · xs 8 · sm 12 · md 16 · lg 24 · xl 32 · 2xl 48 · 3xl 64`. Card density: `compact = md(16)` / `default = lg(24)`. Fin del `p-4/5/6` ad-hoc.
 
