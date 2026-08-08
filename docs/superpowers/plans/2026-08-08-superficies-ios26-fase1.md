@@ -560,9 +560,11 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    // Columna de un bloque compartido: sin superficie ni borde propios.
-    // El separador vertical lo pone `divide-x` del contenedor (spec §7.1).
-    <div className="flex-1 p-sm sm:p-lg">
+    // Movil: columna de un bloque compartido, sin superficie propia — el
+    // separador vertical lo pone `divide-x` del contenedor (spec §7.1).
+    // Escritorio (md:): recupera su tarjeta, porque alli siguen siendo tres
+    // superficies separadas y el escritorio no entra en esta fase.
+    <div className="flex-1 p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
       <p className="font-mono text-eyebrow uppercase tracking-[0.08em] text-muted-foreground sm:tracking-[0.18em]">
         {label}
       </p>
@@ -580,10 +582,15 @@ function KpiPlate({
 Sustituye la sección de KPIs (líneas 129-143) por:
 
 ```tsx
-      {/* KPIs personales — UN bloque, tres columnas separadas por hairline.
-          Antes eran tres superficies con borde: 3 bordes + 3 sombras diciendo
-          lo que el tono ya dice, y solo 77px utiles por tarjeta. */}
-      <Surface as="section" padded={false} className="flex divide-x divide-border">
+      {/* Movil: UN bloque, tres columnas separadas por hairline. Antes eran tres
+          superficies con borde — 3 bordes + 3 sombras diciendo lo que el tono ya
+          dice, y solo 77px utiles por tarjeta.
+          Escritorio (md:): vuelve la rejilla de tres tarjetas de hoy, intacta.
+
+          NO se usa <Surface> aqui: Surface asume que el bloque es la superficie
+          en ambos tamanos, y en los KPI la superficie cambia de sitio segun el
+          ancho (contenedor en movil, cada tarjeta en escritorio). */}
+      <section className="flex rounded-surface bg-card divide-x divide-border md:grid md:grid-cols-3 md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0">
         <KpiPlate
           label="Pendientes"
           value={activeDesigns}
@@ -681,8 +688,12 @@ Sustituye la línea 64:
 por:
 
 ```tsx
-    <div className="p-sm sm:p-lg">
+    <div className="p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
 ```
+
+Igual que en la Task 5: en móvil la columna no tiene superficie propia (la pone el
+bloque), y desde `md:` recupera su tarjeta, porque en escritorio siguen siendo
+cuatro superficies separadas.
 
 - [ ] **Step 3: Rejilla de KPIs (línea 213) pasa a bloque único 2×2**
 
@@ -695,12 +706,14 @@ Sustituye:
 por:
 
 ```tsx
-      {/* Un bloque, rejilla 2x2 en movil separada por hairline interno.
-          En xl vuelven las cuatro columnas de hoy. */}
-      <Surface as="section" padded={false} className="grid grid-cols-2 divide-x divide-y divide-border xl:grid-cols-4 xl:divide-y-0">
+      {/* Movil: un bloque, rejilla 2x2 separada por hairline interno.
+          Escritorio (md:): vuelven las tarjetas sueltas con su gap, y en xl las
+          cuatro columnas de hoy. La superficie cambia de sitio segun el ancho,
+          por eso aqui no se usa <Surface> (ver Task 5). */}
+      <section className="grid grid-cols-2 rounded-surface bg-card divide-x divide-y divide-border md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0 md:divide-y-0 xl:grid-cols-4">
 ```
 
-Cierra con `</Surface>`.
+Cierra con `</section>`. Mismo criterio que en la Task 5: **no uses `<Surface>` para los KPI**, porque en escritorio la superficie la lleva cada tarjeta y no el contenedor.
 
 - [ ] **Step 4: Banner de reparto (línea 148) conserva el tinte, pierde el borde**
 
