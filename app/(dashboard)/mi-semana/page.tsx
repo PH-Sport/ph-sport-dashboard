@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -148,52 +148,52 @@ export default function MyWeekPage() {
                     const short = format(new Date(d.deadline_at), "d MMM · HH:mm", { locale: es });
                     const busy = updating === d.id;
                     return (
-                      <Fragment key={d.id}>
                       <motion.li
+                        key={d.id}
                         layout
                         exit={{ opacity: 0, x: 24, transition: TWEENS.base }}
                         transition={SPRINGS.smooth}
-                        className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40"
                       >
-                        <UrgencyDot level={urgency} />
-                        <button
-                          type="button"
-                          onClick={() => openDetail(d.id)}
-                          className="min-w-0 flex-1 text-left outline-none"
-                        >
-                          <p className="flex items-center gap-1.5 truncate text-sm font-medium">
-                            {d.title}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">{d.player}</p>
-                        </button>
-                        <span
-                          className={cn(
-                            'shrink-0 font-mono tabular text-xs',
-                            urgency === 'h24' || overdue
-                              ? 'font-semibold text-destructive'
-                              : 'text-muted-foreground'
-                          )}
-                        >
-                          {overdue ? `Atrasada · ${short}` : short}
-                        </span>
-                        <Hint label="Marcar como entregada">
-                        <button
-                          type="button"
-                          onClick={() => handleStatusChange(d, 'DELIVERED')}
-                          disabled={busy}
-                          className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 text-xs font-medium text-muted-foreground opacity-100 transition-all hover:border-status-success/40 hover:bg-status-success/10 hover:text-status-success focus-visible:opacity-100 disabled:opacity-50 md:h-8 md:px-2.5 md:opacity-0 md:group-hover:opacity-100"
-                        >
-                          {busy ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Check className="h-3.5 w-3.5" />
-                          )}
-                          Entregar
-                        </button>
-                        </Hint>
+                        <div className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40">
+                          <UrgencyDot level={urgency} />
+                          <button
+                            type="button"
+                            onClick={() => openDetail(d.id)}
+                            className="min-w-0 flex-1 text-left outline-none"
+                          >
+                            <p className="flex items-center gap-1.5 truncate text-sm font-medium">
+                              {d.title}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">{d.player}</p>
+                          </button>
+                          <span
+                            className={cn(
+                              'shrink-0 font-mono tabular text-xs',
+                              urgency === 'h24' || overdue
+                                ? 'font-semibold text-destructive'
+                                : 'text-muted-foreground'
+                            )}
+                          >
+                            {overdue ? `Atrasada · ${short}` : short}
+                          </span>
+                          <Hint label="Marcar como entregada">
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(d, 'DELIVERED')}
+                            disabled={busy}
+                            className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 text-xs font-medium text-muted-foreground opacity-100 transition-all hover:border-status-success/40 hover:bg-status-success/10 hover:text-status-success focus-visible:opacity-100 disabled:opacity-50 md:h-8 md:px-2.5 md:opacity-0 md:group-hover:opacity-100"
+                          >
+                            {busy ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Check className="h-3.5 w-3.5" />
+                            )}
+                            Entregar
+                          </button>
+                          </Hint>
+                        </div>
+                        {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
                       </motion.li>
-                      {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
-                      </Fragment>
                     );
                   })}
                 </AnimatePresence>
