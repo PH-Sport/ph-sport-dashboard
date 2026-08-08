@@ -21,7 +21,7 @@ export function concentricRadius(outer: number, padding: number, min = 4): numbe
 }
 
 /** Clases que restauran el escritorio actual. Identicas para ambas variantes. */
-const DESKTOP = 'md:border md:border-border md:bg-card md:rounded-lg md:shadow-raised';
+const DESKTOP = 'md:border md:border-border md:bg-card md:rounded-2xl md:shadow-raised';
 
 export function surfaceClasses(variant: SurfaceVariant): string {
   const mobile =

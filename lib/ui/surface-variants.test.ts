@@ -50,7 +50,7 @@ describe('surfaceClasses', () => {
       expect(c).toContain('md:border');
       expect(c).toContain('md:border-border');
       expect(c).toContain('md:bg-card');
-      expect(c).toContain('md:rounded-lg');
+      expect(c).toContain('md:rounded-2xl');
       expect(c).toContain('md:shadow-raised');
     }
   });
