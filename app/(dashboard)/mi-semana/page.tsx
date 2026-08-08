@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -14,6 +14,8 @@ import { DashboardPage } from '@/components/ui/dashboard-page';
 import { MyWeekSkeleton } from '@/components/skeletons/my-week-skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Hint } from '@/components/ui/tooltip';
+import { Surface } from '@/components/ui/surface';
+import { RowSeparator } from '@/components/ui/row';
 import { SPRINGS, STAGGER, TWEENS } from '@/components/ui/animations';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -125,10 +127,8 @@ export default function MyWeekPage() {
           className="space-y-4"
         >
           {/* Pendientes */}
-          <motion.section
-            variants={rise}
-            className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
-          >
+          <motion.div variants={rise}>
+            <Surface as="section" variant="plain">
             <div className="mb-2 flex items-center gap-2">
               <h2 className="text-base font-semibold">Pendientes</h2>
               <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
@@ -142,14 +142,14 @@ export default function MyWeekPage() {
             ) : (
               <ul className="-mx-2">
                 <AnimatePresence initial={false}>
-                  {inProgress.map((d) => {
+                  {inProgress.map((d, i) => {
                     const urgency = getUrgency(d.deadline_at, false);
                     const overdue = urgency === 'overdue';
                     const short = format(new Date(d.deadline_at), "d MMM · HH:mm", { locale: es });
                     const busy = updating === d.id;
                     return (
+                      <Fragment key={d.id}>
                       <motion.li
-                        key={d.id}
                         layout
                         exit={{ opacity: 0, x: 24, transition: TWEENS.base }}
                         transition={SPRINGS.smooth}
@@ -192,19 +192,20 @@ export default function MyWeekPage() {
                         </button>
                         </Hint>
                       </motion.li>
+                      {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
+                      </Fragment>
                     );
                   })}
                 </AnimatePresence>
               </ul>
             )}
-          </motion.section>
+            </Surface>
+          </motion.div>
 
           {/* Entregadas, por semana */}
           {deliveredCount > 0 && (
-            <motion.section
-              variants={rise}
-              className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
-            >
+            <motion.div variants={rise}>
+            <Surface as="section" padded={false} className="md:p-lg">
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-semibold">Entregadas</h2>
                 <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
@@ -284,7 +285,8 @@ export default function MyWeekPage() {
                   );
                 })}
               </div>
-            </motion.section>
+            </Surface>
+            </motion.div>
           )}
         </motion.div>
       )}
