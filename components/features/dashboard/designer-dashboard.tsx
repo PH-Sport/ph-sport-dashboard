@@ -40,8 +40,13 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
-      <p className="font-mono text-eyebrow uppercase text-muted-foreground">{label}</p>
+    <div className="rounded-2xl border border-border bg-card p-sm shadow-raised sm:p-lg">
+      {/* Tres columnas en móvil dejan ~85px de contenido por tarjeta: el tracking
+          de 0.18em del token no cabe con etiquetas de 10 caracteres («Completado»)
+          y se sale por la derecha. Se afloja solo en móvil; desde sm: vuelve el token. */}
+      <p className="font-mono text-eyebrow uppercase tracking-[0.08em] text-muted-foreground sm:tracking-[0.18em]">
+        {label}
+      </p>
       <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
