@@ -20,6 +20,16 @@
 - **Textos de UI en español**, con tildes correctas.
 - **Mensajes de commit en español, sin tildes** (patrón del repo: `fix(movil): ...`, `feat(tipografia): ...`).
 - **Stage por rutas explícitas.** Nunca `git add -A` ni `git add .` — hay riesgo de commits concurrentes en este repo.
+- **El separador va SIEMPRE dentro del `<li>`, nunca como su hermano.** `<ul>` solo admite `<li>` como hijo: un `<div>` suelto entre elementos es HTML inválido. Cuando el `<li>` ya es un contenedor flex horizontal, mueve sus clases a un `<div>` interior y deja el `<li>` como envoltorio limpio:
+
+```tsx
+<li key={x.id}>
+  <div className="flex items-center gap-3 …">{/* contenido de la fila */}</div>
+  {i < items.length - 1 && <RowSeparator inset="leading" />}
+</li>
+```
+
+  Si el `<li>` es un `motion.li` con `layout`, el envoltorio interior no interfiere: la animación sigue midiendo el `<li>`.
 
 ---
 
@@ -471,13 +481,23 @@ Cierra con `</Surface>`, envuelta igual en `<motion.div variants={rise}>`.
 
 - [ ] **Step 4: Separadores entre filas pendientes**
 
-Dentro del `<ul>` de pendientes, después de cada `</motion.li>` salvo el último, inserta:
+Cambia `inProgress.map((d) => {` por `inProgress.map((d, i) => {` para disponer del índice.
+
+El separador va **dentro** del `<li>`, nunca como hermano (ver restricciones globales). Como el `motion.li` actual ya es un contenedor flex horizontal, mueve sus clases visuales a un `<div>` interior y deja el `motion.li` con solo las props de animación:
 
 ```tsx
-{i < inProgress.length - 1 && <RowSeparator inset="leading" />}
+<motion.li
+  key={d.id}
+  layout
+  exit={{ opacity: 0, x: 24, transition: TWEENS.base }}
+  transition={SPRINGS.smooth}
+>
+  <div className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40">
+    {/* el contenido actual de la fila, sin cambios */}
+  </div>
+  {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
+</motion.li>
 ```
-
-Para disponer del índice, cambia `inProgress.map((d) => {` por `inProgress.map((d, i) => {`.
 
 - [ ] **Step 5: Verifica**
 
