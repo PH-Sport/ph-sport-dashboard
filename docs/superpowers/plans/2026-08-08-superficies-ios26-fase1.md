@@ -296,7 +296,7 @@ EOF
 - Create: `components/ui/row.tsx`
 
 **Interfaces:**
-- Produces: `<Row leading trailing subtitle onClick href className children>` y `<RowSeparator inset>`.
+- Produces: `<Row leading trailing subtitle onClick className children>` y `<RowSeparator inset className>`.
   - `RowProps = { leading?: ReactNode; trailing?: ReactNode; subtitle?: ReactNode; onClick?: () => void; className?: string; children: ReactNode }`
   - `RowSeparatorProps = { inset?: 'text' | 'leading' }` — `'text'` (por defecto) sangra 16px; `'leading'` sangra 44px, para listas con icono o avatar.
 
@@ -332,7 +332,7 @@ export function Row({ leading, trailing, subtitle, onClick, className, children 
     <>
       {leading}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium md:text-sm">{children}</span>
+        <span className="block truncate text-sm font-medium">{children}</span>
         {subtitle ? (
           <span className="mt-0.5 block truncate text-xs text-muted-foreground">{subtitle}</span>
         ) : null}
@@ -351,7 +351,18 @@ export function Row({ leading, trailing, subtitle, onClick, className, children 
   if (!onClick) return <div className={base}>{content}</div>;
 
   return (
-    <button type="button" onClick={onClick} className={cn(base, 'outline-none focus-visible:bg-muted/40')}>
+    // El foco necesita su PROPIA senal: `bg-muted/40` es identico al hover y en
+    // oscuro son 2,4 puntos de luminancia sobre el lienzo — invisible con teclado.
+    // Se usa el anillo que ya es convencion del repo (14 usos), con `ring-inset`
+    // porque la fila vive dentro de un bloque con overflow-hidden.
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        base,
+        'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset'
+      )}
+    >
       {content}
     </button>
   );
