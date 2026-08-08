@@ -910,7 +910,13 @@ grep -rn "shadow-raised" app components --include="*.tsx"
 
 `shadow-raised` solo debe sobrevivir en `md:` (escritorio) y en capa funcional. Si aparece sin prefijo en una superficie de contenido, quítalo: la elevación es de la capa funcional (spec §3 R1).
 
-- [ ] **Step 3: Verificación completa**
+- [ ] **Step 3: Reindentar los bloques `motion.div` / `Surface`**
+
+Las migraciones dejaron indentación desalineada donde `<Surface>` se envuelve en `<motion.div variants={rise}>` — el hijo queda al mismo nivel que el padre. Empezó en `app/(dashboard)/mi-semana/page.tsx` (bloques de las líneas ~131-201 y ~207-289) y se replica allá donde se usó el mismo patrón. No rompe nada (no hay regla de indentación en el linter ni Prettier configurado), pero deja el archivo torcido.
+
+Recorre los archivos migrados y reindenta esos bloques a un nivel por anidamiento. Solo espacios: si el diff muestra cualquier cambio que no sea de indentación, te has pasado.
+
+- [ ] **Step 4: Verificación completa**
 
 ```bash
 npm run type-check
