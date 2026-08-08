@@ -41,9 +41,11 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    // Columna de un bloque compartido: sin superficie ni borde propios.
-    // El separador vertical lo pone `divide-x` del contenedor (spec §7.1).
-    <div className="flex-1 p-sm sm:p-lg">
+    // Columna de un bloque compartido en movil: sin superficie ni borde
+    // propios. El separador vertical lo pone `divide-x` del contenedor (spec §7.1).
+    // Escritorio (md:): recupera su tarjeta propia, borde + fondo + sombra,
+    // igual que antes de la migracion a movil.
+    <div className="flex-1 p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
       <p className="font-mono text-eyebrow uppercase tracking-[0.08em] text-muted-foreground sm:tracking-[0.18em]">
         {label}
       </p>
@@ -125,10 +127,15 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
         )}
       </Collapse>
 
-      {/* KPIs personales — UN bloque, tres columnas separadas por hairline.
-          Antes eran tres superficies con borde: 3 bordes + 3 sombras diciendo
-          lo que el tono ya dice, y solo 77px utiles por tarjeta. */}
-      <Surface as="section" padded={false} className="flex divide-x divide-border">
+      {/* Movil: UN bloque, tres columnas separadas por hairline. Antes eran tres
+          superficies con borde — 3 bordes + 3 sombras diciendo lo que el tono ya
+          dice, y solo 77px utiles por tarjeta.
+          Escritorio (md:): vuelve la rejilla de tres tarjetas de hoy, intacta.
+
+          NO se usa <Surface> aqui: Surface asume que el bloque es la superficie
+          en ambos tamanos, y en los KPI la superficie cambia de sitio segun el
+          ancho (contenedor en movil, cada tarjeta en escritorio). */}
+      <section className="flex rounded-surface bg-card divide-x divide-border md:grid md:grid-cols-3 md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0">
         <KpiPlate
           label="Pendientes"
           value={activeDesigns}
@@ -142,7 +149,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
           tone={completedThisWeek > 0 ? 'success' : 'default'}
         />
         <KpiPlate label="Completado" value={`${completionPct}%`} note="De tu semana" tone="primary" />
-      </Surface>
+      </section>
 
       {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
