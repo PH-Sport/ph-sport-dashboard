@@ -12,7 +12,7 @@
 
 - **El escritorio no cambia.** Todo estilo iOS va sin prefijo o bajo el breakpoint móvil; a partir de `md:` (768px) se restaura el aspecto actual: `border border-border`, `rounded-lg`, `shadow-raised`. Cualquier diferencia visible en `>=md` es un fallo de la tarea.
 - **Frontera de breakpoint:** `md` (768px). El spec define móvil como `<md`. Entre 640 y 767px se aplica el estilo iOS con los paddings `sm:` que ya existen en `PageContainer`.
-- **Los 56 tests existentes siguen pasando.** `npm test` debe terminar en verde en cada commit.
+- **Los 70 tests existentes siguen pasando** (8 archivos; 77 tras la Task 1). `npm test` debe terminar en verde en cada commit.
 - **`npm run type-check` limpio** en cada commit.
 - **Vitest solo recoge `*.test.ts`** (entorno node, sin jsdom). No escribas tests de componentes React: no hay infraestructura. La lógica testeable se extrae a `.ts` puro.
 - **Radio exterior de superficie: 22px.** Radio interior = exterior − padding, mínimo 4px.
@@ -185,7 +185,7 @@ npm test
 npm run type-check
 ```
 
-Esperado: el archivo nuevo en verde, y los 56 tests previos siguen pasando.
+Esperado: el archivo nuevo en verde, y los 70 tests previos siguen pasando (77 en total).
 
 - [ ] **Step 6: Commit**
 
