@@ -10,7 +10,8 @@
 
 ## Restricciones globales
 
-- **El escritorio no cambia.** Todo estilo iOS va sin prefijo o bajo el breakpoint móvil; a partir de `md:` (768px) se restaura el aspecto actual: `border border-border`, `rounded-lg`, `shadow-raised`. Cualquier diferencia visible en `>=md` es un fallo de la tarea.
+- **El escritorio no cambia.** Todo estilo iOS va sin prefijo o bajo el breakpoint móvil; a partir de `md:` (768px) se restaura el aspecto actual: `border border-border`, **`rounded-2xl`**, `shadow-raised`. Cualquier diferencia visible en `>=md` es un fallo de la tarea.
+- **Ojo con el radio de escritorio:** las 27 superficies que se migran usan hoy `rounded-2xl` (16px), **no** `rounded-lg`. `rounded-lg` es `var(--radius)` = 0.625rem = 10px y lo usa el componente `<Card>` de shadcn, que es otra cosa. `<Surface>` debe restaurar `md:rounded-2xl`; solo los `<Card>` de la Task 7 conservan `md:rounded-lg`.
 - **Frontera de breakpoint:** `md` (768px). El spec define móvil como `<md`. Entre 640 y 767px se aplica el estilo iOS con los paddings `sm:` que ya existen en `PageContainer`.
 - **Los 70 tests existentes siguen pasando** (8 archivos; 77 tras la Task 1). `npm test` debe terminar en verde en cada commit.
 - **`npm run type-check` limpio** en cada commit.
@@ -108,7 +109,7 @@ describe('surfaceClasses', () => {
       expect(c).toContain('md:border');
       expect(c).toContain('md:border-border');
       expect(c).toContain('md:bg-card');
-      expect(c).toContain('md:rounded-lg');
+      expect(c).toContain('md:rounded-2xl');
       expect(c).toContain('md:shadow-raised');
     }
   });
@@ -151,7 +152,7 @@ export function concentricRadius(outer: number, padding: number, min = 4): numbe
 }
 
 /** Clases que restauran el escritorio actual. Identicas para ambas variantes. */
-const DESKTOP = 'md:border md:border-border md:bg-card md:rounded-lg md:shadow-raised';
+const DESKTOP = 'md:border md:border-border md:bg-card md:rounded-2xl md:shadow-raised';
 
 export function surfaceClasses(variant: SurfaceVariant): string {
   const mobile =
