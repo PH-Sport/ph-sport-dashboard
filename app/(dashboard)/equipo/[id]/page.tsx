@@ -92,7 +92,7 @@ function DesignerDetailPage() {
       key={design.id}
       elevation="raised"
       density="compact"
-      className="cursor-pointer hover:border-primary/40"
+      className="cursor-pointer rounded-surface border-0 shadow-none hover:border-primary/40 md:rounded-lg md:border md:border-border md:shadow-raised"
       onClick={() => handleSelectDesign(design.id)}
     >
       <CardContent className="pt-md">

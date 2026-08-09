@@ -36,7 +36,7 @@ export function DesignerCard({ designer, onClick }: DesignerCardProps) {
   return (
     <Card
       elevation="raised"
-      className="cursor-pointer hover:border-primary/40"
+      className="cursor-pointer rounded-surface border-0 shadow-none hover:border-primary/40 md:rounded-lg md:border md:border-border md:shadow-raised"
       onClick={onClick}
     >
       <CardContent className="space-y-4 pt-lg">

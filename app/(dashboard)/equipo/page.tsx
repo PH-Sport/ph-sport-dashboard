@@ -18,6 +18,7 @@ import { useTeamData, type DesignerWithDesigns } from '@/lib/hooks/use-team-data
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
+import { RowSeparator } from '@/components/ui/row';
 import { cn } from '@/lib/utils';
 import { sumWeight } from '@/lib/services/designs/weekly-load';
 import type { Design } from '@/lib/types/design';
@@ -56,7 +57,7 @@ function DesignerPlate({
   return (
     <motion.section
       variants={rise}
-      className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
+      className="rounded-surface bg-card p-md sm:p-lg md:border md:border-border md:rounded-lg md:shadow-raised"
     >
       <div className="mb-3 flex items-center gap-3">
         <button
@@ -91,7 +92,7 @@ function DesignerPlate({
         <p className="px-2 py-md text-sm text-muted-foreground">Sin asignaciones esta semana.</p>
       ) : (
         <ul className="-mx-2">
-          {designs.map((d) => {
+          {designs.map((d, i) => {
             const delivered = d.status === 'DELIVERED';
             const urgency = getUrgency(d.deadline_at, delivered);
             const overdue = urgency === 'overdue';
@@ -129,6 +130,7 @@ function DesignerPlate({
                     {delivered ? 'Entregado' : overdue ? `Atrasada · ${short}` : short}
                   </span>
                 </button>
+                {i < designs.length - 1 && <RowSeparator inset="leading" />}
               </li>
             );
           })}
