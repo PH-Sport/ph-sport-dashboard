@@ -798,7 +798,7 @@ Sustituye:
 por:
 
 ```tsx
-      className="rounded-surface bg-card p-md sm:p-lg md:border md:border-border md:rounded-lg md:shadow-raised"
+      className="rounded-surface bg-card p-md sm:p-lg md:border md:border-border md:rounded-2xl md:shadow-raised"
 ```
 
 Es una `motion.section` con más props, así que aquí se toca solo el `className` en lugar de envolver en `<Surface>`.
