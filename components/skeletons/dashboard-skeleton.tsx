@@ -26,15 +26,15 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
       </div>
 
       {/* KPIs */}
-      {/* Espejo exacto del layout real: un bloque tonal en móvil (divide-x/y),
-          rejilla de tarjetas sueltas a partir de md — así el skeleton no da
-          salto al cargar. */}
+      {/* Espejo exacto del layout real: un bloque tonal en móvil (hairlines por
+          gap-px sobre bg-border), rejilla de tarjetas sueltas a partir de md —
+          así el skeleton no da salto al cargar. */}
       {isAdmin ? (
-        <section className="grid grid-cols-2 rounded-surface bg-card divide-x divide-y divide-border md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0 md:divide-y-0 xl:grid-cols-4">
+        <section className="grid grid-cols-2 gap-px overflow-hidden rounded-surface bg-border md:gap-4 md:overflow-visible md:rounded-none md:bg-transparent xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised"
+              className="bg-card p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised"
             >
               <Skeleton className="h-3 w-16" />
               <Skeleton className="mt-2 h-9 w-14" />

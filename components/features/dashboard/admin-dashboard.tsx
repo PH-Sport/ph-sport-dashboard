@@ -63,10 +63,10 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    // Columna de un bloque compartido en movil: sin superficie ni borde
-    // propios (la pone el contenedor via divide-x/divide-y). Escritorio (md:):
+    // Columna de un bloque compartido en movil: su bg-card tapa el bg-border del
+    // contenedor, y el hueco de 1px entre celdas ES el hairline. Escritorio (md:):
     // recupera su tarjeta propia, borde + fondo + sombra, como antes.
-    <div className="p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
+    <div className="bg-card p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
       <p className="font-mono text-eyebrow uppercase text-muted-foreground">{label}</p>
       <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
@@ -218,11 +218,15 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
         </section>
       </Collapse>
 
-      {/* Movil: un bloque, rejilla 2x2 separada por hairline interno.
+      {/* Movil: un bloque, rejilla 2x2 separada por hairline interno. El hairline
+          es el gap-px dejando ver el bg-border del contenedor, NO divide-x/y:
+          con 4 hijos en 2 columnas, divide-* pinta borde a todos menos al primero,
+          asi que la celda 3 recibia borde izquierdo contra el borde del bloque y
+          la celda 2 borde superior. El gap no tiene ese caso.
           Escritorio (md:): vuelven las tarjetas sueltas con su gap, y en xl las
           cuatro columnas de hoy. La superficie cambia de sitio segun el ancho,
           por eso aqui no se usa <Surface> (ver Task 5). */}
-      <section className="grid grid-cols-2 rounded-surface bg-card divide-x divide-y divide-border md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0 md:divide-y-0 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-px overflow-hidden rounded-surface bg-border md:gap-4 md:overflow-visible md:rounded-none md:bg-transparent xl:grid-cols-4">
         <KpiPlate label="Activas" value={activeCount} note="Pendientes esta semana" />
         <KpiPlate
           label="Entregados"

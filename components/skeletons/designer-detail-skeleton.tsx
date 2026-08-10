@@ -6,9 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 function DesignCardSkeleton() {
   return (
     <Card
-      elevation="raised"
       density="compact"
-      className="rounded-surface border-0 shadow-none md:rounded-lg md:border md:border-border md:shadow-raised"
+      className="rounded-surface border-0 md:rounded-lg md:border md:border-border md:shadow-raised"
     >
       <CardContent className="pt-md">
         <div className="flex items-start justify-between gap-2">
