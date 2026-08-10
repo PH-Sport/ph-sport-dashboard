@@ -44,6 +44,7 @@ import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { resolveDesigner } from '@/lib/utils/designer-display';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { Surface } from '@/components/ui/surface';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
 
 interface Designer {
@@ -173,7 +174,7 @@ export function DesignsTable({
   );
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+    <Surface padded={false} className="md:p-md">
       {/* Barra superior discreta: recuento + items por página */}
       <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
         <Eyebrow>
@@ -380,6 +381,6 @@ export function DesignsTable({
           </div>
         </div>
       )}
-    </div>
+    </Surface>
   );
 }
