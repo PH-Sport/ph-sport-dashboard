@@ -102,7 +102,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
       {/* Hero de urgencia — la entrega más próxima manda cuando vence en <24 h */}
       <Collapse open={isUrgent}>
         {nextDeadline && (
-          <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-md shadow-raised sm:p-lg md:flex-row md:items-center md:justify-between">
+          <section className="flex flex-col gap-4 rounded-surface bg-destructive/[0.06] p-md sm:p-lg md:flex-row md:items-center md:justify-between md:rounded-2xl md:border md:border-destructive/30 md:shadow-raised">
             <div className="flex items-center gap-5">
               <span className="font-mono tabular text-4xl sm:text-5xl font-semibold leading-none text-destructive">
                 {Math.floor(hoursUntilNext!)} h
