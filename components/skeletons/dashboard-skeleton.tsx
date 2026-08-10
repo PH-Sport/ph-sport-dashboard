@@ -1,5 +1,6 @@
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Surface } from '@/components/ui/surface';
 
 interface DashboardSkeletonProps {
   /** 'admin' → 4 KPIs + carga del equipo; 'designer' → 3 KPIs + compañeros. */
@@ -8,8 +9,8 @@ interface DashboardSkeletonProps {
 
 /**
  * Skeleton de /inicio — espeja el dashboard real según rol: tira de KPIs
- * (placas) + dos columnas [2fr,1fr] (lista de vencimientos/cola + panel
- * lateral de carga/compañeros). Mismas superficies rounded-2xl que la UI.
+ * (un bloque tonal en móvil, tarjetas sueltas en escritorio) + dos columnas
+ * [2fr,1fr] (lista de vencimientos/cola + panel lateral de carga/compañeros).
  */
 export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonProps) {
   const isAdmin = variant === 'admin';
@@ -25,27 +26,41 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
       </div>
 
       {/* KPIs */}
-      {/* Espejo exacto del layout real: el panel de diseñador va a 3 columnas con
-          gap y padding más apretados en móvil, así el skeleton no da salto al cargar. */}
-      <div className={isAdmin ? 'grid grid-cols-2 gap-4 xl:grid-cols-4' : 'grid grid-cols-3 gap-2 sm:gap-4'}>
-        {[...Array(isAdmin ? 4 : 3)].map((_, i) => (
-          <div
-            key={i}
-            className={`rounded-2xl border border-border bg-card shadow-raised sm:p-lg ${
-              isAdmin ? 'p-md' : 'p-sm'
-            }`}
-          >
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="mt-2 h-9 w-14" />
-            <Skeleton className="mt-2 h-3 w-24" />
-          </div>
-        ))}
-      </div>
+      {/* Espejo exacto del layout real: un bloque tonal en móvil (divide-x/y),
+          rejilla de tarjetas sueltas a partir de md — así el skeleton no da
+          salto al cargar. */}
+      {isAdmin ? (
+        <section className="grid grid-cols-2 rounded-surface bg-card divide-x divide-y divide-border md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0 md:divide-y-0 xl:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised"
+            >
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="mt-2 h-9 w-14" />
+              <Skeleton className="mt-2 h-3 w-24" />
+            </div>
+          ))}
+        </section>
+      ) : (
+        <section className="flex rounded-surface bg-card divide-x divide-border md:grid md:grid-cols-3 md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={i}
+              className="flex-1 p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised"
+            >
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="mt-2 h-9 w-14" />
+              <Skeleton className="mt-2 h-3 w-24" />
+            </div>
+          ))}
+        </section>
+      )}
 
       {/* Dos columnas: lista principal (2fr) + panel lateral (1fr) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        {/* Izquierda: vencimientos / tu cola */}
-        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+        {/* Izquierda: vencimientos / tu cola — siempre 'plain' en ambos roles */}
+        <Surface as="section" variant="plain">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div className="space-y-2">
               <Skeleton className="h-3 w-28" />
@@ -69,10 +84,10 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
               </li>
             ))}
           </ul>
-        </div>
+        </Surface>
 
-        {/* Derecha: carga del equipo / compañeros */}
-        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+        {/* Derecha: carga del equipo (admin, 'plain') / compañeros (designer, 'grouped') */}
+        <Surface as="section" variant={isAdmin ? 'plain' : 'grouped'}>
           <div className="space-y-2">
             <Skeleton className="h-3 w-28" />
             <Skeleton className="h-5 w-32" />
@@ -105,7 +120,7 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
               ))}
             </ul>
           )}
-        </div>
+        </Surface>
       </div>
     </PageContainer>
   );

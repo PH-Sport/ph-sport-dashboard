@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Surface } from '@/components/ui/surface';
 
 /** Subapartado: rótulo eyebrow + hint + placa (espejo de <Section> en /ajustes). */
 function SectionSkeleton({ children }: { children: ReactNode }) {
@@ -7,9 +8,7 @@ function SectionSkeleton({ children }: { children: ReactNode }) {
     <section>
       <Skeleton className="h-3 w-24" />
       <Skeleton className="mt-1.5 h-4 w-48" />
-      <div className="mt-3 rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
-        {children}
-      </div>
+      <Surface className="mt-3">{children}</Surface>
     </section>
   );
 }

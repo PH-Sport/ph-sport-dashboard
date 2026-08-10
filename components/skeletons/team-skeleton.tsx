@@ -1,5 +1,6 @@
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Surface } from '@/components/ui/surface';
 
 /** Anchos variados para que las filas parezcan títulos reales, no barras iguales. */
 const ROW_WIDTHS = ['w-40', 'w-28', 'w-44'];
@@ -29,10 +30,7 @@ export function TeamSkeleton() {
       {/* Grid de placas de diseñador */}
       <div className="grid gap-4 lg:grid-cols-2">
         {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg"
-          >
+          <Surface key={i}>
             <div className="mb-3 flex items-center gap-3">
               <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1 space-y-1.5">
@@ -50,7 +48,7 @@ export function TeamSkeleton() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Surface>
         ))}
       </div>
     </PageContainer>
