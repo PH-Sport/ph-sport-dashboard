@@ -1,5 +1,6 @@
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Surface } from '@/components/ui/surface';
 
 /**
  * Skeleton de /mi-semana — espeja el layout real: una placa «Pendientes» con
@@ -19,7 +20,7 @@ export function MyWeekSkeleton() {
 
       <div className="space-y-4">
         {/* Placa Pendientes */}
-        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+        <Surface as="section" variant="plain">
           <div className="mb-2 flex items-center gap-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-7 rounded-full" />
@@ -37,10 +38,10 @@ export function MyWeekSkeleton() {
               </li>
             ))}
           </ul>
-        </div>
+        </Surface>
 
         {/* Placa Entregadas — grupos por semana plegados */}
-        <div className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+        <Surface as="section">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-7 rounded-full" />
@@ -54,7 +55,7 @@ export function MyWeekSkeleton() {
               </div>
             ))}
           </div>
-        </div>
+        </Surface>
       </div>
     </PageContainer>
   );

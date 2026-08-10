@@ -5,7 +5,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 /** Tarjeta de diseño compacta (espeja renderDesignItem de /equipo/[id]). */
 function DesignCardSkeleton() {
   return (
-    <Card elevation="raised" density="compact">
+    <Card
+      density="compact"
+      className="rounded-surface border-0 md:rounded-lg md:border md:border-border md:shadow-raised"
+    >
       <CardContent className="pt-md">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 space-y-2">

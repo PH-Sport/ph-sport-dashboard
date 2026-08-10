@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Settings, Save, Loader2 } from 'lucide-react';
 import { DashboardPage } from '@/components/ui/dashboard-page';
+import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
 import { SPRINGS, STAGGER } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
@@ -38,9 +39,9 @@ function Section({
     <section>
       <p className="font-mono text-eyebrow uppercase text-primary">{label}</p>
       <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
-      <div className="mt-3 rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+      <Surface variant="grouped" className="mt-3">
         {children}
-      </div>
+      </Surface>
     </section>
   );
 }

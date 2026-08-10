@@ -44,6 +44,7 @@ import { STATUS_LABELS, getDesignContext } from '@/lib/types/design';
 import { resolveDesigner } from '@/lib/utils/designer-display';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { Surface } from '@/components/ui/surface';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
 
 interface Designer {
@@ -172,8 +173,11 @@ export function DesignsTable({
     </button>
   );
 
+  // Padding solo vertical en movil: la tabla va a sangre de lado a lado, pero el
+  // recuento de arriba y la paginacion de abajo necesitan aire o quedan a ras de
+  // las esquinas redondeadas. En md+, p-md por los cuatro lados, igual que antes.
   return (
-    <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+    <Surface padded={false} className="py-md md:p-md">
       {/* Barra superior discreta: recuento + items por página */}
       <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
         <Eyebrow>
@@ -380,6 +384,6 @@ export function DesignsTable({
           </div>
         </div>
       )}
-    </div>
+    </Surface>
   );
 }

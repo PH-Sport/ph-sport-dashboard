@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { Collapse } from '@/components/ui/collapse';
+import { Surface } from '@/components/ui/surface';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import type { Design } from '@/lib/types/design';
@@ -40,10 +41,11 @@ function KpiPlate({
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-sm shadow-raised sm:p-lg">
-      {/* Tres columnas en móvil dejan ~85px de contenido por tarjeta: el tracking
-          de 0.18em del token no cabe con etiquetas de 10 caracteres («Completado»)
-          y se sale por la derecha. Se afloja solo en móvil; desde sm: vuelve el token. */}
+    // Columna de un bloque compartido en movil: sin superficie ni borde
+    // propios. El separador vertical lo pone `divide-x` del contenedor (spec §7.1).
+    // Escritorio (md:): recupera su tarjeta propia, borde + fondo + sombra,
+    // igual que antes de la migracion a movil.
+    <div className="flex-1 p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
       <p className="font-mono text-eyebrow uppercase tracking-[0.08em] text-muted-foreground sm:tracking-[0.18em]">
         {label}
       </p>
@@ -100,7 +102,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
       {/* Hero de urgencia — la entrega más próxima manda cuando vence en <24 h */}
       <Collapse open={isUrgent}>
         {nextDeadline && (
-          <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/[0.06] p-md shadow-raised sm:p-lg md:flex-row md:items-center md:justify-between">
+          <section className="flex flex-col gap-4 rounded-surface bg-destructive/[0.06] p-md sm:p-lg md:flex-row md:items-center md:justify-between md:rounded-2xl md:border md:border-destructive/30 md:shadow-raised">
             <div className="flex items-center gap-5">
               <span className="font-mono tabular text-4xl sm:text-5xl font-semibold leading-none text-destructive">
                 {Math.floor(hoursUntilNext!)} h
@@ -125,8 +127,15 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
         )}
       </Collapse>
 
-      {/* KPIs personales */}
-      <section className="grid grid-cols-3 gap-2 sm:gap-4">
+      {/* Movil: UN bloque, tres columnas separadas por hairline. Antes eran tres
+          superficies con borde — 3 bordes + 3 sombras diciendo lo que el tono ya
+          dice, y solo 77px utiles por tarjeta.
+          Escritorio (md:): vuelve la rejilla de tres tarjetas de hoy, intacta.
+
+          NO se usa <Surface> aqui: Surface asume que el bloque es la superficie
+          en ambos tamanos, y en los KPI la superficie cambia de sitio segun el
+          ancho (contenedor en movil, cada tarjeta en escritorio). */}
+      <section className="flex rounded-surface bg-card divide-x divide-border md:grid md:grid-cols-3 md:gap-4 md:rounded-none md:bg-transparent md:divide-x-0">
         <KpiPlate
           label="Pendientes"
           value={activeDesigns}
@@ -144,7 +153,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
 
       {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        <section className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+        <Surface as="section" variant="plain">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
               <p className="font-mono text-eyebrow uppercase text-muted-foreground">Tu cola</p>
@@ -200,9 +209,9 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
               })}
             </ul>
           )}
-        </section>
+        </Surface>
 
-        <section className="rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg">
+        <Surface as="section" variant="grouped">
           <p className="font-mono text-eyebrow uppercase text-muted-foreground">Compañeros</p>
           <h2 className="text-base font-semibold">El resto del equipo</h2>
           {teammates.length === 0 ? (
@@ -227,7 +236,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
               ))}
             </ul>
           )}
-        </section>
+        </Surface>
       </div>
     </div>
   );

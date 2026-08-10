@@ -1,5 +1,6 @@
 import { PageContainer } from '@/components/ui/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Surface } from '@/components/ui/surface';
 
 /**
  * Skeleton de /disenos — espeja la barra de filtros única (búsqueda +
@@ -22,7 +23,7 @@ export function DesignsSkeleton() {
       </div>
 
       {/* Barra de filtros única: búsqueda + selectores en una superficie */}
-      <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+      <Surface variant="plain" padded={false} className="md:p-md">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
           <Skeleton className="h-10 min-w-0 flex-1" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:flex xl:items-center">
@@ -32,10 +33,10 @@ export function DesignsSkeleton() {
             <Skeleton className="h-10 xl:w-[130px]" />
           </div>
         </div>
-      </div>
+      </Surface>
 
       {/* Tabla */}
-      <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+      <Surface padded={false} className="py-md md:p-md">
         {/* Barra superior: recuento + items por página */}
         <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
           <Skeleton className="h-3 w-24" />
@@ -120,7 +121,7 @@ export function DesignsSkeleton() {
             </div>
           ))}
         </div>
-      </div>
+      </Surface>
     </PageContainer>
   );
 }
