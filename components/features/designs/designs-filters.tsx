@@ -74,45 +74,45 @@ export function DesignsFilters({
   return (
     <Surface variant="plain" padded={false} className="md:p-md">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-          {/* Búsqueda + toggle de filtros (el toggle solo existe en móvil) */}
-          <div className="flex items-center gap-2 xl:min-w-0 xl:flex-1">
-            <div className="relative min-w-0 flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Buscar por título, jugador o partido…"
-                value={searchQuery}
-                onChange={(e) => onSearchQueryChange(e.target.value)}
-                className="pl-9"
-                aria-label="Buscar diseños"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => setMobileFiltersOpen((v) => !v)}
-              aria-expanded={mobileFiltersOpen}
-              aria-label={mobileFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
-              className={cn(
-                'relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border outline-none transition-colors md:hidden',
-                'focus-visible:ring-2 focus-visible:ring-ring',
-                mobileFiltersOpen
-                  ? 'border-primary/40 bg-primary/10 text-primary'
-                  : 'border-border text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              {hasActiveFilters && (
-                <span
-                  className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary"
-                  aria-hidden
-                />
-              )}
-            </button>
+        {/* Búsqueda + toggle de filtros (el toggle solo existe en móvil) */}
+        <div className="flex items-center gap-2 xl:min-w-0 xl:flex-1">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar por título, jugador o partido…"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              className="pl-9"
+              aria-label="Buscar diseños"
+            />
           </div>
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen((v) => !v)}
+            aria-expanded={mobileFiltersOpen}
+            aria-label={mobileFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
+            className={cn(
+              'relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border outline-none transition-colors md:hidden',
+              'focus-visible:ring-2 focus-visible:ring-ring',
+              mobileFiltersOpen
+                ? 'border-primary/40 bg-primary/10 text-primary'
+                : 'border-border text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            {hasActiveFilters && (
+              <span
+                className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary"
+                aria-hidden
+              />
+            )}
+          </button>
+        </div>
 
-          {/* Selectores — siempre visibles en escritorio; plegados en móvil */}
-          <Collapse open={selectorsVisible}>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:flex xl:items-center">
+        {/* Selectores — siempre visibles en escritorio; plegados en móvil */}
+        <Collapse open={selectorsVisible}>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:flex xl:items-center">
             <Select
               value={statusFilter}
               onValueChange={(v) => onStatusFilterChange(v as DesignStatus | 'all')}
@@ -167,21 +167,21 @@ export function DesignsFilters({
               placeholder="Hasta"
               minDate={weekStartFilter}
             />
-            </div>
-          </Collapse>
+          </div>
+        </Collapse>
 
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onReset}
-              className="shrink-0 self-start text-muted-foreground xl:self-auto"
-            >
-              <X className="mr-1.5 h-4 w-4" />
-              Limpiar
-            </Button>
-          )}
-        </div>
-      </Surface>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onReset}
+            className="shrink-0 self-start text-muted-foreground xl:self-auto"
+          >
+            <X className="mr-1.5 h-4 w-4" />
+            Limpiar
+          </Button>
+        )}
+      </div>
+    </Surface>
   );
 }

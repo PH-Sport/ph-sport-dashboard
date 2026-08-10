@@ -129,163 +129,163 @@ export default function MyWeekPage() {
           {/* Pendientes */}
           <motion.div variants={rise}>
             <Surface as="section" variant="plain">
-            <div className="mb-2 flex items-center gap-2">
-              <h2 className="text-base font-semibold">Pendientes</h2>
-              <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
-                {inProgress.length}
-              </span>
-            </div>
-            {inProgress.length === 0 ? (
-              <p className="py-md text-sm text-muted-foreground">
-                Semana despejada — no te queda nada por entregar. 🎉
-              </p>
-            ) : (
-              <ul className="-mx-2">
-                <AnimatePresence initial={false}>
-                  {inProgress.map((d, i) => {
-                    const urgency = getUrgency(d.deadline_at, false);
-                    const overdue = urgency === 'overdue';
-                    const short = format(new Date(d.deadline_at), "d MMM · HH:mm", { locale: es });
-                    const busy = updating === d.id;
-                    return (
-                      <motion.li
-                        key={d.id}
-                        layout
-                        exit={{ opacity: 0, x: 24, transition: TWEENS.base }}
-                        transition={SPRINGS.smooth}
-                      >
-                        <div className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40">
-                          <UrgencyDot level={urgency} />
-                          <button
-                            type="button"
-                            onClick={() => openDetail(d.id)}
-                            className="min-w-0 flex-1 text-left outline-none"
-                          >
-                            <p className="flex items-center gap-1.5 truncate text-sm font-medium">
-                              {d.title}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">{d.player}</p>
-                          </button>
-                          <span
-                            className={cn(
-                              'shrink-0 font-mono tabular text-xs',
-                              urgency === 'h24' || overdue
-                                ? 'font-semibold text-destructive'
-                                : 'text-muted-foreground'
-                            )}
-                          >
-                            {overdue ? `Atrasada · ${short}` : short}
-                          </span>
-                          <Hint label="Marcar como entregada">
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(d, 'DELIVERED')}
-                            disabled={busy}
-                            className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 text-xs font-medium text-muted-foreground opacity-100 transition-all hover:border-status-success/40 hover:bg-status-success/10 hover:text-status-success focus-visible:opacity-100 disabled:opacity-50 md:h-8 md:px-2.5 md:opacity-0 md:group-hover:opacity-100"
-                          >
-                            {busy ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Check className="h-3.5 w-3.5" />
-                            )}
-                            Entregar
-                          </button>
-                          </Hint>
-                        </div>
-                        {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
-                      </motion.li>
-                    );
-                  })}
-                </AnimatePresence>
-              </ul>
-            )}
+              <div className="mb-2 flex items-center gap-2">
+                <h2 className="text-base font-semibold">Pendientes</h2>
+                <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
+                  {inProgress.length}
+                </span>
+              </div>
+              {inProgress.length === 0 ? (
+                <p className="py-md text-sm text-muted-foreground">
+                  Semana despejada — no te queda nada por entregar. 🎉
+                </p>
+              ) : (
+                <ul className="-mx-2">
+                  <AnimatePresence initial={false}>
+                    {inProgress.map((d, i) => {
+                      const urgency = getUrgency(d.deadline_at, false);
+                      const overdue = urgency === 'overdue';
+                      const short = format(new Date(d.deadline_at), "d MMM · HH:mm", { locale: es });
+                      const busy = updating === d.id;
+                      return (
+                        <motion.li
+                          key={d.id}
+                          layout
+                          exit={{ opacity: 0, x: 24, transition: TWEENS.base }}
+                          transition={SPRINGS.smooth}
+                        >
+                          <div className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40">
+                            <UrgencyDot level={urgency} />
+                            <button
+                              type="button"
+                              onClick={() => openDetail(d.id)}
+                              className="min-w-0 flex-1 text-left outline-none"
+                            >
+                              <p className="flex items-center gap-1.5 truncate text-sm font-medium">
+                                {d.title}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">{d.player}</p>
+                            </button>
+                            <span
+                              className={cn(
+                                'shrink-0 font-mono tabular text-xs',
+                                urgency === 'h24' || overdue
+                                  ? 'font-semibold text-destructive'
+                                  : 'text-muted-foreground'
+                              )}
+                            >
+                              {overdue ? `Atrasada · ${short}` : short}
+                            </span>
+                            <Hint label="Marcar como entregada">
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(d, 'DELIVERED')}
+                              disabled={busy}
+                              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 text-xs font-medium text-muted-foreground opacity-100 transition-all hover:border-status-success/40 hover:bg-status-success/10 hover:text-status-success focus-visible:opacity-100 disabled:opacity-50 md:h-8 md:px-2.5 md:opacity-0 md:group-hover:opacity-100"
+                            >
+                              {busy ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Check className="h-3.5 w-3.5" />
+                              )}
+                              Entregar
+                            </button>
+                            </Hint>
+                          </div>
+                          {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
+                        </motion.li>
+                      );
+                    })}
+                  </AnimatePresence>
+                </ul>
+              )}
             </Surface>
           </motion.div>
 
           {/* Entregadas, por semana */}
           {deliveredCount > 0 && (
             <motion.div variants={rise}>
-            <Surface as="section" padded={false} className="md:p-lg">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold">Entregadas</h2>
-                <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
-                  {deliveredCount}
-                </span>
-              </div>
-              <div className="mt-2 space-y-1">
-                {deliveredGroups.map((w) => {
-                  const open = openWeeks.includes(w.key);
-                  return (
-                    <div key={w.key} className="-mx-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setOpenWeeks((ws) =>
-                            open ? ws.filter((x) => x !== w.key) : [...ws, w.key]
-                          )
-                        }
-                        className="flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40 md:min-h-0"
-                      >
-                        <motion.span
-                          initial={false}
-                          animate={{ rotate: open ? 0 : -90 }}
-                          transition={SPRINGS.snappy}
+              <Surface as="section" padded={false} className="md:p-lg">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold">Entregadas</h2>
+                  <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">
+                    {deliveredCount}
+                  </span>
+                </div>
+                <div className="mt-2 space-y-1">
+                  {deliveredGroups.map((w) => {
+                    const open = openWeeks.includes(w.key);
+                    return (
+                      <div key={w.key} className="-mx-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenWeeks((ws) =>
+                              open ? ws.filter((x) => x !== w.key) : [...ws, w.key]
+                            )
+                          }
+                          className="flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/40 md:min-h-0"
                         >
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        </motion.span>
-                        <span className="flex-1 font-mono text-eyebrow uppercase text-muted-foreground">
-                          {w.label}
-                        </span>
-                        <span className="font-mono tabular text-xs text-muted-foreground">
-                          {w.items.length}
-                        </span>
-                      </button>
-                      <Collapse open={open}>
-                        <ul>
-                          {w.items.map((d) => {
-                            const busy = updating === d.id;
-                            const short = format(new Date(d.deadline_at), "d MMM", { locale: es });
-                            return (
-                              <motion.li
-                                key={d.id}
-                                layout
-                                className="group flex items-center gap-3 rounded-xl py-2 pl-9 pr-2 transition-colors hover:bg-muted/40"
-                              >
-                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />
-                                <button
-                                  type="button"
-                                  onClick={() => openDetail(d.id)}
-                                  className="min-w-0 flex-1 truncate text-left text-sm text-muted-foreground line-through outline-none"
+                          <motion.span
+                            initial={false}
+                            animate={{ rotate: open ? 0 : -90 }}
+                            transition={SPRINGS.snappy}
+                          >
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          </motion.span>
+                          <span className="flex-1 font-mono text-eyebrow uppercase text-muted-foreground">
+                            {w.label}
+                          </span>
+                          <span className="font-mono tabular text-xs text-muted-foreground">
+                            {w.items.length}
+                          </span>
+                        </button>
+                        <Collapse open={open}>
+                          <ul>
+                            {w.items.map((d) => {
+                              const busy = updating === d.id;
+                              const short = format(new Date(d.deadline_at), "d MMM", { locale: es });
+                              return (
+                                <motion.li
+                                  key={d.id}
+                                  layout
+                                  className="group flex items-center gap-3 rounded-xl py-2 pl-9 pr-2 transition-colors hover:bg-muted/40"
                                 >
-                                  {d.title}
-                                </button>
-                                <span className="shrink-0 font-mono tabular text-xs text-muted-foreground">
-                                  {short}
-                                </span>
-                                <Hint label="Volver a pendiente">
-                                <button
-                                  type="button"
-                                  onClick={() => handleStatusChange(d, 'BACKLOG')}
-                                  disabled={busy}
-                                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-100 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 disabled:opacity-50 md:h-7 md:w-7 md:opacity-0 md:group-hover:opacity-100"
-                                >
-                                  {busy ? (
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                  ) : (
-                                    <Undo2 className="h-3.5 w-3.5" />
-                                  )}
-                                </button>
-                                </Hint>
-                              </motion.li>
-                            );
-                          })}
-                        </ul>
-                      </Collapse>
-                    </div>
-                  );
-                })}
-              </div>
-            </Surface>
+                                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success" />
+                                  <button
+                                    type="button"
+                                    onClick={() => openDetail(d.id)}
+                                    className="min-w-0 flex-1 truncate text-left text-sm text-muted-foreground line-through outline-none"
+                                  >
+                                    {d.title}
+                                  </button>
+                                  <span className="shrink-0 font-mono tabular text-xs text-muted-foreground">
+                                    {short}
+                                  </span>
+                                  <Hint label="Volver a pendiente">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(d, 'BACKLOG')}
+                                    disabled={busy}
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-100 transition-all hover:bg-muted hover:text-foreground focus-visible:opacity-100 disabled:opacity-50 md:h-7 md:w-7 md:opacity-0 md:group-hover:opacity-100"
+                                  >
+                                    {busy ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <Undo2 className="h-3.5 w-3.5" />
+                                    )}
+                                  </button>
+                                  </Hint>
+                                </motion.li>
+                              );
+                            })}
+                          </ul>
+                        </Collapse>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Surface>
             </motion.div>
           )}
         </motion.div>
