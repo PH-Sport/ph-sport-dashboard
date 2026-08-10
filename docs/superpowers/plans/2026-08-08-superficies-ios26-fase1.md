@@ -862,6 +862,8 @@ Ajustes es la pantalla que más se acerca al patrón de Apple sin esfuerzo (spec
 
 El componente `Section` está en la **línea 28** de `app/(dashboard)/ajustes/page.tsx`. Envuelve **solo** `{children}` en `<Surface variant="grouped">`, dejando `label` y `hint` **fuera**: son la cabecera y el pie de sección de iOS, y van sobre el lienzo, nunca dentro del bloque. Ése es justo el detalle que hace que Ajustes se lea como Ajustes.
 
+El `div` que sustituyes lleva `mt-3` además de las clases de superficie. Ese margen **no es** parte de la superficie y no lo aporta `Surface`: pásalo tú, `<Surface variant="grouped" className="mt-3">`, o el bloque se pegará al `hint`. El resto de sus clases (`rounded-2xl border border-border bg-card p-md shadow-raised sm:p-lg`) sí las cubre `Surface` con `padded` por defecto.
+
 Añade `import { Surface } from '@/components/ui/surface';`
 
 - [ ] **Step 2: Quita la tarjeta envolvente de los filtros en móvil**
@@ -875,10 +877,12 @@ En `components/features/designs/designs-filters.tsx` línea 74, sustituye:
 por:
 
 ```tsx
-    <Surface padded={false} className="md:p-md">
+    <Surface variant="plain" padded={false} className="md:p-md">
 ```
 
 Añade el import y cierra con `</Surface>`. En móvil la búsqueda queda sobre el lienzo; en escritorio conserva su tarjeta.
+
+`variant="plain"` es obligatorio aquí, no un adorno: la variante por defecto es `grouped`, que en móvil pinta `bg-card rounded-surface` — un bloque de color ceñido al campo y sin padding, que es peor que cualquiera de las dos opciones. `plain` da `bg-transparent`, que es lo que significa «sobre el lienzo». En `md:` ambas variantes son idénticas, así que el escritorio no lo nota.
 
 - [ ] **Step 3: Verifica**
 
