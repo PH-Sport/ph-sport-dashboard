@@ -855,8 +855,13 @@ EOF
 Ajustes es la pantalla que más se acerca al patrón de Apple sin esfuerzo (spec §7.6).
 
 **Files:**
-- Modify: `app/(dashboard)/ajustes/page.tsx` (componente `Section`, y la píldora de pestañas línea ~97)
+- Modify: `app/(dashboard)/ajustes/page.tsx` (componente `Section`, línea 28)
 - Modify: `components/features/designs/designs-filters.tsx` (contenedor, línea 74)
+
+La píldora de pestañas General/Miembros (línea ~97) **no se toca**. Es capa funcional, no
+capa de contenido: un control segmentado conserva su superficie propia en iOS, igual que la
+`MobileTabBar` conserva su cristal. Retirarle el borde en móvil la dejaría indistinguible de
+texto suelto. Esta fase solo retira los bordes que agrupan **contenido**.
 
 - [ ] **Step 1: `Section` de ajustes pasa a `grouped`**
 
