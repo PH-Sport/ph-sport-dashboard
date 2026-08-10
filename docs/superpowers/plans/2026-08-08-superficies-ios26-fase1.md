@@ -922,9 +922,27 @@ EOF
 grep -rn "rounded-2xl border border-border bg-card" app components --include="*.tsx"
 ```
 
-Esperado: solo coincidencias en `components/skeletons/**`. Los skeletons deben reflejar la forma nueva, así que actualízalos para que usen `bg-card rounded-surface` sin borde en móvil — si un skeleton pinta un borde que el contenido real ya no tiene, se ve un salto al cargar.
+El inventario ya está hecho y adjudicado. Esto es lo que devuelve y qué hacer con cada cosa:
 
-- [ ] **Step 2: Comprueba que no quedan sombras de agrupación en contenido**
+**Migrar (capa de contenido, es tu trabajo en este paso):**
+- `components/features/designs/designs-table.tsx:176` — el contenedor de la tabla de `/disenos`, que queda justo debajo de los filtros que la Task 8 dejó sobre el lienzo. Sustituye `<div className="rounded-2xl border border-border bg-card p-md shadow-raised">` por `<Surface padded={false} className="md:p-md">` — variante `grouped` por defecto, que es la correcta aquí: la tabla es un grupo de contenido y en móvil se agrupa por tono. Cierra con `</Surface>` y añade el import.
+
+**No tocar (capa funcional — conservan superficie por diseño, no por descuido):**
+- `components/ui/dialog.tsx:86`, `components/pwa/install-prompt.tsx:104`, `components/features/account/members-panel.tsx:240` — overlays, todos con `shadow-overlay`.
+- `components/features/designs/cards/agent-composer.tsx:154` — es la **barra de composición** del agente (icono + textarea + enviar, con `focus-within:ring`), el equivalente del campo de escribir de Mensajes. Un control de entrada conserva su borde y su fondo: es lo que lo separa del lienzo. Lleva `shadow-sm`, no `shadow-raised`, precisamente porque ya estaba tratado como control.
+
+**Aplazado a la fase 2, no lo toques:**
+- `components/features/account/members-panel.tsx:183` — las tarjetas de miembro. Hacerlo bien es convertirlas en filas de una lista agrupada (avatar pequeño a la izquierda en vez de grande arriba), y la superficie cambia de sitio según el ancho: rejilla de tarjetas en escritorio, bloque único en móvil. Es el mismo patrón que ya causó una regresión en los KPI. Quitarle solo el borde lo dejaría a medio camino.
+
+- [ ] **Step 2: Los skeletons reflejan la forma nueva**
+
+Los skeletons deben calcar la forma del contenido ya cargado: si un skeleton pinta un borde que el contenido real ya no tiene, se ve un salto al terminar de cargar. Los ficheros son `components/skeletons/{team,settings,my-week,designs,dashboard}-skeleton.tsx`.
+
+Usa el mismo `<Surface>` que usa la pantalla real de cada uno, con la misma variante, para que la forma no pueda divergir. Donde el contenido real quedó `plain` (sobre el lienzo), el skeleton va `plain`; donde quedó `grouped`, `grouped`. Consulta la pantalla correspondiente antes de tocar cada skeleton: `app/(dashboard)/mi-semana/page.tsx`, `app/(dashboard)/ajustes/page.tsx`, `app/(dashboard)/equipo/page.tsx`, `components/features/dashboard/{designer,admin}-dashboard.tsx` y `components/features/designs/designs-filters.tsx`.
+
+`components/skeletons/designer-detail-skeleton.tsx` también aparece en el grep de `shadow-raised`: revísalo contra `app/(dashboard)/equipo/[id]/page.tsx`.
+
+- [ ] **Step 3: Comprueba que no quedan sombras de agrupación en contenido**
 
 ```bash
 grep -rn "shadow-raised" app components --include="*.tsx"
@@ -932,13 +950,15 @@ grep -rn "shadow-raised" app components --include="*.tsx"
 
 `shadow-raised` solo debe sobrevivir en `md:` (escritorio) y en capa funcional. Si aparece sin prefijo en una superficie de contenido, quítalo: la elevación es de la capa funcional (spec §3 R1).
 
-- [ ] **Step 3: Reindentar los bloques `motion.div` / `Surface`**
+- [ ] **Step 4: Reindentar los bloques `motion.div` / `Surface`**
 
 Las migraciones dejaron indentación desalineada donde `<Surface>` se envuelve en `<motion.div variants={rise}>` — el hijo queda al mismo nivel que el padre. Empezó en `app/(dashboard)/mi-semana/page.tsx` (bloques de las líneas ~131-201 y ~207-289) y se replica allá donde se usó el mismo patrón. No rompe nada (no hay regla de indentación en el linter ni Prettier configurado), pero deja el archivo torcido.
 
-Recorre los archivos migrados y reindenta esos bloques a un nivel por anidamiento. Solo espacios: si el diff muestra cualquier cambio que no sea de indentación, te has pasado.
+También quedó torcido `components/features/designs/designs-filters.tsx`: al sustituir el contenedor por `<Surface>`, el `div` interno quedó a 6 espacios con su contenido a 10.
 
-- [ ] **Step 4: Verificación completa**
+Recorre los archivos migrados y reindenta esos bloques a un nivel por anidamiento. Solo espacios: si el diff muestra cualquier cambio que no sea de indentación, te has pasado. Compruébalo tú antes de commitear con `git diff -w`, que ignora los cambios de espaciado: **debe salir vacío para este paso**.
+
+- [ ] **Step 5: Verificación completa**
 
 ```bash
 npm run type-check
@@ -946,15 +966,11 @@ npm test
 npm run build
 ```
 
-Los tres deben pasar. `npm run build` es obligatorio: detecta errores de tipos que `type-check` puede pasar por alto en componentes de servidor.
+Los tres deben pasar. `npm run build` es obligatorio: detecta errores de tipos que `type-check` puede pasar por alto en componentes de servidor. **No lances `npm start` ni `npm run dev`**: bloquean el proceso y no hay credenciales en el entorno para ver las pantallas autenticadas.
 
-- [ ] **Step 4: Revisión visual de las cinco pantallas**
+### Revisión visual — la hace el humano, no el implementador
 
-```bash
-npm run build && npm start
-```
-
-Mide en **build de producción, nunca en dev** (regla del proyecto). Recorre a 390px y luego a 1280px: `/inicio`, `/mi-semana`, `/equipo`, `/disenos`, `/ajustes`.
+Requiere sesión iniciada y no hay credenciales en el entorno, así que es la entrega final de la fase, no un paso del encargo. Se mide en **build de producción, nunca en dev** (regla del proyecto): `npm run build && npm start`. Recorrido a 390px y luego a 1280px por `/inicio`, `/mi-semana`, `/equipo`, `/disenos` y `/ajustes`.
 
 Criterios de aceptación de la fase:
 - En móvil no queda **ningún** borde rodeando un grupo de contenido.
@@ -962,14 +978,42 @@ Criterios de aceptación de la fase:
 - Las listas de filas repetidas van a sangre; los grupos heterogéneos son bloques tonales.
 - A 1280px, las cinco pantallas son indistinguibles de `main` antes de esta fase.
 
-- [ ] **Step 5: Commit final**
+- [ ] **Step 6: Commits finales**
+
+Tres commits, no uno: la tabla, los skeletons y el reindentado son cambios de naturaleza distinta y el reindentado debe poder revisarse a solas. **Stage por rutas explícitas — nunca `git add -A` ni `git add .`**, puede haber cambios concurrentes de otra sesión en el repo.
 
 ```bash
+git add components/features/designs/designs-table.tsx
+git commit -m "$(cat <<'EOF'
+refactor(disenos): la tabla se agrupa por tono en movil
+
+Quedaba encerrada en una caja justo debajo de unos filtros ya sobre el lienzo.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GBqC8cqr9ghGpdJpidJtRc
+EOF
+)"
+
 git add components/skeletons
 git commit -m "$(cat <<'EOF'
 refactor(skeletons): reflejar las superficies sin borde en movil
 
 Evita el salto visual entre el esqueleto y el contenido ya cargado.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GBqC8cqr9ghGpdJpidJtRc
+EOF
+)"
+```
+
+Y el reindentado aparte, con las rutas que hayas tocado en el Step 4:
+
+```bash
+git add <las rutas reindentadas, una a una>
+git commit -m "$(cat <<'EOF'
+style(superficies): reindentar los bloques migrados
+
+Solo espacios: git diff -w entre este commit y su padre sale vacio.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01GBqC8cqr9ghGpdJpidJtRc
@@ -988,6 +1032,7 @@ Documentado para que nadie lo intente por iniciativa propia:
 - **Concentricidad completa, disciplina de tinte, suelo tipográfico, CSS nativo de PWA** → fase 4.
 - **Sheets con detents, grabber, form sheets** → fase 5.
 - **Estados vacíos y de error** → fase posterior; en esta fase los `<Card>` de estado vacío se dejan intactos a propósito.
+- **Tarjetas de miembro de Ajustes → Miembros** (`members-panel.tsx:183`) → fase 2, con las listas. No es retirar un borde: es convertir tarjetas en filas de una lista agrupada, con la superficie cambiando de sitio según el ancho. Ese patrón ya costó una regresión en los KPI.
 - **Escritorio** → fase 2 del proyecto, no de este plan.
 
 ## Resultado esperado
