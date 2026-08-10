@@ -130,7 +130,8 @@ function DesignerPlate({
                     {delivered ? 'Entregado' : overdue ? `Atrasada · ${short}` : short}
                   </span>
                 </button>
-                {i < designs.length - 1 && <RowSeparator inset="leading" />}
+                {/* 26px = px-2 (8) + punto (6) + gap-3 (12) */}
+                {i < designs.length - 1 && <RowSeparator inset={26} />}
               </li>
             );
           })}

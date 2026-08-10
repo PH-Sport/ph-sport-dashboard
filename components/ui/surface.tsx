@@ -5,7 +5,7 @@ import { surfaceClasses, type SurfaceVariant } from '@/lib/ui/surface-variants';
 interface SurfaceProps {
   /** 'grouped' = bloque tonal (grupos con significado). 'plain' = a sangre (misma fila repetida). */
   variant?: SurfaceVariant;
-  /** Padding interior. Desactivalo cuando la superficie contenga solo <Row>, que ya trae el suyo. */
+  /** Padding interior. Desactivalo cuando las filas de dentro ya traigan el suyo. */
   padded?: boolean;
   as?: 'div' | 'section';
   className?: string;
@@ -32,7 +32,7 @@ export function Surface({
       className={cn(
         surfaceClasses(variant),
         // grouped: padding en movil y escritorio. plain: solo en escritorio,
-        // porque en movil el padding lo pone cada <Row>.
+        // porque en movil el padding lo pone cada fila.
         padded && (variant === 'grouped' ? 'p-md sm:p-lg' : 'md:p-lg'),
         className
       )}

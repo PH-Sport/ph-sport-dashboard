@@ -173,8 +173,11 @@ export function DesignsTable({
     </button>
   );
 
+  // Padding solo vertical en movil: la tabla va a sangre de lado a lado, pero el
+  // recuento de arriba y la paginacion de abajo necesitan aire o quedan a ras de
+  // las esquinas redondeadas. En md+, p-md por los cuatro lados, igual que antes.
   return (
-    <Surface padded={false} className="md:p-md">
+    <Surface padded={false} className="py-md md:p-md">
       {/* Barra superior discreta: recuento + items por página */}
       <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
         <Eyebrow>

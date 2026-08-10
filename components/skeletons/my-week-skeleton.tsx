@@ -41,7 +41,7 @@ export function MyWeekSkeleton() {
         </Surface>
 
         {/* Placa Entregadas — grupos por semana plegados */}
-        <Surface as="section" padded={false} className="md:p-lg">
+        <Surface as="section">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-7 rounded-full" />

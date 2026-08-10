@@ -36,7 +36,7 @@ export function DesignsSkeleton() {
       </Surface>
 
       {/* Tabla */}
-      <Surface padded={false} className="md:p-md">
+      <Surface padded={false} className="py-md md:p-md">
         {/* Barra superior: recuento + items por página */}
         <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
           <Skeleton className="h-3 w-24" />

@@ -155,7 +155,17 @@ export default function MyWeekPage() {
                           transition={SPRINGS.smooth}
                         >
                           <div className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/40">
-                            <UrgencyDot level={urgency} />
+                            {/* UrgencyDot devuelve null cuando la entrega no corre
+                                prisa. En movil se reserva su hueco igualmente, o el
+                                texto de esas filas arrancaria 20px a la izquierda del
+                                resto y el separador no casaria con ninguna. En md+ no
+                                se reserva: no hay separadores que alinear y el hueco
+                                cambiaria el escritorio. */}
+                            {urgency ? (
+                              <UrgencyDot level={urgency} />
+                            ) : (
+                              <span aria-hidden className="h-2 w-2 shrink-0 md:hidden" />
+                            )}
                             <button
                               type="button"
                               onClick={() => openDetail(d.id)}
@@ -192,7 +202,8 @@ export default function MyWeekPage() {
                             </button>
                             </Hint>
                           </div>
-                          {i < inProgress.length - 1 && <RowSeparator inset="leading" />}
+                          {/* 28px = px-2 (8) + punto (8) + gap-3 (12) */}
+                          {i < inProgress.length - 1 && <RowSeparator inset={28} />}
                         </motion.li>
                       );
                     })}
@@ -205,7 +216,10 @@ export default function MyWeekPage() {
           {/* Entregadas, por semana */}
           {deliveredCount > 0 && (
             <motion.div variants={rise}>
-              <Surface as="section" padded={false} className="md:p-lg">
+              {/* Con padding: la cabecera "Entregadas" vive DENTRO del bloque, y sin
+                  el vive pegada a la esquina redondeada. En md+ da p-lg igual que
+                  antes, asi que el escritorio no se entera. */}
+              <Surface as="section">
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-semibold">Entregadas</h2>
                   <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">

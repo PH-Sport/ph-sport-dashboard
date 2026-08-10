@@ -330,7 +330,8 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
                       </span>
                     </span>
                   </button>
-                  {i < upcoming.length - 1 && <RowSeparator inset="leading" />}
+                  {/* 52px = px-2 (8) + avatar (32) + gap-3 (12) */}
+                  {i < upcoming.length - 1 && <RowSeparator inset={52} />}
                   </li>
                 );
               })}
@@ -346,7 +347,7 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
             <p className="mt-4 text-sm text-muted-foreground">Sin actividad esta semana.</p>
           ) : (
             <ul className="mt-4 space-y-4">
-              {visibleDesignerLoads.map((designer, i) => {
+              {visibleDesignerLoads.map((designer) => {
                 const overloaded = designer.active > 5;
                 return (
                   <li key={designer.id}>
@@ -376,7 +377,9 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
                         )}
                       />
                     </div>
-                    {i < visibleDesignerLoads.length - 1 && <RowSeparator inset="leading" />}
+                    {/* Sin separador a proposito: la barra de progreso ocupa todo el
+                        ancho, y un hairline justo debajo se lee como un subrayado
+                        doble, no como una division entre personas. */}
                   </li>
                 );
               })}
