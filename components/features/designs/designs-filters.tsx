@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Surface } from '@/components/ui/surface';
 import { Collapse } from '@/components/ui/collapse';
 import {
   Select,
@@ -71,7 +72,7 @@ export function DesignsFilters({
   const selectorsVisible = !isMobile || mobileFiltersOpen;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-md shadow-raised">
+    <Surface variant="plain" padded={false} className="md:p-md">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
           {/* Búsqueda + toggle de filtros (el toggle solo existe en móvil) */}
           <div className="flex items-center gap-2 xl:min-w-0 xl:flex-1">
@@ -181,6 +182,6 @@ export function DesignsFilters({
             </Button>
           )}
         </div>
-      </div>
+      </Surface>
   );
 }
