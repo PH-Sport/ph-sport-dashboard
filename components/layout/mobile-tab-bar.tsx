@@ -18,7 +18,7 @@
  * `@media (display-mode: standalone)`.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -35,6 +35,10 @@ export function MobileTabBar() {
   const pathname = usePathname() ?? '';
   const { mutate } = useSWRConfig();
 
+  // Destino tocado, antes de que Next termine de navegar: la pastilla no
+  // espera a la ruta. Sin esto arranca tarde y el gesto se siente perezoso.
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
   const [createOpen, setCreateOpen] = useState(false);
   // El diálogo no se monta hasta el primer uso: evita cargar diseñadores
   // (useDesigners) en cada página para quien nunca toca el «+».
@@ -42,6 +46,20 @@ export function MobileTabBar() {
 
   // Solo las 3 secciones principales: Ajustes ya vive en el dropdown del perfil.
   const items = buildNavItems(profile?.role);
+
+  // La ruta manda en cuanto llega; hasta entonces manda el dedo.
+  const activeHref =
+    items.find(({ href }) => isItemActive(pathname, href))?.href ?? items[0]?.href;
+  const shownHref = pendingHref ?? activeHref;
+
+  // Cualquier cambio de ruta suelta el optimismo y devuelve el mando a la
+  // realidad — tanto si llegamos al destino tocado como si acabamos en otro.
+  const prevPathname = useRef(pathname);
+  useEffect(() => {
+    if (prevPathname.current === pathname) return;
+    prevPathname.current = pathname;
+    setPendingHref(null);
+  }, [pathname]);
 
   const openCreate = () => {
     setCreateMounted(true);
@@ -67,22 +85,26 @@ export function MobileTabBar() {
           <ul className="grid grid-cols-3">
             {items.map(({ href, label, icon: Icon }) => {
               const active = isItemActive(pathname, href);
+              const shown = shownHref === href;
               return (
                 <li key={href}>
                   <Link
                     href={href}
+                    onClick={() => setPendingHref(href)}
                     aria-current={active ? 'page' : undefined}
                     className={cn(
-                      'relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-2xl outline-none transition-colors',
+                      'relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-2xl outline-none transition-colors duration-200',
                       'focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset',
-                      active ? 'text-primary' : 'text-sidebar-foreground/70'
+                      shown ? 'text-primary' : 'text-sidebar-foreground/70'
                     )}
                   >
-                    {active && (
+                    {shown && (
                       <motion.span
                         layoutId="tabbar-active-pill"
                         transition={SPRINGS.smooth}
-                        className="absolute inset-x-1.5 inset-y-1.5 rounded-xl bg-primary/15"
+                        // El tinte al 15% sobre cristal no dibujaba su propio
+                        // recorrido: con borde y sombra la pastilla se ve viajar.
+                        className="absolute inset-x-1.5 inset-y-1.5 rounded-xl border border-primary/25 bg-primary/25 shadow-sm"
                         aria-hidden
                       />
                     )}
