@@ -132,10 +132,15 @@ El modelo puede combinarlas en un turno: lo habitual será `add_designs` +
 
 **Un turno de usuario = una llamada al modelo.** El servidor no re-llama al
 modelo tras aplicar herramientas: devuelve los bloques al cliente, que los
-aplica. En el turno siguiente el cliente reconstruye el historial incluyendo
-los `tool_result` sintéticos correspondientes (`"aplicado: 2 tarjetas
-añadidas, ids a1b2, c3d4"`), como exige la API de Anthropic. Latencia y coste
-acotados y predecibles; nada de bucles de agente.
+aplica. Latencia y coste acotados y predecibles; nada de bucles de agente.
+
+**El historial viaja como texto plano**, sin bloques `tool_use`/`tool_result`.
+No hacen falta: el estado real de las tarjetas llega en el snapshot de cada
+turno, así que el modelo ve el *resultado* de sus acciones, no su eco. Para no
+perder la traza de qué hizo, el turno del asistente que se reenvía lleva
+anexada una línea de recibo — `[añadidas 2 tarjetas: a1b2, c3d4]` — generada
+en el cliente. Evita la exigencia de la API de emparejar cada `tool_use` con
+su `tool_result`, que es superficie de error pura para lo que aporta aquí.
 
 **Validación de entrada** con zod en `lib/api/schemas.ts`, como el resto de
 rutas: `parseMessageSchema` se sustituye por `designChatSchema`.
@@ -284,8 +289,8 @@ Todo lógica pura, sin navegador, en el estilo que ya usa el repo
   corrupto.
 - Recorte del historial: conserva el primer mensaje del usuario y respeta los
   dos topes.
-- Reconstrucción del historial con `tool_result` sintéticos en el formato que
-  espera la API de Anthropic.
+- Serialización del snapshot de tarjetas que se manda al modelo, incluidas las
+  tarjetas vacías (que no deben ensuciar el contexto).
 
 ## Fuera de alcance
 
