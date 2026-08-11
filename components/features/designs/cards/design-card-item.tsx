@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { ChevronRight, Link2, Pencil, Trash2 } from 'lucide-react';
 
 import { Collapse } from '@/components/ui/collapse';
@@ -30,7 +28,8 @@ import {
 } from '@/lib/types/design';
 import { autoTitleFor, effectiveTitle, type DesignCard } from '@/lib/utils/design-cards';
 import type { Designer } from '@/lib/hooks/use-designers';
-import { WeightChip, WEIGHT_COLORS } from './weight-chip';
+import { WEIGHT_COLORS } from './weight-chip';
+import { CardSummaryRow } from './card-summary-row';
 
 export interface DesignCardItemProps {
   card: DesignCard;
@@ -45,30 +44,6 @@ export interface DesignCardItemProps {
   loadingDesigners: boolean;
   /** El diálogo lo calcula con `isOutsideWeek`. */
   outsideWeek: boolean;
-}
-
-/** Etiquetas legibles para los códigos de aviso que devuelve el agente. */
-const WARNING_LABELS: Record<string, string> = {
-  agente_no_disponible: 'Agente no disponible',
-  disenador_no_encontrado: 'Diseñador no encontrado',
-  fecha_pasada: 'Fecha pasada',
-  fecha_no_reconocida: 'Fecha no reconocida',
-  tipo_no_reconocido: 'Tipo no reconocido',
-  hora_asumida: 'Hora asumida (12:00)',
-};
-
-/** Traduce un código de aviso a texto legible; si no está mapeado, lo humaniza. */
-function warningLabel(code: string): string {
-  return WARNING_LABELS[code] ?? code.replace(/_/g, ' ');
-}
-
-/** Chip discreto de aviso (fuera de semana, avisos del agente). Tono status-warning. */
-function WarningChip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-status-warning/50 bg-status-warning/15 px-2 py-0.5 text-[11px] md:text-[10px] font-medium text-status-warning">
-      {children}
-    </span>
-  );
 }
 
 export function DesignCardItem({
@@ -86,14 +61,10 @@ export function DesignCardItem({
   const [driveOpen, setDriveOpen] = useState(() => card.folder_url.trim() !== '');
   const [titleOpen, setTitleOpen] = useState(() => card.titleEdited);
 
-  const title = effectiveTitle(card);
   const hasMatch = card.type === 'matchday';
   const designerName = card.designer_id
     ? (designers.find((d) => d.id === card.designer_id)?.displayName ?? 'Auto')
     : 'Auto';
-  const dateLabel = card.deadline_at
-    ? format(card.deadline_at, 'dd MMM HH:mm', { locale: es })
-    : 'sin fecha';
   const titleInputValue = card.titleEdited ? card.title : effectiveTitle(card);
 
   return (
@@ -116,29 +87,12 @@ export function DesignCardItem({
         }}
         className="flex cursor-pointer items-center gap-3 px-4 py-3"
       >
-        <span className="shrink-0 font-mono text-xs text-muted-foreground">
-          {String(index).padStart(2, '0')}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className={cn('truncate text-sm font-medium', !title && 'text-muted-foreground')}>
-            {title || 'Nuevo diseño'}
-          </p>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <WeightChip type={card.type} />
-            <span className="text-xs text-muted-foreground">{designerName}</span>
-            <span className="font-mono text-xs text-muted-foreground">{dateLabel}</span>
-            {card.source === 'ia' && (
-              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] md:text-[10px] font-medium text-muted-foreground">
-                Agente
-              </span>
-            )}
-            {outsideWeek && <WarningChip>Fuera de semana</WarningChip>}
-            {/* Warnings are unique strings (no duplicates expected) */}
-            {card.warnings.map((warning) => (
-              <WarningChip key={warning}>{warningLabel(warning)}</WarningChip>
-            ))}
-          </div>
-        </div>
+        <CardSummaryRow
+          card={card}
+          index={index}
+          designerName={designerName}
+          outsideWeek={outsideWeek}
+        />
         <motion.span
           animate={{ rotate: open ? 90 : 0 }}
           transition={SPRINGS.snappy}
