@@ -130,6 +130,11 @@ const config: Config = {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
+        /* Invitación que respira: se apaga en cuanto el usuario acepta. */
+        'pulse-ring': {
+          '0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0)' },
+          '50%': { boxShadow: '0 0 0 4px hsl(var(--primary) / 0.18)' },
+        },
         'fade-out': {
           from: { opacity: '1' },
           to: { opacity: '0' },
@@ -161,6 +166,7 @@ const config: Config = {
         'slide-up': 'slide-up 0.4s ease-out',
         'blink': 'blink 0.3s ease-in-out',
         'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
+        'pulse-ring': 'pulse-ring 2.4s ease-in-out infinite',
       },
     },
   },
