@@ -11,7 +11,7 @@ export function DesignDetailSkeleton() {
     <>
       {/* Cabecera */}
       <div className="border-b border-border/60 p-lg">
-        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-4 w-16" />
         <Skeleton className="mt-1.5 h-6 w-48" />
         <Skeleton className="mt-2 h-4 w-56" />
       </div>

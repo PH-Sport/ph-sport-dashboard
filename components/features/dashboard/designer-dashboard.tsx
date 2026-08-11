@@ -32,12 +32,10 @@ const TONE_TEXT = {
 function KpiPlate({
   label,
   value,
-  note,
   tone = 'default',
 }: {
   label: string;
   value: string | number;
-  note: string;
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
@@ -52,7 +50,6 @@ function KpiPlate({
       <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-muted-foreground">{note}</p>
     </div>
   );
 }
@@ -139,16 +136,14 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
         <KpiPlate
           label="Pendientes"
           value={activeDesigns}
-          note="En tu cola esta semana"
           tone={activeDesigns > 0 ? 'primary' : 'default'}
         />
         <KpiPlate
-          label="Entregadas"
+          label="Entregados"
           value={completedThisWeek}
-          note="Esta semana"
           tone={completedThisWeek > 0 ? 'success' : 'default'}
         />
-        <KpiPlate label="Completado" value={`${completionPct}%`} note="De tu semana" tone="primary" />
+        <KpiPlate label="Completado" value={`${completionPct}%`} tone="primary" />
       </section>
 
       {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}

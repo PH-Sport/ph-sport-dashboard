@@ -50,7 +50,7 @@ export function MyWeekSkeleton() {
             {[...Array(2)].map((_, i) => (
               <div key={i} className="-mx-2 flex items-center gap-2 rounded-xl px-2 py-2">
                 <Skeleton className="h-4 w-4 shrink-0" />
-                <Skeleton className="h-3 w-32 flex-1" />
+                <Skeleton className="h-4 w-32 flex-1" />
                 <Skeleton className="h-3 w-6 shrink-0" />
               </div>
             ))}

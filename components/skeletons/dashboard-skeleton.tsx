@@ -36,9 +36,8 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
               key={i}
               className="bg-card p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised"
             >
-              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-4 w-16" />
               <Skeleton className="mt-2 h-9 w-14" />
-              <Skeleton className="mt-2 h-3 w-24" />
             </div>
           ))}
         </section>
@@ -49,9 +48,8 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
               key={i}
               className="flex-1 p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised"
             >
-              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-4 w-16" />
               <Skeleton className="mt-2 h-9 w-14" />
-              <Skeleton className="mt-2 h-3 w-24" />
             </div>
           ))}
         </section>
@@ -63,7 +61,7 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
         <Surface as="section" variant="plain">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div className="space-y-2">
-              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-4 w-28" />
               <Skeleton className="h-5 w-32" />
             </div>
             <Skeleton className="h-3 w-16" />
@@ -89,7 +87,7 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
         {/* Derecha: carga del equipo (admin, 'plain') / compañeros (designer, 'grouped') */}
         <Surface as="section" variant={isAdmin ? 'plain' : 'grouped'}>
           <div className="space-y-2">
-            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-4 w-28" />
             <Skeleton className="h-5 w-32" />
           </div>
           {isAdmin ? (

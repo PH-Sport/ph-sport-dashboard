@@ -39,7 +39,7 @@ export function DesignsSkeleton() {
       <Surface padded={false} className="py-md md:p-md">
         {/* Barra superior: recuento + items por página */}
         <div className="flex items-center justify-between gap-4 px-2 pb-2 pt-1">
-          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-4 w-24" />
           <div className="hidden items-center gap-2 sm:flex">
             <Skeleton className="h-4 w-14" />
             <Skeleton className="h-8 w-[4.5rem] rounded-lg" />
