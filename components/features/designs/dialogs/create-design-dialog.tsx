@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTriggerSliding } from '@/components/ui/tabs';
 import { Plus, Edit, Save, Layers, Loader2, Info, RotateCcw } from 'lucide-react';
 import { useDesigners } from '@/lib/hooks/use-designers';
 import { cn } from '@/lib/utils';
@@ -27,9 +27,6 @@ import { useDesignDraft } from '@/lib/hooks/use-design-draft';
 import { useDesignChat, type ChatMessage } from '@/lib/hooks/use-design-chat';
 import { useConfirm } from '@/lib/hooks/use-confirm';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-
-/** Recordamos si el usuario ya descubrió el chat: el halo es invitación, no reclamo. */
-const CHAT_DISCOVERED_KEY = 'phsport:chat-discovered';
 
 interface CreateDesignDialogProps {
   open: boolean;
@@ -70,7 +67,6 @@ export function CreateDesignDialog({
   } = useDesignDraft({ enabled: open, design });
 
   const [tab, setTab] = useState<'cards' | 'chat'>('cards');
-  const [chatDiscovered, setChatDiscovered] = useState(true);
   const [cardsFlash, setCardsFlash] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -79,9 +75,6 @@ export function CreateDesignDialog({
   useEffect(() => {
     if (!open) return;
     setTab('cards');
-    if (typeof window !== 'undefined') {
-      setChatDiscovered(window.localStorage.getItem(CHAT_DISCOVERED_KEY) === '1');
-    }
   }, [open]);
 
   useEffect(
@@ -155,12 +148,7 @@ export function CreateDesignDialog({
   };
 
   const handleTabChange = (value: string) => {
-    const next = value === 'chat' ? 'chat' : 'cards';
-    setTab(next);
-    if (next === 'chat' && !chatDiscovered) {
-      setChatDiscovered(true);
-      if (typeof window !== 'undefined') window.localStorage.setItem(CHAT_DISCOVERED_KEY, '1');
-    }
+    setTab(value === 'chat' ? 'chat' : 'cards');
   };
 
   const {
@@ -341,8 +329,10 @@ export function CreateDesignDialog({
                 className="flex min-h-0 flex-1 flex-col"
               >
                 <TabsList className="grid w-full shrink-0 grid-cols-2">
-                  <TabsTrigger
+                  <TabsTriggerSliding
                     value="cards"
+                    active={tab === 'cards'}
+                    indicatorId="create-design-tab"
                     className={cn(
                       'transition-shadow',
                       // Destello: el agente tocó el taller mientras mirabas el chat.
@@ -350,14 +340,14 @@ export function CreateDesignDialog({
                     )}
                   >
                     Tarjetas · {cards.length}
-                  </TabsTrigger>
-                  <TabsTrigger
+                  </TabsTriggerSliding>
+                  <TabsTriggerSliding
                     value="chat"
-                    // El halo respira hasta que el chat se usa por primera vez.
-                    className={cn(!chatDiscovered && 'animate-pulse-ring')}
+                    active={tab === 'chat'}
+                    indicatorId="create-design-tab"
                   >
                     Chat
-                  </TabsTrigger>
+                  </TabsTriggerSliding>
                 </TabsList>
 
                 <TabsContent
