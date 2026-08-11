@@ -28,6 +28,9 @@ export function useDesignDraft({ enabled, design }: { enabled: boolean; design?:
   const [storedMessages, setStoredMessages] = useState<unknown[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lo último pendiente de escribir: si el diálogo se cierra antes de que
+  // venza el debounce, se vuelca aquí mismo en vez de perderse.
+  const pendingSave = useRef<string | null>(null);
   // Espejo síncrono de las tarjetas: `applyCalls` necesita el estado actual
   // para devolver los recibos en el mismo tick, sin esperar al re-render.
   const cardsRef = useRef(cards);
@@ -44,6 +47,14 @@ export function useDesignDraft({ enabled, design }: { enabled: boolean; design?:
     }
 
     if (!enabled) return;
+
+    // Reabrir antes de que venza el debounce leería una versión anterior a lo
+    // que aún está en el aire: primero se vuelca, luego se lee.
+    if (pendingSave.current !== null && typeof window !== 'undefined') {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      window.localStorage.setItem(DRAFT_STORAGE_KEY, pendingSave.current);
+      pendingSave.current = null;
+    }
 
     const guardado = deserializeDraft(
       typeof window === 'undefined' ? null : window.localStorage.getItem(DRAFT_STORAGE_KEY)
@@ -63,12 +74,12 @@ export function useDesignDraft({ enabled, design }: { enabled: boolean; design?:
   const persist = useCallback(
     (nextCards: DesignCard[], nextMessages: unknown[]) => {
       if (design || typeof window === 'undefined') return;
+      pendingSave.current = serializeDraft({ cards: nextCards, messages: nextMessages });
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
-        window.localStorage.setItem(
-          DRAFT_STORAGE_KEY,
-          serializeDraft({ cards: nextCards, messages: nextMessages })
-        );
+        if (pendingSave.current === null) return;
+        window.localStorage.setItem(DRAFT_STORAGE_KEY, pendingSave.current);
+        pendingSave.current = null;
       }, SAVE_DEBOUNCE_MS);
     },
     [design]
@@ -79,9 +90,15 @@ export function useDesignDraft({ enabled, design }: { enabled: boolean; design?:
     persist(cards, storedMessages);
   }, [cards, storedMessages, hydrated, persist]);
 
+  // Al desmontar, el debounce no se descarta: se vuelca. Cerrar el diálogo
+  // justo después de teclear no puede costar el último cambio.
   useEffect(
     () => () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (pendingSave.current !== null && typeof window !== 'undefined') {
+        window.localStorage.setItem(DRAFT_STORAGE_KEY, pendingSave.current);
+        pendingSave.current = null;
+      }
     },
     []
   );
