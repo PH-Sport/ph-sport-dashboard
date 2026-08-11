@@ -86,8 +86,37 @@ export const updateAssigneeSchema = z
   .strict();
 export type UpdateAssigneeInput = z.infer<typeof updateAssigneeSchema>;
 
-/** POST /api/designs/parse — mensaje en lenguaje natural que el agente interpreta */
-export const parseMessageSchema = z.object({
-  message: z.string().trim().min(1).max(4000),
-}).strict();
-export type ParseMessageInput = z.infer<typeof parseMessageSchema>;
+/**
+ * POST /api/designs/chat — un turno de conversación con el agente de alta.
+ * Llega autocontenido: el hilo (texto plano) y la foto del taller. El servidor
+ * no guarda estado entre turnos, así que estos topes son también su defensa.
+ */
+export const designChatSchema = z
+  .object({
+    messages: z
+      .array(
+        z.object({
+          role: z.enum(['user', 'assistant']),
+          text: z.string().max(8000),
+        })
+      )
+      .min(1)
+      .max(40),
+    cards: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(64),
+          type: z.string().max(64).nullable(),
+          player: z.string().max(200),
+          match_home: z.string().max(200),
+          match_away: z.string().max(200),
+          deadline_at: z.string().max(32).nullable(),
+          designer_name: z.string().max(200).nullable(),
+          details: z.string().max(2000),
+          warnings: z.array(z.string().max(64)).max(20),
+        })
+      )
+      .max(40),
+  })
+  .strict();
+export type DesignChatInput = z.infer<typeof designChatSchema>;

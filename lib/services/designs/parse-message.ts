@@ -4,8 +4,11 @@ import { DESIGN_TYPES, type DesignType } from '@/lib/types/design';
  * Lógica pura del agente de parseo (Fase 4, Task 1): construcción del prompt
  * y del tool schema para Claude, y normalización del `tool_use` devuelto por
  * el modelo a candidatos de diseño ya validados contra el dominio de la app
- * (tipos, diseñadores, fechas). Sin HTTP, sin React: eso vive en las tasks
- * siguientes (ruta `/api/designs/parse` y UI).
+ * (tipos, diseñadores, fechas). Sin HTTP, sin React.
+ *
+ * Sigue siendo la base del agente aunque la conversación viva en
+ * `chat-agent.ts`: `normalizeCandidate` y `matchDesigner` son la única puerta
+ * por la que un valor del modelo entra al dominio.
  */
 
 /** Diseñador tal y como lo necesita el matching (subconjunto de la fila real). */
