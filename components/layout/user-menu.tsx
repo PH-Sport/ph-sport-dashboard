@@ -19,7 +19,6 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { useViewAs } from '@/lib/auth/view-as-context';
 import { ROLE_LABEL, ROLE_ACCENT } from '@/lib/utils/role';
 import { ViewAsMenuSection } from './view-as-menu-section';
-import { ThemeModeSwitch } from '@/components/ui/theme-mode-switch';
 import { cn } from '@/lib/utils';
 
 export function UserMenu() {
@@ -153,11 +152,6 @@ export function UserMenu() {
                 )}
 
                 {isDev && <ViewAsMenuSection />}
-
-                <DropdownMenuSeparator className="bg-border" />
-                {/* El tema deja la barra: es un ajuste, y aquí no cuesta un
-                    hueco de la primera vista. */}
-                <ThemeModeSwitch />
 
                 <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem

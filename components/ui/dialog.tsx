@@ -98,8 +98,12 @@ const DialogContent = React.forwardRef<
         asChild
         onOpenAutoFocus={focusPanelOnOpen ? handleOpenAutoFocus : undefined}
       >
-        <div
+        <motion.div
           tabIndex={-1}
+          // layoutRoot: mismo motivo que en la tab bar — el diálogo es fixed y
+          // las animaciones de layout de dentro (la pastilla de las pestañas)
+          // se medirían contra el documento, arrastrando el scroll del fondo.
+          layoutRoot
           className={cn(
             'pointer-events-none fixed inset-0 z-50 flex',
             risesFromBottom
@@ -178,7 +182,7 @@ const DialogContent = React.forwardRef<
               </DialogPrimitive.Close>
             )}
           </motion.div>
-        </div>
+        </motion.div>
       </DialogPrimitive.Content>
     </DialogPortal>
   );

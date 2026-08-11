@@ -77,7 +77,14 @@ export function MobileTabBar() {
 
   return (
     <>
-      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 md:hidden">
+      {/* layoutRoot: la barra es fixed, pero framer proyecta las animaciones de
+          layout contra el documento. Al navegar, el scroll vuelve a 0 entre la
+          medida de origen y la de destino, y la pastilla se comía esa diferencia
+          en diagonal. Con layoutRoot sus hijos se miden contra esta barra. */}
+      <motion.div
+        layoutRoot
+        className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 md:hidden"
+      >
         <nav
           aria-label="Navegación principal"
           className="glass-sidebar min-w-0 flex-1 rounded-2xl shadow-overlay"
@@ -131,7 +138,7 @@ export function MobileTabBar() {
         >
           <Plus className="h-6 w-6" aria-hidden />
         </button>
-      </div>
+      </motion.div>
 
       {createMounted && (
         <CreateDesignDialog
