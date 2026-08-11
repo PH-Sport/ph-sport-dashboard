@@ -170,7 +170,6 @@ export default function SettingsPage() {
     <DashboardPage
       title="Ajustes"
       icon={Settings}
-      subtitle="Tu cuenta, apariencia, notificaciones y la gestión del equipo"
       maxWidth="4xl"
       loading={false}
       skeleton={null}

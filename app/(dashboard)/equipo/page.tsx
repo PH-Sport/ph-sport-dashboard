@@ -187,7 +187,6 @@ export default function TeamPage() {
     <DashboardPage
       title="Semana"
       icon={CalendarRange}
-      subtitle="Quién lleva qué esta semana"
       loading={showSkeleton}
       skeleton={<TeamSkeleton />}
       actions={

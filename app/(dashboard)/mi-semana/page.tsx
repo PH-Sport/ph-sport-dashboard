@@ -101,7 +101,6 @@ export default function MyWeekPage() {
     <DashboardPage
       title="Mi semana"
       icon={CalendarRange}
-      subtitle="Tu cola, ordenada por entrega"
       loading={showSkeleton}
       skeleton={<MyWeekSkeleton />}
     >
