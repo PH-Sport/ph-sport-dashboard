@@ -54,12 +54,10 @@ function getDeadlineLabel(deadline: Date): string {
 function KpiPlate({
   label,
   value,
-  note,
   tone = 'default',
 }: {
   label: string;
   value: string | number;
-  note: string;
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
@@ -71,7 +69,6 @@ function KpiPlate({
       <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-muted-foreground">{note}</p>
     </div>
   );
 }
@@ -227,23 +224,20 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
           cuatro columnas de hoy. La superficie cambia de sitio segun el ancho,
           por eso aqui no se usa <Surface> (ver Task 5). */}
       <section className="grid grid-cols-2 gap-px overflow-hidden rounded-surface bg-border md:gap-4 md:overflow-visible md:rounded-none md:bg-transparent xl:grid-cols-4">
-        <KpiPlate label="Activas" value={activeCount} note="Pendientes esta semana" />
+        <KpiPlate label="Activos" value={activeCount} />
         <KpiPlate
           label="Entregados"
           value={deliveredCount}
-          note="Completados esta semana"
           tone={deliveredCount > 0 ? 'success' : 'default'}
         />
         <KpiPlate
           label="Atrasados"
           value={overdueCount}
-          note="Vencidos sin entregar"
           tone={overdueCount > 0 ? 'warning' : 'default'}
         />
         <KpiPlate
-          label="Equipo activo"
+          label="Equipo"
           value={`${activeDesignersCount}/${designers.length}`}
-          note="Con trabajo asignado"
           tone="primary"
         />
       </section>
