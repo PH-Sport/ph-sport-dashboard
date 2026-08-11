@@ -247,9 +247,14 @@ export default function MyWeekPage() {
                           <span className="flex-1 font-mono text-eyebrow uppercase text-muted-foreground">
                             {w.label}
                           </span>
-                          <span className="font-mono tabular text-xs text-muted-foreground">
-                            {w.items.length}
-                          </span>
+                          {/* Con un solo grupo, este numero es el mismo que el badge
+                              de "Entregadas" que tiene justo encima. Solo informa
+                              cuando hay varias semanas que comparar. */}
+                          {deliveredGroups.length > 1 && (
+                            <span className="font-mono tabular text-xs text-muted-foreground">
+                              {w.items.length}
+                            </span>
+                          )}
                         </button>
                         <Collapse open={open}>
                           <ul>
