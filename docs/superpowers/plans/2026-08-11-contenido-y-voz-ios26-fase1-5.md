@@ -676,6 +676,39 @@ El large title colapsable toca el layout compartido: su diseño depende de cómo
 
 ---
 
+---
+
+## Estado de ejecución (2026-08-11)
+
+**Tandas A y B COMPLETAS**, en `origin/feat/superficies-ios26-fase1` y mergeadas a `preview`.
+
+| Tarea | Commit | Nota |
+|---|---|---|
+| A1 subtítulos | `390ced9` | El de `/inicio` conservado: es dato |
+| A2 notas de KPI | `d318890` | `note` fuera del *tipo*, no solo del JSX |
+| A3 emoji | `e76333f` | El «Semana despejada» global sobrevive |
+| A4 contadores | `8292620` | `loadPct` conservado: lo usa `overloaded` |
+| B1 token | `feecb8c` | Único cambio que afecta a escritorio, deliberado |
+| B2 rótulos | `e15bb3a` | 17 migrados · 25 `font-mono tabular` intactos |
+| B3 skeletons + panel diseñador | `de57962` | Ver desviación abajo |
+
+**Desviación respecto al plan, en B3:** el plan asumía que la tanda A había cubierto todos los
+KPI. No era cierto — `designer-dashboard.tsx` tiene **su propio `KpiPlate`** con `note`, que A2 no
+tocó porque solo se inspeccionó `admin-dashboard.tsx`. Resultado: en la misma `/inicio` los KPI
+tenían tres líneas o dos según el rol, y decían «Entregadas» vs «Entregados» para la misma
+entidad. Corregido dentro de B3, junto con los skeletons que seguían reservando la línea muerta.
+
+**Lección para las tandas C y D:** cuando una pantalla tiene variante por rol, `grep` del texto
+encuentra un panel y no el gemelo. Busca por *estructura* (`grep -rn "KpiPlate\|function.*Plate"`),
+no solo por la cadena visible.
+
+**Verificación final de A+B:** type-check · lint · 77/77 · build de 20 páginas · **cero clases
+`md:` alteradas** en toda la fase 1.5 (`git diff 54bdbdf..HEAD | grep "^[-+].*md:"` vacío).
+
+**Siguiente paso:** validación de Mario en el iPhone. Las tandas C y D se planifican después.
+
+---
+
 ## Notas de la self-review
 
 - **Cobertura:** las cinco «Priority Issues» de la crítica se reparten así — cinco rótulos
