@@ -258,7 +258,7 @@ export function MembersPanel() {
                 <div className="space-y-4 p-lg">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="font-mono text-eyebrow uppercase text-muted-foreground">
+                      <label className="text-eyebrow text-muted-foreground">
                         Nombre
                       </label>
                       <input
@@ -268,7 +268,7 @@ export function MembersPanel() {
                       />
                     </div>
                     <div>
-                      <label className="font-mono text-eyebrow uppercase text-muted-foreground">
+                      <label className="text-eyebrow text-muted-foreground">
                         Primer apellido
                       </label>
                       <input
@@ -279,7 +279,7 @@ export function MembersPanel() {
                     </div>
                   </div>
                   <div>
-                    <label className="font-mono text-eyebrow uppercase text-muted-foreground">
+                    <label className="text-eyebrow text-muted-foreground">
                       Alias <span className="normal-case text-muted-foreground/60">(opcional)</span>
                     </label>
                     <input

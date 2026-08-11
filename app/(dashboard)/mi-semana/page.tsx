@@ -244,7 +244,7 @@ export default function MyWeekPage() {
                           >
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           </motion.span>
-                          <span className="flex-1 font-mono text-eyebrow uppercase text-muted-foreground">
+                          <span className="flex-1 text-eyebrow text-muted-foreground">
                             {w.label}
                           </span>
                           {/* Con un solo grupo, este numero es el mismo que el badge
