@@ -36,7 +36,12 @@ const config: Config = {
         'card-title': ['1rem', { lineHeight: '1.5rem', fontWeight: '600' }],
         body: ['0.875rem', { lineHeight: '1.25rem' }],
         caption: ['0.75rem', { lineHeight: '1rem' }],
-        eyebrow: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.18em', fontWeight: '500' }],
+        // Rótulo de sección — footnote de iOS (13pt), caja de frase, sin tracking.
+        // La versión anterior (mono 11px + 0.18em + uppercase) era voz de dashboard,
+        // no de app nativa: SF Pro no espacia mayúsculas. Único token de la fase 1.5
+        // que afecta también a escritorio: un token tipográfico no se bifurca por
+        // viewport sin duplicarlo, y duplicarlo sería peor.
+        eyebrow: ['0.8125rem', { lineHeight: '1.125rem', letterSpacing: '0', fontWeight: '600' }],
       },
       // Elevación — modelo mate border-led: flat (sin sombra) / raised / overlay
       boxShadow: {
