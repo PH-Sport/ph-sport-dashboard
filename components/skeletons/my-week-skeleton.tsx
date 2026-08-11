@@ -19,8 +19,8 @@ export function MyWeekSkeleton() {
       </div>
 
       <div className="space-y-4">
-        {/* Placa Pendientes */}
-        <Surface as="section" variant="plain">
+        {/* Placa Pendientes — lista que se toca, misma caja que el contenido */}
+        <Surface as="section" variant="grouped">
           <div className="mb-2 flex items-center gap-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-7 rounded-full" />

@@ -45,6 +45,7 @@ import { resolveDesigner } from '@/lib/utils/designer-display';
 import { UrgencyDot, getUrgency } from '@/components/ui/urgency-dot';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { Surface } from '@/components/ui/surface';
+import { RowSeparator } from '@/components/ui/row';
 import type { DesignSortColumn, SortDirection } from '@/lib/hooks/use-designs-table';
 
 interface Designer {
@@ -205,8 +206,8 @@ export function DesignsTable({
       </div>
 
       {/* Móvil: lista de filas (la tabla de 6 columnas no se encoge) */}
-      <ul className="space-y-0.5 md:hidden">
-        {paginatedItems.map((design) => {
+      <ul className="md:hidden">
+        {paginatedItems.map((design, i) => {
           const dz = resolveDesigner(design, designers);
           return (
             <li key={design.id} className="rounded-xl px-2 py-3 transition-colors hover:bg-muted/40">
@@ -244,6 +245,12 @@ export function DesignsTable({
                   </span>
                 </span>
               </div>
+              {/* Dentro del <li> (un <div> no es hijo válido de <ul>). mt-3/-mb-3
+                  reparte el aire a partes iguales: el pt-3 de la fila siguiente
+                  pone la mitad de abajo. inset 0: el texto ya arranca en el px-2. */}
+              {i < paginatedItems.length - 1 && (
+                <RowSeparator inset={0} className="mt-3 -mb-3" />
+              )}
             </li>
           );
         })}

@@ -127,7 +127,9 @@ export default function MyWeekPage() {
         >
           {/* Pendientes */}
           <motion.div variants={rise}>
-            <Surface as="section" variant="plain">
+            {/* Mismo tratamiento que Entregadas y que el resto de listas de
+                diseños: filas que se tocan → caja tonal con hairlines. */}
+            <Surface as="section" variant="grouped">
               <div className="mb-2 flex items-center gap-2">
                 <h2 className="text-base font-semibold">Pendientes</h2>
                 <span className="rounded-full bg-muted px-2 py-0.5 font-mono tabular text-[11px] text-muted-foreground">

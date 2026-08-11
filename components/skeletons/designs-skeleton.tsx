@@ -46,8 +46,8 @@ export function DesignsSkeleton() {
           </div>
         </div>
 
-        {/* Móvil: lista de filas */}
-        <ul className="space-y-0.5 md:hidden">
+        {/* Móvil: lista de filas — sin space-y, como la lista real (separa el hairline) */}
+        <ul className="md:hidden">
           {[...Array(6)].map((_, i) => (
             <li key={i} className="rounded-xl px-2 py-2.5">
               <div className="flex items-start justify-between gap-2">

@@ -57,8 +57,8 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
 
       {/* Dos columnas: lista principal (2fr) + panel lateral (1fr) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        {/* Izquierda: vencimientos / tu cola — siempre 'plain' en ambos roles */}
-        <Surface as="section" variant="plain">
+        {/* Izquierda: vencimientos / tu cola — lista que se toca, 'grouped' en ambos roles */}
+        <Surface as="section" variant="grouped">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div className="space-y-2">
               <Skeleton className="h-4 w-28" />
@@ -84,8 +84,8 @@ export function DashboardSkeleton({ variant = 'designer' }: DashboardSkeletonPro
           </ul>
         </Surface>
 
-        {/* Derecha: carga del equipo (admin, 'plain') / compañeros (designer, 'grouped') */}
-        <Surface as="section" variant={isAdmin ? 'plain' : 'grouped'}>
+        {/* Derecha: carga del equipo / compañeros — solo lectura, 'plain' en ambos roles */}
+        <Surface as="section" variant="plain">
           <div className="space-y-2">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-5 w-32" />

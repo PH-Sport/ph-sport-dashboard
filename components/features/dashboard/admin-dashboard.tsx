@@ -244,7 +244,9 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
 
       {/* Dos columnas: vencimientos + carga */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        <Surface as="section" variant="plain">
+        {/* Lista de filas que se tocan → caja tonal: el bloque marca dónde
+            empieza y acaba lo accionable, y los hairlines separan cada unidad. */}
+        <Surface as="section" variant="grouped">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
               <p className="text-eyebrow text-muted-foreground">

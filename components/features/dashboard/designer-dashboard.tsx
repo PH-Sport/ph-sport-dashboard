@@ -148,7 +148,8 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
 
       {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}
       <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        <Surface as="section" variant="plain">
+        {/* Filas que se tocan → caja tonal, como el resto de listas de diseños. */}
+        <Surface as="section" variant="grouped">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
               <p className="text-eyebrow text-muted-foreground">Tu cola</p>
@@ -206,7 +207,8 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
           )}
         </Surface>
 
-        <Surface as="section" variant="grouped">
+        {/* Solo se lee (nada aquí se toca) → plano, como «Carga del equipo». */}
+        <Surface as="section" variant="plain">
           <p className="text-eyebrow text-muted-foreground">Compañeros</p>
           <h2 className="text-base font-semibold">El resto del equipo</h2>
           {teammates.length === 0 ? (
