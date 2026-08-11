@@ -51,6 +51,11 @@ export function MobileTabBar() {
   const activeHref =
     items.find(({ href }) => isItemActive(pathname, href))?.href ?? items[0]?.href;
   const shownHref = pendingHref ?? activeHref;
+  // Posición de la pastilla, en celdas. Nunca -1: sin coincidencia, la primera.
+  const activeIndex = Math.max(
+    0,
+    items.findIndex(({ href }) => href === shownHref)
+  );
 
   // Cualquier cambio de ruta suelta el optimismo y devuelve el mando a la
   // realidad — tanto si llegamos al destino tocado como si acabamos en otro.
@@ -77,19 +82,34 @@ export function MobileTabBar() {
 
   return (
     <>
-      {/* layoutRoot: la barra es fixed, pero framer proyecta las animaciones de
-          layout contra el documento. Al navegar, el scroll vuelve a 0 entre la
-          medida de origen y la de destino, y la pastilla se comía esa diferencia
-          en diagonal. Con layoutRoot sus hijos se miden contra esta barra. */}
-      <motion.div
-        layoutRoot
-        className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 md:hidden"
-      >
+      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 md:hidden">
         <nav
           aria-label="Navegación principal"
           className="glass-sidebar min-w-0 flex-1 rounded-2xl shadow-overlay"
         >
-          <ul className="grid grid-cols-3">
+          <ul
+            className="relative grid"
+            style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+          >
+            {/* La pastilla NO se monta y desmonta entre pestañas: es una sola,
+                fuera de las celdas, que se desplaza con su propio transform.
+                Con layoutId, framer guardaba su posición en coordenadas de
+                documento; al navegar, el scroll volvía a 0 y la pastilla
+                recorría esa diferencia — de ahí la diagonal. Un transform
+                propio no depende de medida alguna, así que es inmune. */}
+            <motion.span
+              aria-hidden
+              initial={false}
+              animate={{ x: `${activeIndex * 100}%` }}
+              transition={SPRINGS.smooth}
+              // El ancho sale del número real de secciones, no de un w-1/3
+              // fijo: si algún día son dos o cuatro, la pastilla sigue casando.
+              style={{ width: `${100 / items.length}%` }}
+              className="pointer-events-none absolute inset-y-1.5 left-0 px-1.5"
+            >
+              <span className="block h-full w-full rounded-xl border border-primary/25 bg-primary/25 shadow-sm" />
+            </motion.span>
+
             {items.map(({ href, label, icon: Icon }) => {
               const active = isItemActive(pathname, href);
               const shown = shownHref === href;
@@ -105,16 +125,6 @@ export function MobileTabBar() {
                       shown ? 'text-primary' : 'text-sidebar-foreground/70'
                     )}
                   >
-                    {shown && (
-                      <motion.span
-                        layoutId="tabbar-active-pill"
-                        transition={SPRINGS.smooth}
-                        // El tinte al 15% sobre cristal no dibujaba su propio
-                        // recorrido: con borde y sombra la pastilla se ve viajar.
-                        className="absolute inset-x-1.5 inset-y-1.5 rounded-xl border border-primary/25 bg-primary/25 shadow-sm"
-                        aria-hidden
-                      />
-                    )}
                     <Icon className="relative z-10 h-5 w-5" aria-hidden />
                     <span className="relative z-10 text-[11px] font-medium">{label}</span>
                   </Link>
@@ -138,7 +148,7 @@ export function MobileTabBar() {
         >
           <Plus className="h-6 w-6" aria-hidden />
         </button>
-      </motion.div>
+      </div>
 
       {createMounted && (
         <CreateDesignDialog
