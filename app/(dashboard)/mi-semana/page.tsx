@@ -135,9 +135,7 @@ export default function MyWeekPage() {
                 </span>
               </div>
               {inProgress.length === 0 ? (
-                <p className="py-md text-sm text-muted-foreground">
-                  Semana despejada — no te queda nada por entregar. 🎉
-                </p>
+                <p className="py-md text-sm text-muted-foreground">Nada pendiente.</p>
               ) : (
                 <ul className="-mx-2">
                   <AnimatePresence initial={false}>
