@@ -92,7 +92,9 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        {/* Por defecto manda el dispositivo; quien quiera fijarlo lo elige en
+            el menú de perfil o en Ajustes → Apariencia. */}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider delayDuration={200}>
             <MotionProvider>
               <AuthProvider initialUser={user} initialProfile={profile}>

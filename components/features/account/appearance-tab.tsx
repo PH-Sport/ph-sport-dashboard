@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Check, Moon, Sun } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { THEME_MODES } from '@/lib/theme/theme-modes';
 import { useAccentColor } from '@/lib/theme/use-accent-color';
 import { accentSwatch, accentSwatchForeground } from '@/lib/theme/accent-colors';
 import {
@@ -21,10 +22,8 @@ interface AppearanceTabProps {
   onDefaultViewChange: (v: DefaultView) => void;
 }
 
-const THEME_OPTIONS = [
-  { value: 'light', label: 'Claro', icon: Sun },
-  { value: 'dark', label: 'Oscuro', icon: Moon },
-] as const;
+// Los tres modos viven en lib/theme/theme-modes.ts: aquí y en el menú de
+// perfil se pintan los mismos, sin duplicar la lista.
 
 export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTabProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -40,8 +39,8 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
     <div className="space-y-lg py-2">
       <div className="space-y-3">
         <Label>Tema</Label>
-        <div className="grid grid-cols-2 gap-3">
-          {THEME_OPTIONS.map(({ value, label, icon: Icon }) => {
+        <div className="grid grid-cols-3 gap-3">
+          {THEME_MODES.map(({ value, label, icon: Icon }) => {
             const active = mounted && theme === value;
             return (
               <button
@@ -50,7 +49,10 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
                 onClick={() => setTheme(value)}
                 aria-pressed={active}
                 className={cn(
-                  'flex items-center justify-center gap-2 rounded-md border px-3 py-3 text-sm font-medium transition-colors md:py-2.5',
+                  // Móvil: icono sobre etiqueta — «Dispositivo» no cabe al lado
+                  // del icono en un tercio de pantalla. En md+ vuelve a una fila.
+                  'flex flex-col items-center justify-center gap-1 rounded-md border px-2 py-3 text-xs font-medium transition-colors',
+                  'md:flex-row md:gap-2 md:px-3 md:py-2.5 md:text-sm',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background',
                   active
                     ? 'border-primary/50 bg-primary/10 text-foreground'
@@ -64,7 +66,7 @@ export function AppearanceTab({ defaultView, onDefaultViewChange }: AppearanceTa
           })}
         </div>
         <p className="text-sm text-muted-foreground">
-          Se aplica al instante en este dispositivo.
+          Se aplica al instante y se recuerda en este navegador.
         </p>
       </div>
 

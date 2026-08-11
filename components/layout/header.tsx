@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import { UserMenu } from './user-menu';
 import { NotificationsDropdown } from './notifications-dropdown';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { RolePill } from './role-pill';
 import { usePageTitleCollapsed } from './page-title-context';
 import { sectionLabelFor } from '@/lib/ui/section-label';
@@ -44,7 +43,7 @@ export function Header() {
 
         <div className="flex shrink-0 items-center gap-2">
           <RolePill />
-          <ThemeToggle />
+          {/* El tema vive ahora en el menú de perfil, no en la primera vista. */}
           <NotificationsDropdown />
           <UserMenu />
         </div>
