@@ -184,7 +184,9 @@ export function CreateDesignDialog({
                 )
           )}
         >
-          <DialogHeader>
+          {/* En creación la hoja sube desde abajo: la cabecera presta su zona
+              al gesto de arrastrar para cerrar (no hay asa que agarrar). */}
+          <DialogHeader {...(!isEditMode && { 'data-drag-handle': '' })}>
             <DialogTitle className="text-xl md:text-2xl flex items-center gap-3">
               {isEditMode ? (
                 <>

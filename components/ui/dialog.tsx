@@ -56,6 +56,10 @@ const DialogContent = React.forwardRef<
 >(({ className, children, fullscreenOnMobile = false, mobileSheet = false, ...props }, ref) => {
   const isMobile = useIsMobile();
   const sheetMode = mobileSheet && isMobile;
+  // Pantalla completa en móvil: entra desde abajo igual que la hoja, pero sin
+  // asa (no hay fondo asomando que la justifique) y conservando la X.
+  const fullMode = fullscreenOnMobile && isMobile;
+  const risesFromBottom = sheetMode || fullMode;
   // El arrastre solo escucha en el asa (dragControls): así el scroll interno
   // del contenido no pelea con el gesto de cierre.
   const dragControls = useDragControls();
@@ -72,8 +76,9 @@ const DialogContent = React.forwardRef<
         <div
           className={cn(
             'pointer-events-none fixed inset-0 z-50 flex',
-            sheetMode
-              ? 'items-end justify-center'
+            risesFromBottom
+              ? // Anclado abajo: el y:100% sale del borde inferior, no del centro.
+                'items-end justify-center'
               : fullscreenOnMobile
                 ? 'items-center justify-center md:p-4 md:pb-[max(1rem,env(safe-area-inset-bottom))] md:pt-[max(1rem,env(safe-area-inset-top))]'
                 : 'items-center justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]'
@@ -88,19 +93,32 @@ const DialogContent = React.forwardRef<
               // Hoja: full-bleed abajo, esquinas solo arriba, aire para el home indicator.
               // Van tras className para ganar los merges (p. ej. rounded/max-w del consumidor).
               sheetMode &&
-                'max-h-[88dvh] w-full max-w-none rounded-b-none rounded-t-2xl border-x-0 border-b-0 pt-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]'
+                'max-h-[88dvh] w-full max-w-none rounded-b-none rounded-t-2xl border-x-0 border-b-0 pt-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]',
+              // Pantalla completa: sin esquinas ni bordes, todo el alto real.
+              fullMode && 'h-[100dvh] max-h-none w-full max-w-none rounded-none border-0'
             )}
-            initial={sheetMode ? { y: '100%' } : contentAnimation.initial}
-            animate={sheetMode ? { y: 0 } : contentAnimation.animate}
-            exit={sheetMode ? { y: '100%' } : contentAnimation.exit}
-            transition={sheetMode ? SPRINGS.smooth : TRANSITIONS.modal}
+            initial={risesFromBottom ? { y: '100%' } : contentAnimation.initial}
+            animate={risesFromBottom ? { y: 0 } : contentAnimation.animate}
+            exit={risesFromBottom ? { y: '100%' } : contentAnimation.exit}
+            transition={risesFromBottom ? SPRINGS.smooth : TRANSITIONS.modal}
             {...props}
-            drag={sheetMode ? 'y' : false}
+            drag={risesFromBottom ? 'y' : false}
             dragListener={false}
             dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 1 }}
-            onDragEnd={sheetMode ? handleDragEnd : undefined}
+            onDragEnd={risesFromBottom ? handleDragEnd : undefined}
+            // Sin asa que agarrar, el gesto vive en la cabecera: quien la marque
+            // con data-drag-handle presta su zona al arrastre.
+            onPointerDown={
+              fullMode
+                ? (e) => {
+                    if ((e.target as HTMLElement).closest('[data-drag-handle]')) {
+                      dragControls.start(e);
+                    }
+                  }
+                : undefined
+            }
           >
             {sheetMode && (
               // sticky: si el contenido de la hoja scrollea, el asa no se pierde.
@@ -126,7 +144,9 @@ const DialogContent = React.forwardRef<
             ) : (
               /* Táctil: 44px de área (p-3.5) con el icono en la MISMA posición visual
                  que el compacto de escritorio (1.5+3.5 = 3+2 = 20px del borde). */
-              <DialogPrimitive.Close className="absolute right-1.5 top-1.5 rounded-lg p-3.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none md:right-3 md:top-3 md:p-2">
+              /* El ref también aquí: en pantalla completa no hay Close oculto,
+                 y el swipe de cierre necesita a quién llamar. */
+              <DialogPrimitive.Close ref={closeRef} className="absolute right-1.5 top-1.5 rounded-lg p-3.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none md:right-3 md:top-3 md:p-2">
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
