@@ -48,12 +48,27 @@ type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.
      * swipe-para-cerrar (el cierre es asa/gesto/scrim, sin X). En escritorio
      * no cambia nada: modal centrado con X, como siempre. */
     mobileSheet?: boolean;
+    /** Al abrir, Radix enfoca el primer control y este estrena su anillo de
+     * foco sin que nadie haya tocado el teclado. Con esto el diálogo abre con
+     * el foco en su propio panel: el anillo se reserva para quien navegue con
+     * Tab de verdad. */
+    focusPanelOnOpen?: boolean;
   };
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, fullscreenOnMobile = false, mobileSheet = false, ...props }, ref) => {
+>((
+  {
+    className,
+    children,
+    fullscreenOnMobile = false,
+    mobileSheet = false,
+    focusPanelOnOpen = false,
+    ...props
+  },
+  ref
+) => {
   const isMobile = useIsMobile();
   const sheetMode = mobileSheet && isMobile;
   // Pantalla completa en móvil: entra desde abajo igual que la hoja, pero sin
@@ -69,11 +84,22 @@ const DialogContent = React.forwardRef<
     if (info.offset.y > 100 || info.velocity.y > 500) closeRef.current?.click();
   };
 
+  // El foco entra en el panel (tabIndex -1, sin estilos de foco) en vez de en
+  // el primer botón, que estrenaría su anillo sin que nadie pulse Tab.
+  const handleOpenAutoFocus = (event: Event) => {
+    event.preventDefault();
+    (event.currentTarget as HTMLElement | null)?.focus();
+  };
+
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content asChild>
+      <DialogPrimitive.Content
+        asChild
+        onOpenAutoFocus={focusPanelOnOpen ? handleOpenAutoFocus : undefined}
+      >
         <div
+          tabIndex={-1}
           className={cn(
             'pointer-events-none fixed inset-0 z-50 flex',
             risesFromBottom

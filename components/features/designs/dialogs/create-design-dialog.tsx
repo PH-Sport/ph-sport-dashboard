@@ -246,6 +246,8 @@ export function CreateDesignDialog({
         <DialogContent
           // Móvil: hoja a pantalla completa que sube desde abajo.
           fullscreenOnMobile={!isEditMode}
+          // Sin esto, «Tarjetas» abre con el anillo de foco puesto.
+          focusPanelOnOpen
           className={cn(
             isEditMode
               ? 'max-h-[90dvh] max-w-2xl overflow-y-auto'
