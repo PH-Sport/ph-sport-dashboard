@@ -54,12 +54,10 @@ function getDeadlineLabel(deadline: Date): string {
 function KpiPlate({
   label,
   value,
-  note,
   tone = 'default',
 }: {
   label: string;
   value: string | number;
-  note: string;
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
@@ -67,11 +65,10 @@ function KpiPlate({
     // contenedor, y el hueco de 1px entre celdas ES el hairline. Escritorio (md:):
     // recupera su tarjeta propia, borde + fondo + sombra, como antes.
     <div className="bg-card p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
-      <p className="font-mono text-eyebrow uppercase text-muted-foreground">{label}</p>
+      <p className="text-eyebrow text-muted-foreground">{label}</p>
       <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-muted-foreground">{note}</p>
     </div>
   );
 }
@@ -160,7 +157,7 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
               {String(totalAlerts).padStart(2, '0')}
             </span>
             <div>
-              <p className="font-mono text-eyebrow uppercase text-primary">Avisos</p>
+              <p className="text-eyebrow text-primary">Avisos</p>
               <ul className="mt-0.5 space-y-0.5 text-sm text-muted-foreground">
                 {criticalCount > 0 && (
                   <li>
@@ -227,23 +224,20 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
           cuatro columnas de hoy. La superficie cambia de sitio segun el ancho,
           por eso aqui no se usa <Surface> (ver Task 5). */}
       <section className="grid grid-cols-2 gap-px overflow-hidden rounded-surface bg-border md:gap-4 md:overflow-visible md:rounded-none md:bg-transparent xl:grid-cols-4">
-        <KpiPlate label="Activas" value={activeCount} note="Pendientes esta semana" />
+        <KpiPlate label="Activos" value={activeCount} />
         <KpiPlate
           label="Entregados"
           value={deliveredCount}
-          note="Completados esta semana"
           tone={deliveredCount > 0 ? 'success' : 'default'}
         />
         <KpiPlate
           label="Atrasados"
           value={overdueCount}
-          note="Vencidos sin entregar"
           tone={overdueCount > 0 ? 'warning' : 'default'}
         />
         <KpiPlate
-          label="Equipo activo"
+          label="Equipo"
           value={`${activeDesignersCount}/${designers.length}`}
-          note="Con trabajo asignado"
           tone="primary"
         />
       </section>
@@ -253,7 +247,7 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
         <Surface as="section" variant="plain">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
+              <p className="text-eyebrow text-muted-foreground">
                 Próximas 48 horas
               </p>
               <h2 className="text-base font-semibold">Vencimientos</h2>
@@ -340,7 +334,7 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
         </Surface>
 
         <Surface as="section" variant="plain">
-          <p className="font-mono text-eyebrow uppercase text-muted-foreground">Carga del equipo</p>
+          <p className="text-eyebrow text-muted-foreground">Carga del equipo</p>
           <h2 className="text-base font-semibold">Trabajo activo</h2>
 
           {designerLoads.length === 0 ? (
@@ -388,7 +382,7 @@ export function AdminDashboard({ items, onAssign, assigning, onDesignClick }: Ad
 
           {inactiveDesigners.length > 0 && (
             <div className="mt-5 border-t border-border pt-4">
-              <p className="font-mono text-eyebrow uppercase text-muted-foreground">
+              <p className="text-eyebrow text-muted-foreground">
                 Sin trabajo esta semana
               </p>
               <p className="mt-1 text-sm text-muted-foreground">

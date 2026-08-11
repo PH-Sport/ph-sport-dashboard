@@ -37,7 +37,7 @@ function Section({
 }) {
   return (
     <section>
-      <p className="font-mono text-eyebrow uppercase text-primary">{label}</p>
+      <p className="text-eyebrow text-primary">{label}</p>
       <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
       <Surface variant="grouped" className="mt-3">
         {children}
@@ -170,7 +170,6 @@ export default function SettingsPage() {
     <DashboardPage
       title="Ajustes"
       icon={Settings}
-      subtitle="Tu cuenta, apariencia, notificaciones y la gestión del equipo"
       maxWidth="4xl"
       loading={false}
       skeleton={null}

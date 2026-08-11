@@ -6,7 +6,7 @@ import { Surface } from '@/components/ui/surface';
 function SectionSkeleton({ children }: { children: ReactNode }) {
   return (
     <section>
-      <Skeleton className="h-3 w-24" />
+      <Skeleton className="h-4 w-24" />
       <Skeleton className="mt-1.5 h-4 w-48" />
       <Surface className="mt-3">{children}</Surface>
     </section>

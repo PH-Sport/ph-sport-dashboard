@@ -192,7 +192,6 @@ function DesignsPageContent() {
     <DashboardPage
       title="Diseños"
       icon={Palette}
-      subtitle="Gestión de todas las piezas gráficas"
       loading={showSkeleton}
       skeleton={<DesignsSkeleton />}
       actions={

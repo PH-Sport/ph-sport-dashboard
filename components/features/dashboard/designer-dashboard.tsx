@@ -32,12 +32,10 @@ const TONE_TEXT = {
 function KpiPlate({
   label,
   value,
-  note,
   tone = 'default',
 }: {
   label: string;
   value: string | number;
-  note: string;
   tone?: keyof typeof TONE_TEXT;
 }) {
   return (
@@ -46,13 +44,12 @@ function KpiPlate({
     // Escritorio (md:): recupera su tarjeta propia, borde + fondo + sombra,
     // igual que antes de la migracion a movil.
     <div className="flex-1 p-sm sm:p-lg md:rounded-2xl md:border md:border-border md:bg-card md:shadow-raised">
-      <p className="font-mono text-eyebrow uppercase tracking-[0.08em] text-muted-foreground sm:tracking-[0.18em]">
+      <p className="text-eyebrow text-muted-foreground">
         {label}
       </p>
       <p className={cn('mt-2 font-mono tabular text-3xl sm:text-4xl font-semibold leading-none', TONE_TEXT[tone])}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-muted-foreground">{note}</p>
     </div>
   );
 }
@@ -108,7 +105,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
                 {Math.floor(hoursUntilNext!)} h
               </span>
               <div>
-                <p className="font-mono text-eyebrow uppercase text-destructive">Entrega más próxima</p>
+                <p className="text-eyebrow text-destructive">Entrega más próxima</p>
                 <p className="mt-0.5 text-sm font-medium">{nextDeadline.title}</p>
                 <p className="text-xs text-muted-foreground">
                   {nextDeadline.player} ·{' '}
@@ -139,16 +136,14 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
         <KpiPlate
           label="Pendientes"
           value={activeDesigns}
-          note="En tu cola esta semana"
           tone={activeDesigns > 0 ? 'primary' : 'default'}
         />
         <KpiPlate
-          label="Entregadas"
+          label="Entregados"
           value={completedThisWeek}
-          note="Esta semana"
           tone={completedThisWeek > 0 ? 'success' : 'default'}
         />
-        <KpiPlate label="Completado" value={`${completionPct}%`} note="De tu semana" tone="primary" />
+        <KpiPlate label="Completado" value={`${completionPct}%`} tone="primary" />
       </section>
 
       {/* Dos columnas: tu cola + compañeros (secundario a propósito) */}
@@ -156,7 +151,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
         <Surface as="section" variant="plain">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-eyebrow uppercase text-muted-foreground">Tu cola</p>
+              <p className="text-eyebrow text-muted-foreground">Tu cola</p>
               <h2 className="text-base font-semibold">Pendientes</h2>
             </div>
             <Link
@@ -212,7 +207,7 @@ export function DesignerDashboard({ items, userId, onDesignClick }: DesignerDash
         </Surface>
 
         <Surface as="section" variant="grouped">
-          <p className="font-mono text-eyebrow uppercase text-muted-foreground">Compañeros</p>
+          <p className="text-eyebrow text-muted-foreground">Compañeros</p>
           <h2 className="text-base font-semibold">El resto del equipo</h2>
           {teammates.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">Sin compañeros con trabajo activo.</p>

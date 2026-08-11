@@ -26,7 +26,7 @@ export function Header() {
       <div className="flex h-14 items-center justify-between gap-2 px-3 md:h-12 md:gap-4 md:px-6">
         <div className="flex min-w-0 items-center gap-2 md:gap-3">
           {/* Móvil: sin hamburguesa — la navegación vive en la MobileTabBar inferior. */}
-          <span className="truncate font-mono text-eyebrow uppercase text-muted-foreground">
+          <span className="truncate text-eyebrow text-muted-foreground">
             {sectionLabel}
           </span>
         </div>

@@ -101,7 +101,6 @@ export default function MyWeekPage() {
     <DashboardPage
       title="Mi semana"
       icon={CalendarRange}
-      subtitle="Tu cola, ordenada por entrega"
       loading={showSkeleton}
       skeleton={<MyWeekSkeleton />}
     >
@@ -136,9 +135,7 @@ export default function MyWeekPage() {
                 </span>
               </div>
               {inProgress.length === 0 ? (
-                <p className="py-md text-sm text-muted-foreground">
-                  Semana despejada — no te queda nada por entregar. 🎉
-                </p>
+                <p className="py-md text-sm text-muted-foreground">Nada pendiente.</p>
               ) : (
                 <ul className="-mx-2">
                   <AnimatePresence initial={false}>
@@ -247,12 +244,17 @@ export default function MyWeekPage() {
                           >
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           </motion.span>
-                          <span className="flex-1 font-mono text-eyebrow uppercase text-muted-foreground">
+                          <span className="flex-1 text-eyebrow text-muted-foreground">
                             {w.label}
                           </span>
-                          <span className="font-mono tabular text-xs text-muted-foreground">
-                            {w.items.length}
-                          </span>
+                          {/* Con un solo grupo, este numero es el mismo que el badge
+                              de "Entregadas" que tiene justo encima. Solo informa
+                              cuando hay varias semanas que comparar. */}
+                          {deliveredGroups.length > 1 && (
+                            <span className="font-mono tabular text-xs text-muted-foreground">
+                              {w.items.length}
+                            </span>
+                          )}
                         </button>
                         <Collapse open={open}>
                           <ul>

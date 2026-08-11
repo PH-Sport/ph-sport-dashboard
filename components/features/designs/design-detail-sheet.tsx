@@ -205,7 +205,7 @@ export function DesignDetailSheet({
             <>
               {/* Cabecera */}
               <div className="border-b border-border/60 p-lg">
-                <p className="font-mono text-eyebrow uppercase text-muted-foreground">Diseño</p>
+                <p className="text-eyebrow text-muted-foreground">Diseño</p>
                 <DialogTitle className="mt-1 truncate font-heading text-xl font-semibold tracking-tight">
                   {design.title}
                 </DialogTitle>
