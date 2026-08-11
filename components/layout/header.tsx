@@ -5,20 +5,11 @@ import { UserMenu } from './user-menu';
 import { NotificationsDropdown } from './notifications-dropdown';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { RolePill } from './role-pill';
-
-/** Rótulo de sección derivado del primer segmento de la ruta. */
-const SECTION_LABELS: Record<string, string> = {
-  inicio: 'Inicio',
-  equipo: 'Semana',
-  'mi-semana': 'Semana',
-  disenos: 'Diseños',
-  ajustes: 'Ajustes',
-};
+import { sectionLabelFor } from '@/lib/ui/section-label';
 
 export function Header() {
   const pathname = usePathname() ?? '';
-  const segment = pathname.split('/')[1] ?? '';
-  const sectionLabel = SECTION_LABELS[segment] ?? '';
+  const sectionLabel = sectionLabelFor(pathname);
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] backdrop-blur-sm">
