@@ -17,6 +17,7 @@ import { DesignDetailSheet } from '@/components/features/designs/design-detail-s
 import { useDashboard } from '@/lib/hooks/use-dashboard';
 import { useUpcomingWork } from '@/lib/hooks/use-upcoming-work';
 import { upcomingLabel } from '@/lib/utils/upcoming-work';
+import { PulseDot } from '@/components/ui/pulse-dot';
 import { fillGreeting, getDailyTemplate, pickRotatingTemplate } from '@/lib/utils/greeting';
 
 // Aplica la rotación del saludo ANTES del primer pintado en cliente (sin flash,
@@ -105,7 +106,22 @@ export default function Dashboard() {
   return (
     <DashboardPage
       title={title}
-      subtitle={upcoming ? `Semana del ${dateRangeLabel} · ${upcoming}` : `Semana del ${dateRangeLabel}`}
+      subtitle={
+        upcoming ? (
+          <>
+            Semana del {dateRangeLabel}
+            {/* La frase entera no cabe en móvil y partirla dejaba una palabra
+                suelta colgando, así que ahí va sola la señal: el mismo punto con
+                haz que la campana usa para «tienes algo sin leer». Avisa de que
+                hay trabajo detrás, no de cuánto — el detalle queda para el lector
+                de pantalla y para el escritorio, donde la frase sí cabe. */}
+            <PulseDot label={upcoming} className="ml-2 md:hidden" />
+            <span className="hidden md:inline"> · {upcoming}</span>
+          </>
+        ) : (
+          `Semana del ${dateRangeLabel}`
+        )
+      }
       // En móvil crear vive en el «+» de la tab bar inferior; este botón es de escritorio.
       actions={
         <CreateDesignButton
