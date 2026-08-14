@@ -22,10 +22,20 @@ export function Header() {
         'z-30 border-b pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)]',
         // Móvil: flota sobre el contenido en vez de reservarle 56px de alto. Con
         // el título grande a la vista, la mitad izquierda de esta barra está
-        // vacía, así que ocupar esa franja salía caro donde menos sobra. En md+
-        // sigue empujando el contenido: allí el espacio no aprieta y `fixed`
-        // ignoraría el desplazamiento lateral de la sidebar.
-        'fixed inset-x-0 top-0 md:sticky',
+        // vacía, así que ocupar esa franja salía caro donde menos sobra.
+        //
+        // Se consigue con sticky + margen negativo, NO con `fixed`. `fixed` fue
+        // el primer intento y se portó mal en iPhone: el contenido se le colaba
+        // por debajo mientras en Chrome se veía perfecto. La barra cuelga de
+        // MainArea, que es un motion.div; un ancestro animado por framer-motion
+        // puede establecer containing block (le basta will-change: transform), y
+        // entonces `fixed` deja de referirse al viewport — con WebKit y Blink
+        // resolviéndolo distinto. `sticky` no depende de eso.
+        //
+        // El -mb-14 se come los 56px de la fila de controles pero NO la
+        // safe-area, que el propio header sigue reservando: así el contenido
+        // sube hasta el borde de la barra sin meterse bajo el notch.
+        'sticky top-0 -mb-14 md:mb-0',
         // Scroll edge effect: arriba del todo va desnuda del todo — sin fondo ni
         // línea — y al desplazar recoge ambos, que es lo que mantiene legible el
         // contenido cuando le pasa por debajo.
@@ -35,13 +45,12 @@ export function Header() {
         // el fantasma de uno bajo el otro. En md+ el título queda mucho más abajo y
         // nunca llega a cruzarse, así que allí se conserva el cristal esmerilado.
         //
-        // El 0.99 NO es un descuido: es el arreglo de un bug de Safari 26. Un
-        // `position: fixed` con fondo EXACTAMENTE opaco lo trata como relleno
-        // simple y lo RECORTA en el borde de su barra flotante; por debajo de
-        // alpha 1 la capa pasa por el compositor y se pinta entera. Con 1 clavado,
-        // en iPhone el contenido se colaba por debajo de la barra. Ese 1% de
-        // transparencia es invisible y es justo lo que la mantiene entera.
-        // https://1ar.io/updates/safari-26-liquid-glass-web/
+        // El 0.99 NO es un descuido. Safari 26 trata una capa posicionada con
+        // fondo EXACTAMENTE opaco como relleno simple y la recorta en el borde de
+        // su barra flotante; por debajo de alpha 1 pasa por el compositor y se
+        // pinta entera. Ya no dependemos de ello —esto es sticky, no fixed— pero
+        // ese 1% de transparencia es invisible y sale gratis, así que se queda
+        // como red de seguridad. https://1ar.io/updates/safari-26-liquid-glass-web/
         'transition-colors duration-200 ease-out-expo md:border-border md:bg-background/90 md:backdrop-blur-sm',
         collapsed ? 'border-border bg-background/[0.99]' : 'border-transparent bg-transparent'
       )}
