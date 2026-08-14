@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { UserMenu } from './user-menu';
 import { NotificationsDropdown } from './notifications-dropdown';
-import { RolePill } from './role-pill';
+import { ViewAsPill } from './view-as-pill';
 import { usePageTitleCollapsed } from './page-title-context';
 import { sectionLabelFor } from '@/lib/ui/section-label';
 import { cn } from '@/lib/utils';
@@ -42,7 +42,9 @@ export function Header() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <RolePill />
+          {/* El rol ya no se anuncia aquí: no cambia, y vive en el menú de perfil
+              junto al nombre y el correo. Solo queda el aviso de «Ver como». */}
+          <ViewAsPill />
           {/* El tema vive ahora en el menú de perfil, no en la primera vista. */}
           <NotificationsDropdown />
           <UserMenu />
