@@ -41,3 +41,9 @@ Thumbs.db
 
 # Subagent-driven-development scratch state (progress ledger, task briefs/reports)
 .superpowers/
+# Playwright: sesión guardada (credenciales), informes y resultados.
+# Las capturas de referencia (e2e/__capturas__) SÍ se versionan: son la línea base.
+/e2e/.sesion/
+/playwright-report/
+/test-results/
+/blob-report/

@@ -13,7 +13,11 @@
     "test:watch": "vitest",
     "clean": "rimraf .next",
     "generate:favicon-pngs": "node scripts/generate-favicon-pngs.cjs",
-    "generate:pwa-icons": "node scripts/generate-pwa-icons.mjs"
+    "generate:pwa-icons": "node scripts/generate-pwa-icons.mjs",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:informe": "playwright show-report",
+    "e2e:capturas": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",
@@ -53,6 +57,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "^22.8.4",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
