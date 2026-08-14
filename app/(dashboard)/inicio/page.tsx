@@ -15,6 +15,8 @@ import { DesignerDashboard } from '@/components/features/dashboard/designer-dash
 import { AdminDashboard } from '@/components/features/dashboard/admin-dashboard';
 import { DesignDetailSheet } from '@/components/features/designs/design-detail-sheet';
 import { useDashboard } from '@/lib/hooks/use-dashboard';
+import { useUpcomingWork } from '@/lib/hooks/use-upcoming-work';
+import { upcomingLabel } from '@/lib/utils/upcoming-work';
 import { fillGreeting, getDailyTemplate, pickRotatingTemplate } from '@/lib/utils/greeting';
 
 // Aplica la rotación del saludo ANTES del primer pintado en cliente (sin flash,
@@ -41,6 +43,12 @@ export default function Dashboard() {
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
   const dateRangeLabel = `${format(weekStart, 'd MMM', { locale: es })} – ${format(weekEnd, 'd MMM', { locale: es })}`;
+
+  // Esta pantalla solo mira la semana en curso, así que lo asignado para más
+  // adelante no asomaría por ningún lado. La coletilla lo dice de pasada, sin
+  // añadir nada nuevo a la pantalla: si no hay cola, el rótulo es el de siempre.
+  const upcoming = upcomingLabel(useUpcomingWork());
+
 
   // Nombre corto (alias || nombre) ya resuelto por la BD; cae al email si no hay perfil aún.
   const firstName = profile?.display_name || (user?.email ? user.email.split('@')[0] : '');
@@ -97,7 +105,7 @@ export default function Dashboard() {
   return (
     <DashboardPage
       title={title}
-      subtitle={`Semana del ${dateRangeLabel}`}
+      subtitle={upcoming ? `Semana del ${dateRangeLabel} · ${upcoming}` : `Semana del ${dateRangeLabel}`}
       // En móvil crear vive en el «+» de la tab bar inferior; este botón es de escritorio.
       actions={
         <CreateDesignButton
