@@ -29,10 +29,14 @@ export function Header() {
         // Scroll edge effect: arriba del todo va desnuda del todo — sin fondo ni
         // línea — y al desplazar recoge ambos, que es lo que mantiene legible el
         // contenido cuando le pasa por debajo.
+        //
+        // En móvil el fondo es OPACO, no translúcido: ahora el título grande pasa
+        // justo por detrás del rótulo de sección, y con un 10% de transparencia y
+        // 4px de desenfoque se leía el fantasma de uno bajo el otro. En md+ el
+        // título queda mucho más abajo y nunca llega a cruzarse, así que allí se
+        // conserva el cristal esmerilado de siempre.
         'transition-colors duration-200 ease-out-expo md:border-border md:bg-background/90 md:backdrop-blur-sm',
-        collapsed
-          ? 'border-border bg-background/90 backdrop-blur-sm'
-          : 'border-transparent bg-transparent'
+        collapsed ? 'border-border bg-background' : 'border-transparent bg-transparent'
       )}
     >
       {/* Móvil: 56px de alto — aire para los controles de 44px (como las apps nativas). */}
