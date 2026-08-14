@@ -5,9 +5,6 @@ import { LucideIcon } from 'lucide-react';
 import { usePageTitleReporter } from '@/components/layout/page-title-context';
 import { cn } from '@/lib/utils';
 
-/** Alto de la barra en móvil (h-14). El título se da por colapsado al cruzarla. */
-const HEADER_HEIGHT = 56;
-
 interface PageHeaderProps {
   title: ReactNode;
   /** Optional Lucide icon component rendered next to the title. */
@@ -37,9 +34,13 @@ export function PageHeader({
 
     const observer = new IntersectionObserver(
       ([entry]) => report(!entry.isIntersecting),
-      // Recorta el viewport por arriba con el alto de la barra: el título cuenta
-      // como oculto justo al pasar bajo ella, no al salir de la pantalla.
-      { rootMargin: `-${HEADER_HEIGHT}px 0px 0px 0px`, threshold: 0 }
+      // El título cuenta como recogido cuando sale de la pantalla, sin recortar
+      // el viewport por arriba. Antes se le descontaba el alto de la barra,
+      // porque la barra empujaba el contenido y el título nacía por debajo de
+      // ella. Desde que la barra flota, el título arranca DENTRO de esa franja:
+      // con aquel descuento se daba por pasado nada más cargar, la barra se
+      // ponía opaca al instante y el título grande no llegaba a verse nunca.
+      { rootMargin: '0px', threshold: 0 }
     );
     observer.observe(el);
 
