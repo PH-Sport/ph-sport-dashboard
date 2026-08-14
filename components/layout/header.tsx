@@ -19,10 +19,20 @@ export function Header() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 border-b bg-background/90 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] backdrop-blur-sm',
-        // Scroll edge effect: sin línea arriba del todo, línea al desplazar.
-        'transition-colors duration-200 ease-out-expo md:border-border',
-        collapsed ? 'border-border' : 'border-transparent'
+        'z-30 border-b pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)]',
+        // Móvil: flota sobre el contenido en vez de reservarle 56px de alto. Con
+        // el título grande a la vista, la mitad izquierda de esta barra está
+        // vacía, así que ocupar esa franja salía caro donde menos sobra. En md+
+        // sigue empujando el contenido: allí el espacio no aprieta y `fixed`
+        // ignoraría el desplazamiento lateral de la sidebar.
+        'fixed inset-x-0 top-0 md:sticky',
+        // Scroll edge effect: arriba del todo va desnuda del todo — sin fondo ni
+        // línea — y al desplazar recoge ambos, que es lo que mantiene legible el
+        // contenido cuando le pasa por debajo.
+        'transition-colors duration-200 ease-out-expo md:border-border md:bg-background/90 md:backdrop-blur-sm',
+        collapsed
+          ? 'border-border bg-background/90 backdrop-blur-sm'
+          : 'border-transparent bg-transparent'
       )}
     >
       {/* Móvil: 56px de alto — aire para los controles de 44px (como las apps nativas). */}

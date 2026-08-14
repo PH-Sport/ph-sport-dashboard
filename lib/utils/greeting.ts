@@ -58,17 +58,43 @@ function getSlot(hour: number): Slot {
   return 'night';
 }
 
-function getPool(slot: Slot): string[] {
-  switch (slot) {
-    case 'morning':
-      return MORNING_GREETINGS;
-    case 'afternoon':
-      return AFTERNOON_GREETINGS;
-    case 'evening':
-      return EVENING_GREETINGS;
-    case 'night':
-      return NIGHT_GREETINGS;
-  }
+/**
+ * Tope de caracteres del saludo en móvil.
+ *
+ * El título comparte franja con la campana y el avatar, que se llevan ~104px a
+ * la derecha. En un móvil de 390px quedan unos 240px, y a 24px en negrita eso da
+ * para 18 caracteres largos. Pasado ese punto el saludo se corta con puntos
+ * suspensivos, que es peor que no tenerlo.
+ */
+export const GREETING_MAX_CHARS_MOBILE = 18;
+
+/** Ancho disponible para el saludo, cuando conviene medirlo. */
+export interface GreetingFit {
+  /** Nombre que se va a insertar: se mide el saludo ya montado, no la plantilla. */
+  name: string;
+  maxChars: number;
+}
+
+function getPool(slot: Slot, fit?: GreetingFit): string[] {
+  const pool = (() => {
+    switch (slot) {
+      case 'morning':
+        return MORNING_GREETINGS;
+      case 'afternoon':
+        return AFTERNOON_GREETINGS;
+      case 'evening':
+        return EVENING_GREETINGS;
+      case 'night':
+        return NIGHT_GREETINGS;
+    }
+  })();
+
+  if (!fit) return pool;
+
+  const quepan = pool.filter((t) => fillTemplate(t, fit.name).length <= fit.maxChars);
+  // Un nombre muy largo podría no dejar ninguno en pie. Antes que quedarnos sin
+  // saludo, preferimos uno que se corte: la franja horaria nunca se queda muda.
+  return quepan.length > 0 ? quepan : pool;
 }
 
 function fillTemplate(template: string, name: string): string {
@@ -105,8 +131,9 @@ export function pickRotatingTemplate(
   avoid: string | null,
   now: Date = new Date(),
   rng: () => number = Math.random,
+  fit?: GreetingFit,
 ): string {
-  const pool = getPool(getSlot(now.getHours()));
+  const pool = getPool(getSlot(now.getHours()), fit);
   const candidates = avoid && pool.length > 1 ? pool.filter((t) => t !== avoid) : pool;
   const choices = candidates.length > 0 ? candidates : pool;
   return choices[Math.floor(rng() * choices.length)];

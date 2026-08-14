@@ -57,7 +57,11 @@ export function PageHeader({
         className
       )}
     >
-      <div className="min-w-0">
+      {/* En móvil la barra flota sobre esta fila, así que el título le cede sitio
+          a la campana y al avatar: 44+44 de controles, más su gap y el padding de
+          la barra, son 108px desde el borde; con el p-4 del contenedor, 96 aquí
+          bastan. En md+ la barra vuelve a empujar el contenido y no hace falta. */}
+      <div className="min-w-0 pr-24 md:pr-0">
         <h1
           ref={titleRef}
           className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3"

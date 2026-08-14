@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DashboardPage } from '@/components/ui/dashboard-page';
@@ -18,7 +18,13 @@ import { useDashboard } from '@/lib/hooks/use-dashboard';
 import { useUpcomingWork } from '@/lib/hooks/use-upcoming-work';
 import { upcomingLabel } from '@/lib/utils/upcoming-work';
 import { PulseDot } from '@/components/ui/pulse-dot';
-import { fillGreeting, getDailyTemplate, pickRotatingTemplate } from '@/lib/utils/greeting';
+import {
+  fillGreeting,
+  getDailyTemplate,
+  pickRotatingTemplate,
+  GREETING_MAX_CHARS_MOBILE,
+} from '@/lib/utils/greeting';
+import { useIsMobile } from '@/lib/hooks/use-is-mobile';
 
 // Aplica la rotación del saludo ANTES del primer pintado en cliente (sin flash,
 // también en la vuelta en caliente que se salta el skeleton). En server cae a
@@ -53,9 +59,19 @@ export default function Dashboard() {
 
   // Nombre corto (alias || nombre) ya resuelto por la BD; cae al email si no hay perfil aún.
   const firstName = profile?.display_name || (user?.email ? user.email.split('@')[0] : '');
+  const isMobile = useIsMobile();
 
   // Seed determinista (server === cliente) para no romper la hidratación...
   const [template, setTemplate] = useState<string>(getDailyTemplate);
+
+  // En móvil el título comparte franja con la campana y el avatar, así que la
+  // rotación descarta los saludos que no caben. Va por ref, no por dependencias:
+  // el efecto tiene que correr UNA vez por montaje. Si dependiera de estos
+  // valores, el saludo volvería a cambiar cuando el perfil termina de resolver o
+  // cuando se gira el móvil, que es justo lo que el efecto evita.
+  const fitRef = useRef({ name: firstName, isMobile });
+  fitRef.current = { name: firstName, isMobile };
+
   // ...y al montar en cliente rotamos a otra variante de la franja, evitando la
   // última mostrada. Se repite en cada montaje → cubre refresco y navegar-y-volver.
   useIsomorphicLayoutEffect(() => {
@@ -65,7 +81,15 @@ export default function Dashboard() {
     } catch {
       /* sessionStorage no disponible (incógnito estricto, etc.): rotamos igual */
     }
-    const next = pickRotatingTemplate(last);
+    const { name, isMobile: enMovil } = fitRef.current;
+    const next = pickRotatingTemplate(
+      last,
+      new Date(),
+      Math.random,
+      // Sin nombre resuelto todavía medimos contra uno de largo corriente: es
+      // preferible pasarse de prudente a elegir un saludo que luego no quepa.
+      enMovil ? { name: name || 'Nombre', maxChars: GREETING_MAX_CHARS_MOBILE } : undefined
+    );
     setTemplate(next);
     try {
       sessionStorage.setItem(GREETING_STORAGE_KEY, next);

@@ -34,6 +34,10 @@ export function PageContainer({
         // Móvil (<md): p-4 + holgura inferior para la MobileTabBar flotante
         // (h-14 + inset + aire) más la safe-area del home indicator
         'flex flex-col gap-4 p-4 pb-[calc(env(safe-area-inset-bottom)+5.25rem)] sm:gap-6 sm:p-6 sm:pb-[calc(env(safe-area-inset-bottom)+5.25rem)] md:p-8 md:pb-8 mx-auto w-full',
+        // Bajo md la barra flota y ya no reserva altura, así que la muesca del
+        // dispositivo pasa a ser cosa nuestra: sin esto el título se metería bajo
+        // el notch. En md+ la barra vuelve a empujar y el padding es el de antes.
+        'pt-[calc(env(safe-area-inset-top)+1rem)] sm:pt-[calc(env(safe-area-inset-top)+1.5rem)] md:pt-8',
         MAX_WIDTH_CLASS[maxWidth],
         className
       )}
