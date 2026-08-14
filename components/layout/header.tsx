@@ -30,13 +30,20 @@ export function Header() {
         // línea — y al desplazar recoge ambos, que es lo que mantiene legible el
         // contenido cuando le pasa por debajo.
         //
-        // En móvil el fondo es OPACO, no translúcido: ahora el título grande pasa
-        // justo por detrás del rótulo de sección, y con un 10% de transparencia y
-        // 4px de desenfoque se leía el fantasma de uno bajo el otro. En md+ el
-        // título queda mucho más abajo y nunca llega a cruzarse, así que allí se
-        // conserva el cristal esmerilado de siempre.
+        // En móvil el fondo tapa de verdad: el título grande pasa justo por detrás
+        // del rótulo de sección, y con el 90% + 4px de desenfoque de antes se leía
+        // el fantasma de uno bajo el otro. En md+ el título queda mucho más abajo y
+        // nunca llega a cruzarse, así que allí se conserva el cristal esmerilado.
+        //
+        // El 0.99 NO es un descuido: es el arreglo de un bug de Safari 26. Un
+        // `position: fixed` con fondo EXACTAMENTE opaco lo trata como relleno
+        // simple y lo RECORTA en el borde de su barra flotante; por debajo de
+        // alpha 1 la capa pasa por el compositor y se pinta entera. Con 1 clavado,
+        // en iPhone el contenido se colaba por debajo de la barra. Ese 1% de
+        // transparencia es invisible y es justo lo que la mantiene entera.
+        // https://1ar.io/updates/safari-26-liquid-glass-web/
         'transition-colors duration-200 ease-out-expo md:border-border md:bg-background/90 md:backdrop-blur-sm',
-        collapsed ? 'border-border bg-background' : 'border-transparent bg-transparent'
+        collapsed ? 'border-border bg-background/[0.99]' : 'border-transparent bg-transparent'
       )}
     >
       {/* Móvil: 56px de alto — aire para los controles de 44px (como las apps nativas). */}
