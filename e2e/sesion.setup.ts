@@ -1,6 +1,7 @@
 import { test as setup, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { RUTA_SESION } from './sesion-ruta';
 
 /**
  * Inicia sesión una vez y guarda la sesión en disco, para que los tests que
@@ -15,8 +16,6 @@ import path from 'node:path';
  *
  * Usa una cuenta DE PRUEBA, no la tuya: los tests navegan y podrían escribir.
  */
-
-export const RUTA_SESION = path.join(__dirname, '.sesion', 'usuario.json');
 
 setup('iniciar sesión', async ({ page }) => {
   const email = process.env.PLAYWRIGHT_USER;
