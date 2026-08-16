@@ -1,90 +1,97 @@
 # PHSPORT Dashboard
 
-Dashboard para el equipo de diseño de PHSPORT.
+Dashboard interno del equipo de diseño de PHSPORT: se reparte el trabajo entre
+diseñadores, con fecha de entrega, y se marca como entregado. Aplicación web
+instalable (PWA), en castellano.
 
-## Características
+> **¿Vas a trabajar en el código?** Empieza por `CLAUDE.md` (cómo se trabaja) y
+> `docs/estado-y-traspaso.md` (dónde está cada cosa y qué queda pendiente).
 
-### Gestión de Diseños
+## Qué hace
 
-- **Vista principal**: Tabla con filtros avanzados
-- **Estados de flujo**: Pendiente → Entregado
-- **Asignación inteligente**: Algoritmo de reparto basado en carga de trabajo
+**Diseños.** Lista con filtros y vista de calendario. Estado binario: pendiente →
+entregado. Alta en lote desde un taller de tarjetas, con un agente conversacional
+que interpreta el encargo en lenguaje natural y lo convierte en tarjetas.
 
-### Comunicaciones
+**Reparto.** Asignación automática ponderada por la carga de cada diseñador en la
+semana a la que pertenece cada entrega, y reasignación manual desde el detalle.
 
-- **Chat en tiempo real**: Mensajería instantánea por diseño
-- **Edición de mensajes**: Edita tus mensajes (límite 15 minutos)
-- **Sincronización**: Actualizaciones en tiempo real entre usuarios
-- **Indicadores**: Muestra "(editado)" en mensajes modificados
+**Vistas por rol.** Mánager: dashboard de equipo, carga y vencimientos. Diseñador:
+«Mi semana», con lo pendiente y lo entregado agrupado por semanas.
 
-### Usuarios y Configuración
+**Avisos.** Notificaciones dentro de la app, por correo y push, cuando te asignan
+trabajo o se acerca una entrega.
 
-- **Roles**: Manager y Designer con permisos diferenciados
-- **Perfil unificado**: Gestión de nombre, avatar y contraseña
-- **Autenticación**: Sistema seguro vía Supabase Auth
+**Equipo y ajustes.** Alta por invitación, roles, perfil, preferencias de aviso y
+tema claro/oscuro que sigue al dispositivo.
 
-### Actividad
+## Stack
 
-- **Vista de actividad**: Seguimiento de conversaciones activas
-- **Mensajes no leídos**: Indicadores visuales de nuevos mensajes
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript
+- **Estilos:** Tailwind CSS, shadcn/ui, Framer Motion
+- **Backend:** Supabase — PostgreSQL con RLS, Auth, Realtime, Storage, Edge Functions
+- **IA:** Claude (Anthropic) para el agente de alta de diseños
+- **Tests:** Vitest (unidad) y Playwright (navegador)
 
-## Stack Tecnológico
+## Puesta en marcha
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Estilos**: Tailwind CSS, Shadcn UI
-- **Animaciones**: Framer Motion
-- **Backend**: Supabase (PostgreSQL, Auth, Realtime, Storage)
+Requiere **Node 24** y acceso al proyecto de Supabase.
 
-## Requisitos Previos
+```bash
+npm install
+npx playwright install     # solo si vas a ejecutar tests de navegador
+cp .env.example .env.local # y rellenar
+npm run dev
+```
 
-- Node.js 18+
-- Cuenta de Supabase
+`.env.local` no está versionado. Necesita `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` y `NEXT_PUBLIC_APP_URL`.
 
-## Configuración
+> **No hay entorno de staging:** la configuración local apunta a la base de datos
+> de producción. Lo que se escriba lo ven los diseñadores.
 
-1. Clonar el repositorio
-2. Instalar dependencias:
-   ```bash
-   npm install
-   ```
-3. Configurar variables de entorno en `.env.local`:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-   ```
-4. Iniciar servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
+## Scripts
 
-## Scripts disponibles
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo en `localhost:3000` |
+| `npm run build` / `npm start` | Build de producción y arrancarlo |
+| `npm test` | Tests unitarios (Vitest) |
+| `npm run e2e` | Tests de navegador (Playwright) — ver `docs/testing-navegadores.md` |
+| `npm run type-check` | Valida tipos sin compilar |
+| `npm run lint` | ESLint |
 
-| Comando              | Descripción                                |
-| -------------------- | ------------------------------------------ |
-| `npm run dev`        | Servidor de desarrollo en `localhost:3000` |
-| `npm run build`      | Build de producción                        |
-| `npm run start`      | Arranca el build generado                  |
-| `npm run lint`       | Ejecuta ESLint                             |
-| `npm run type-check` | Valida tipos TypeScript                    |
+Medir rendimiento o pintado **siempre** sobre `build` + `start`, nunca sobre
+`dev`.
 
-## Estructura del Proyecto
+## Estructura
 
 ```
 app/
-  api/                    # API Routes (endpoints)
-  dashboard/              # Vista Manager
-  my-week/                # Vista Designer
-  communications/         # Sistema de chat
-  designs/                # Gestión de diseños
+  (auth)/           login, invitación, restablecer contraseña
+  (dashboard)/      inicio · mi-semana · disenos · equipo · ajustes
+  api/designs/      rutas de servidor (validación zod en lib/api/schemas.ts)
 components/
-  ui/                     # Componentes base (Shadcn)
-  features/               # Componentes de negocio
-    comments/             # Chat y comentarios
-    account/              # Configuración de usuario
+  ui/               sistema de diseño propio (Surface, Row, PulseDot…) + shadcn
+  layout/           shell: cabecera, sidebar, barra de pestañas móvil
+  features/         componentes de negocio por dominio
 lib/
-  supabase/               # Cliente y utilidades
-  services/               # Lógica de negocio
-  hooks/                  # Hooks de React
+  hooks/            datos vía SWR
+  utils/            lógica pura — aquí viven los tests
+  services/designs/ reparto, agente de alta
+  supabase/         clientes de navegador y servidor
 supabase/
-  migrations/             # Migraciones SQL
+  migrations/       SQL numerado
+  functions/        Edge Functions
+e2e/                Playwright
+docs/               estado del proyecto, planes y auditorías
 ```
+
+## Documentación
+
+| Documento | Para qué |
+|---|---|
+| `CLAUDE.md` | Convenciones y trampas conocidas |
+| `docs/estado-y-traspaso.md` | Dónde está cada cosa, decisiones y pendientes |
+| `docs/testing-navegadores.md` | Matriz de Playwright y lo que **no** cubre |
+| `docs/inventario-estado-actual.md` | Mapa capa por capa (junio 2026) |
