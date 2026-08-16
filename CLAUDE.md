@@ -5,11 +5,37 @@ diseñadores, con fecha de entrega, y se marcan como entregados. Next.js (App
 Router) + Supabase. En castellano de principio a fin: interfaz, comentarios de
 código y mensajes de commit.
 
-## Antes de tocar nada
+## Al empezar una sesión
 
-**Lee `docs/estado-y-traspaso.md`.** Es la foto viva del proyecto: en qué rama
-está cada cosa, qué decisiones se tomaron y por qué, y qué queda pendiente. Este
-archivo describe cómo se trabaja; aquel, dónde estamos.
+1. **Sitúate.** En qué rama estás, si el árbol está limpio y si el remoto se ha
+   movido desde la última vez:
+
+   ```bash
+   git branch --show-current && git status --short
+   git fetch origin && git log --oneline HEAD..@{u}
+   ```
+
+2. **Lee `docs/estado-y-traspaso.md`.** Es la foto viva: en qué rama está cada
+   cosa, qué decisiones se tomaron y por qué, y qué queda pendiente. Este archivo
+   describe cómo se trabaja; aquel, dónde estamos. Mira su fecha: si han pasado
+   semanas, trátalo como una pista y verifica contra el repo antes de darlo por
+   bueno.
+
+3. **No sincronices por tu cuenta.** Nada de `pull`, cambios de rama ni `stash`
+   sin pedirlo: puede haber otra sesión trabajando en este mismo directorio.
+   Si el remoto va por delante, dilo y espera.
+
+## Al cerrar una tanda
+
+Si cambió el estado del proyecto —algo se mergeó, un pendiente se resolvió, se
+tomó una decisión con la que habrá que convivir—, **actualiza
+`docs/estado-y-traspaso.md` en el mismo commit o en uno seguido**. Es lo único
+que viaja entre equipos: lo que no quede ahí escrito, se pierde. Un documento de
+estado que miente es peor que no tenerlo, porque la siguiente sesión arranca
+convencida.
+
+Anota también los rodeos, no solo los aciertos: por qué se descartó una vía o qué
+diagnóstico resultó falso. Eso es justo lo que evita repetir el camino largo.
 
 ## Arrancar en un equipo nuevo
 
