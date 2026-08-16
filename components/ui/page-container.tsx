@@ -32,8 +32,13 @@ export function PageContainer({
     <div
       className={cn(
         // Móvil (<md): p-4 + holgura inferior para la MobileTabBar flotante
-        // (h-14 + inset + aire) más la safe-area del home indicator
-        'flex flex-col gap-4 p-4 pb-[calc(env(safe-area-inset-bottom)+5.25rem)] sm:gap-6 sm:p-6 sm:pb-[calc(env(safe-area-inset-bottom)+5.25rem)] md:p-8 md:pb-8 mx-auto w-full',
+        // (h-14 + inset + aire) más la safe-area del home indicator.
+        //
+        // 6.5rem y no 5.25: es la altura del fundido inferior de la tab bar. Si
+        // el contenido terminase dentro de esa franja, la última fila se leería
+        // atenuada al llegar al final del scroll. Los dos valores van juntos —
+        // si cambia uno, cambia el otro (ver mobile-tab-bar.tsx).
+        'flex flex-col gap-4 p-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] sm:gap-6 sm:p-6 sm:pb-[calc(env(safe-area-inset-bottom)+6.5rem)] md:p-8 md:pb-8 mx-auto w-full',
         MAX_WIDTH_CLASS[maxWidth],
         className
       )}

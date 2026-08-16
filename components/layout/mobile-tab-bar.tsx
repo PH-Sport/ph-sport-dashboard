@@ -82,6 +82,22 @@ export function MobileTabBar() {
 
   return (
     <>
+      {/* Fundido inferior — el otro extremo del scroll edge effect de la cabecera.
+          La barra flota, así que el contenido le pasa por detrás y asomaba nítido
+          y cortado a media altura en el hueco que queda hasta el borde. Esta capa
+          lo desvanece contra el fondo antes de que llegue ahí.
+
+          Va de opaco a transparente con la parada intermedia al 50%: la mitad de
+          abajo (la que cubre la barra y el home indicator) tapa del todo, y solo
+          el tramo de arriba difumina. Un degradado de dos paradas a esta altura
+          se nota como una banda gris sobre el contenido.
+
+          `background` y no `card`: es el fondo de la página lo que hay detrás.
+          Como es un token, sirve igual en claro y en oscuro. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-[calc(env(safe-area-inset-bottom)+6.5rem)] bg-gradient-to-t from-background via-background to-transparent md:hidden"
+      />
       <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 md:hidden">
         <nav
           aria-label="Navegación principal"
