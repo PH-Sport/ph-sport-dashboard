@@ -27,12 +27,26 @@ código y mensajes de commit.
 
 ## Al cerrar una tanda
 
-Si cambió el estado del proyecto —algo se mergeó, un pendiente se resolvió, se
-tomó una decisión con la que habrá que convivir—, **actualiza
-`docs/estado-y-traspaso.md` en el mismo commit o en uno seguido**. Es lo único
-que viaja entre equipos: lo que no quede ahí escrito, se pierde. Un documento de
-estado que miente es peor que no tenerlo, porque la siguiente sesión arranca
-convencida.
+**Actualiza la documentación del área que tocaste**, en el mismo commit o en uno
+seguido. La documentación es lo único que viaja entre equipos: lo que no quede
+escrito, se pierde. Y un documento que miente es peor que no tenerlo, porque la
+siguiente sesión arranca convencida.
+
+| Si tocaste… | Actualiza |
+|---|---|
+| Cualquier cosa que cambie el estado: un merge, un pendiente resuelto, una decisión con la que habrá que convivir | `docs/estado-y-traspaso.md` |
+| Convenciones, comandos, una trampa nueva que descubriste | `CLAUDE.md` |
+| La matriz de navegadores o su cobertura | `docs/testing-navegadores.md` |
+| Qué hace el producto, o cómo se pone en marcha | `README.md` |
+| Un plan en curso (rediseño, refactor, móvil) | El plan correspondiente en `docs/` |
+
+`docs/estado-y-traspaso.md` se revisa **siempre**; los demás, solo si los tocaste.
+Actualizar únicamente el de estado deja al específico mintiendo.
+
+**No todos los documentos son vivos.** El inventario y las auditorías llevan
+fecha en la cabecera y son fotos de un momento: envejecen a propósito y sirven
+para comparar contra el presente. No los reescribas; si su contenido ya no se
+sostiene, dilo en el documento vivo que corresponda.
 
 Anota también los rodeos, no solo los aciertos: por qué se descartó una vía o qué
 diagnóstico resultó falso. Eso es justo lo que evita repetir el camino largo.
