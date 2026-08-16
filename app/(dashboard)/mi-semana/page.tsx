@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronDown, Undo2, CalendarRange, Loader2 } from 'lucide-react';
+import { Check, ChevronDown, Undo2, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapse } from '@/components/ui/collapse';
 import { Button } from '@/components/ui/button';
@@ -100,7 +100,6 @@ export default function MyWeekPage() {
   return (
     <DashboardPage
       title="Mi semana"
-      icon={CalendarRange}
       loading={showSkeleton}
       skeleton={<MyWeekSkeleton />}
     >

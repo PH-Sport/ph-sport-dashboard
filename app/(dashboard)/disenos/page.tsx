@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Palette, List, CalendarDays } from 'lucide-react';
+import { List, CalendarDays } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CreateDesignDialog } from '@/components/features/designs/dialogs/create-design-dialog';
@@ -191,7 +191,6 @@ function DesignsPageContent() {
   return (
     <DashboardPage
       title="Diseños"
-      icon={Palette}
       loading={showSkeleton}
       skeleton={<DesignsSkeleton />}
       actions={

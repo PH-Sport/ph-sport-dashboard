@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { WeekNav } from '@/components/ui/week-nav';
 import { SPRINGS, STAGGER } from '@/components/ui/animations';
-import { CalendarRange, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { TeamSkeleton } from '@/components/skeletons/team-skeleton';
 import { useTeamData, type DesignerWithDesigns } from '@/lib/hooks/use-team-data';
@@ -186,7 +186,6 @@ export default function TeamPage() {
   return (
     <DashboardPage
       title="Semana"
-      icon={CalendarRange}
       loading={showSkeleton}
       skeleton={<TeamSkeleton />}
       actions={

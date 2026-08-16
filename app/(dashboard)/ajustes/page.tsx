@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Settings, Save, Loader2 } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import { DashboardPage } from '@/components/ui/dashboard-page';
 import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
@@ -169,7 +169,6 @@ export default function SettingsPage() {
   return (
     <DashboardPage
       title="Ajustes"
-      icon={Settings}
       maxWidth="4xl"
       loading={false}
       skeleton={null}

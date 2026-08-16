@@ -10,11 +10,10 @@ import { Surface } from '@/components/ui/surface';
 export function MyWeekSkeleton() {
   return (
     <PageContainer>
-      {/* Header: título + subtítulo (sin acciones) */}
+      {/* Header: título (sin acciones). Sin subtítulo: la página ya no lo tiene. */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <Skeleton className="mb-2 h-9 w-44" />
-          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-9 w-44" />
         </div>
       </div>
 

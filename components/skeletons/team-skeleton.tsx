@@ -13,11 +13,10 @@ const ROW_WIDTHS = ['w-40', 'w-28', 'w-44'];
 export function TeamSkeleton() {
   return (
     <PageContainer>
-      {/* Header: título + subtítulo + WeekNav */}
+      {/* Header: título + WeekNav. Sin subtítulo: la página ya no lo tiene. */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <Skeleton className="mb-2 h-9 w-40" />
-          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-9 w-40" />
         </div>
         {/* Placa WeekNav (chevron · etiqueta · chevron) */}
         <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-raised">

@@ -10,11 +10,10 @@ import { Surface } from '@/components/ui/surface';
 export function DesignsSkeleton() {
   return (
     <PageContainer>
-      {/* Header: título + subtítulo · tabs + crear */}
+      {/* Header: título · tabs + crear. Sin subtítulo: la página ya no lo tiene. */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <Skeleton className="mb-2 h-9 w-32" />
-          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-9 w-32" />
         </div>
         <div className="flex items-center gap-3">
           <Skeleton className="h-9 w-44 rounded-lg" />
