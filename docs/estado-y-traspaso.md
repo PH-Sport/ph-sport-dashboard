@@ -1,7 +1,7 @@
 # Estado del proyecto y traspaso
 
-> **Actualizado:** 2026-08-16, al cerrar la tanda de agosto y antes de continuar
-> desde otro equipo.
+> **Actualizado:** 2026-08-16, al cerrar los dos remates de la cabecera móvil y
+> antes de continuar desde otro equipo.
 > **Para qué sirve:** que quien retome —persona o Claude Code, en cualquier
 > máquina— sepa dónde está cada cosa, por qué se decidió así y qué falta. Las
 > convenciones de trabajo están en `CLAUDE.md`.
@@ -13,7 +13,7 @@
 | Rama | Contenido |
 |---|---|
 | `main` | Lo que corre en producción. Último: `4e6f929`. |
-| `preview` | **82 commits por delante de `main`.** Todo lo de abajo vive aquí. Último: `db516ec`. |
+| `preview` | **87 commits por delante de `main`.** Todo lo de abajo vive aquí. Último: `b8e26eb`. |
 
 Ese desfase no es de esta tanda: arrastra el chat de creación de diseños, la fase
 1 del rediseño iOS 26 y el trabajo de superficies. **Subir a producción no es un
@@ -111,7 +111,33 @@ Dos cambios que salieron de aquellas teorías se quedan, comentados, porque son
 inofensivos: el fondo con alpha `0.99` (red de seguridad ante Safari 26) y la
 vuelta a `sticky`, que es preferible con o sin bug.
 
-### 6. Matriz de navegadores (`ad6bfb2`, `db516ec`)
+### 6. Los dos remates de la cabecera móvil (`0f4ebe5`, `b8e26eb`)
+
+Cerraban la lista de pendientes del rediseño iOS 26. Los dos son de aspecto, sin
+lógica detrás.
+
+- **El contenido se desvanece bajo la tab bar.** La barra flota, así que el
+  contenido le pasa por detrás y asomaba nítido y cortado a media altura en el
+  hueco que queda hasta el borde. Una capa fija de degradado lo apaga contra el
+  fondo antes de llegar ahí: es el otro extremo del *scroll edge effect* que la
+  cabecera ya tenía arriba. Tres paradas y no dos —la intermedia al 50%— porque
+  con dos se ve una banda gris sobre el contenido.
+- **Los títulos de página se quedaron sin icono.** Ajustes, Mail y Salud no
+  ilustran sus títulos grandes; con un icono al lado, el título parecía más el
+  encabezado de una tarjeta que el de una pantalla. Fuera las cuatro props
+  `icon=`. La prop sigue en la firma de `PageHeader` sin usuarios: quitarla no
+  aporta y toca dos componentes más.
+- **De propina:** tres skeletons seguían reservando la línea del subtítulo que se
+  eliminó de esas páginas en agosto, y saltaban al cargar. El de `/inicio` la
+  conserva porque allí el subtítulo **sí** existe: es el rango de la semana, que
+  es un dato y no una descripción.
+
+Con esto **la «tanda D» del rediseño iOS 26 deja de existir como lista propia**.
+Era una enumeración de remates sueltos, y lo que quedaba de ella lo absorbió el
+criterio de superficies («la caja marca lo que se toca, el plano lo que se lee»),
+que es mejor guía. No busques un plan de tanda D: no lo hay ni hace falta.
+
+### 7. Matriz de navegadores (`ad6bfb2`, `db516ec`)
 
 Cuatro proyectos de Playwright y 40 tests. **Lee `docs/testing-navegadores.md`
 antes de fiarte de un verde**: Playwright emula dispositivos, no sistemas
@@ -124,7 +150,7 @@ operativos, y trae una sola build de cada motor. No hay «iOS 18 frente a 26», 
 
 ### 1. Subir a producción
 
-Los 82 commits. Decidir si entero o por partes. Recordar que la migración 041 ya
+Los 87 commits. Decidir si entero o por partes. Recordar que la migración 041 ya
 está viva en la base de datos.
 
 ### 2. Una cuenta de pruebas
@@ -145,6 +171,11 @@ El arreglo de la cabecera se comprobó en iPhone el 2026-08-16 y a primera vista
 va bien. El resto de la tanda —el aviso de semanas futuras, la barra sin la
 píldora— no se ha usado en el día a día todavía.
 
+**Sin ver en dispositivo:** el fundido de la tab bar y los títulos sin icono
+(§6). Del fundido, lo que hay que mirar es la cantidad: si sabe a poco o a
+demasiado, es un número —`6.5rem` en los dos archivos del acoplamiento— y se
+ajusta en un minuto.
+
 ### 4. Ideas anotadas, sin decidir
 
 - **Llevar el aviso de semanas futuras a Diseños.** Hoy solo está en Inicio.
@@ -153,7 +184,9 @@ píldora— no se ha usado en el día a día todavía.
 - **El ritmo del punto con haz.** Late mientras haya trabajo detrás. Si cansa, se
   ralentiza con una clase o se le dan unos pocos latidos.
 - **Desvanecer el título grande al acercarse a la barra**, como hace iOS, en vez
-  de dejar que se meta debajo.
+  de dejar que se meta debajo. **Ojo, no confundir con el fundido de la tab bar
+  (§6), que ya está hecho:** aquel apaga el contenido contra el borde *inferior*;
+  esto es el borde *superior*, y sigue sin hacerse.
 - **Instalar Xcode** para probar iOS real (18 y 26) sin depender del móvil de
   Mario. No está instalado; se maneja con `xcrun simctl`, no con Playwright.
 
@@ -161,6 +194,12 @@ píldora— no se ha usado en el día a día todavía.
 
 ## Cosas que conviene saber y no se deducen del código
 
+- **El fundido de la tab bar y el `pb` del contenido van acoplados.** Los dos
+  valen `6.5rem`: la altura del degradado en `mobile-tab-bar.tsx` y el
+  `pb-[calc(env(safe-area-inset-bottom)+6.5rem)]` de `page-container.tsx`. Si el
+  contenido termina **dentro** de la franja del degradado, la última fila se lee
+  atenuada al llegar al final del scroll. Cambiar uno obliga a cambiar el otro;
+  está comentado en ambos archivos.
 - **Safari 26 ya no lee `theme-color`.** Tinta su barra muestreando el fondo de
   los elementos fijos o pegajosos cercanos al borde, incluso si tienen
   `opacity: 0`. El `themeColor` de `app/layout.tsx` no hace nada en iOS 26. Si
