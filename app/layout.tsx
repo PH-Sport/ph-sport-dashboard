@@ -15,6 +15,7 @@ import { AccentSync } from '@/components/providers/accent-sync';
 import { AuthProvider } from '@/lib/auth/auth-context';
 import { getServerAuth } from '@/lib/auth/get-server-auth';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/sonner';
 import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 import {
@@ -107,6 +108,7 @@ export default async function RootLayout({
               </AuthProvider>
             </MotionProvider>
           </TooltipProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
