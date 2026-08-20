@@ -1,7 +1,7 @@
 # Estado del proyecto y traspaso
 
-> **Actualizado:** 2026-08-16, al cerrar los dos remates de la cabecera móvil y
-> antes de continuar desde otro equipo.
+> **Actualizado:** 2026-08-18, al retomar el trabajo en el equipo de Mario, ya
+> sincronizado con el remoto.
 > **Para qué sirve:** que quien retome —persona o Claude Code, en cualquier
 > máquina— sepa dónde está cada cosa, por qué se decidió así y qué falta. Las
 > convenciones de trabajo están en `CLAUDE.md`.
@@ -13,11 +13,15 @@
 | Rama | Contenido |
 |---|---|
 | `main` | Lo que corre en producción. Último: `4e6f929`. |
-| `preview` | **87 commits por delante de `main`.** Todo lo de abajo vive aquí. Último: `b8e26eb`. |
+| `preview` | **88 commits por delante de `main`.** Todo lo de abajo vive aquí. Último: `2c02d99`. |
 
 Ese desfase no es de esta tanda: arrastra el chat de creación de diseños, la fase
 1 del rediseño iOS 26 y el trabajo de superficies. **Subir a producción no es un
 merge de trámite**; hay que decidir si va entero o por partes.
+
+**El flujo de ramas ya está por escrito** en `CLAUDE.md`, apartado «Ramas»: se
+implementa en `preview` y `main` solo recibe lo probado. Hasta ahora era un
+acuerdo tácito y no constaba en ningún sitio.
 
 ### Cuidado: la base de datos va por delante del código
 

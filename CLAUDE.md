@@ -25,6 +25,20 @@ código y mensajes de commit.
    sin pedirlo: puede haber otra sesión trabajando en este mismo directorio.
    Si el remoto va por delante, dilo y espera.
 
+## Ramas
+
+**Se implementa en `preview`.** Ahí va todo lo nuevo: es la rama de trabajo y la
+que despliega a staging. `main` es producción y **solo recibe lo que ya se ha
+probado**. No se desarrolla sobre `main` ni se commitea ahí directamente.
+
+El paso de una a otra **no es de trámite**: se decide qué sube y cuándo, y lo
+decide Mario. `preview` puede acumular varias iniciativas a la vez, así que un
+merge a ciegas subiría a producción cosas sin validar mezcladas con cosas
+listas. Mira `docs/estado-y-traspaso.md` antes de proponerlo.
+
+Las ramas de feature (`feat/…`) se integran en `preview`; una vez absorbidas no
+tienen nada propio y no hace falta mantenerlas al día.
+
 ## Al cerrar una tanda
 
 **Actualiza la documentación del área que tocaste**, en el mismo commit o en uno
