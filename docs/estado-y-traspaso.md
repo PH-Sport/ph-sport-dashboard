@@ -1,7 +1,7 @@
 # Estado del proyecto y traspaso
 
-> **Actualizado:** 2026-08-18, al retomar el trabajo en el equipo de Mario, ya
-> sincronizado con el remoto.
+> **Actualizado:** 2026-08-20, al arreglar el alta por invitación y montar el
+> Toaster que llevaba ausente desde el principio.
 > **Para qué sirve:** que quien retome —persona o Claude Code, en cualquier
 > máquina— sepa dónde está cada cosa, por qué se decidió así y qué falta. Las
 > convenciones de trabajo están en `CLAUDE.md`.
@@ -32,6 +32,11 @@ pero innecesario.
 
 Consecuencia práctica: producción ya emite los avisos de asignación con el enlace
 correcto, aunque el resto de la tanda no esté desplegado.
+
+Lo mismo vale para `042_fix_validate_invitation_search_path.sql`: se aplicó
+directamente sobre producción el 2026-08-20 para desatascar el alta de Loren, y
+quedó registrada en el historial de migraciones de Supabase. El archivo del repo
+es la copia para el control de versiones, no algo pendiente de ejecutar.
 
 ---
 
@@ -150,6 +155,61 @@ operativos, y trae una sola build de cada motor. No hay «iOS 18 frente a 26», 
 
 ---
 
+### 8. El alta por invitación llevaba meses rota (migración `042`)
+
+Loren vuelve al equipo, se le pasa un enlace de invitación, rellena el formulario
+y **el botón «Crear cuenta» no hace nada**. No era cosa suya ni de que se le
+borrase la cuenta: le habría pasado a cualquiera.
+
+La cadena, de fuera a dentro:
+
+1. La migración `025` escribió `SET search_path = 'public, pg_temp'` **con
+   comillas**. Postgres no lo lee como dos esquemas: lo lee como **uno solo
+   llamado literalmente «public, pg_temp»**, coma incluida. Se comprueba en un
+   segundo: con ese `search_path`, `to_regclass('invitations')` devuelve `null`
+   y `to_regclass('public.invitations')` sí resuelve.
+2. `validate_invitation` era **la única** función del flujo que nombraba sus
+   tablas sin cualificar. Sus hermanas (`use_invitation`, `handle_new_user`)
+   escriben `public.` delante y se salvaban **de casualidad**.
+3. Al no encontrar la tabla lanzaba `42P01 relation "invitations" does not
+   exist`, y **PostgREST traduce ese error a un HTTP 404**. Por eso parecía que
+   faltaba la función, cuando lo que fallaba era su cuerpo.
+4. El formulario recibía el error y llamaba a `toast.error(...)` — invisible,
+   porque la app no montaba `<Toaster/>` (ver abajo).
+
+**Desde cuándo:** el último alta que funcionó es la de Diego, el 20 de abril. Hay
+una invitación del 17 de junio que caducó con 0 usos. Así que estuvo roto entre
+esas dos fechas, y nadie se enteró porque no entró gente nueva.
+
+**Cómo se encontró, que es lo que vale para la próxima:** los logs. En 24 h no
+había **ni un solo** `POST /signup` en `auth_logs`, lo que descartó de golpe todas
+las teorías sobre la cuenta borrada de Loren. En `edge_logs` estaban los nueve
+404 de `validate_invitation` contra los 200 de `get_invitation_by_token`. Con eso
+la llamada se reprodujo con la clave anónima y un UUID inventado, y el cuerpo del
+error lo dijo todo. Teorizar sobre el borrado de Loren habría costado horas.
+
+**Las otras 14 funciones con el mismo `search_path` mal escrito se quedan como
+están.** Están revisadas una a una: todas cualifican sus tablas con `public.`, así
+que hoy funcionan. Pero funcionan por costumbre, no por diseño — están a un
+`CREATE OR REPLACE` descuidado de romperse igual. Ver pendientes.
+
+### 9. Ningún aviso de la app se había visto nunca
+
+`toast()` se llama desde 12 archivos, pero **`<Toaster/>` no estaba montado en
+ninguna parte**, y `git log -S'Toaster' --all` confirma que nunca lo estuvo.
+Sonner no dibuja nada sin ese componente: las llamadas se ejecutan sin error y
+sin pintar. Toda la app llevaba desde el primer día tragándose sus avisos, los de
+error y los de éxito.
+
+Se monta en el layout raíz, dentro de `ThemeProvider` (necesita `useTheme`) y
+fuera del `AuthProvider`, para que cubra también las pantallas de auth, que viven
+fuera del shell del dashboard. Arriba y centrado: en móvil la tab bar flota sobre
+el borde inferior y un toast abajo le cae encima.
+
+Esto es lo que convirtió un error concreto en «no hace nada», que es mucho más
+caro de diagnosticar. Si algo vuelve a fallar en silencio, sospechar primero de
+un aviso que no se ve.
+
 ## Qué queda pendiente
 
 ### 1. Subir a producción
@@ -180,7 +240,24 @@ píldora— no se ha usado en el día a día todavía.
 demasiado, es un número —`6.5rem` en los dos archivos del acoplamiento— y se
 ajusta en un minuto.
 
-### 4. Ideas anotadas, sin decidir
+### 4. Las otras 14 funciones con el `search_path` entrecomillado
+
+Mismo defecto que tumbó `validate_invitation` (§8), pero hoy inofensivo: todas
+cualifican sus tablas con `public.`. La lista sale de un vistazo:
+
+```sql
+select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and exists (select 1 from unnest(p.proconfig) c where c like 'search_path=%,%');
+```
+
+Entre ellas están `handle_new_user`, `is_admin` y toda la tubería de
+notificaciones, así que no es una limpieza cosmética: si una se toca sin cuidado
+y pierde un `public.`, se cae en silencio igual que se cayó el alta. El arreglo
+es mecánico —`SET search_path = ''` y cualificar— pero toca funciones vivas y
+merece su propia tanda con verificación una por una, no ir de paso.
+
+### 5. Ideas anotadas, sin decidir
 
 - **Llevar el aviso de semanas futuras a Diseños.** Hoy solo está en Inicio.
   Requiere pensar dónde: esa página no tiene subtítulo y la semana vive en dos
