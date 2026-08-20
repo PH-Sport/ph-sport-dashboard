@@ -1,7 +1,7 @@
 # Estado del proyecto y traspaso
 
-> **Actualizado:** 2026-08-20, al arreglar el alta por invitación y montar el
-> Toaster que llevaba ausente desde el principio.
+> **Actualizado:** 2026-08-20, al arreglar los dos fallos del alta por invitación
+> (migraciones 042 y 043) y montar el Toaster, ausente desde el principio.
 > **Para qué sirve:** que quien retome —persona o Claude Code, en cualquier
 > máquina— sepa dónde está cada cosa, por qué se decidió así y qué falta. Las
 > convenciones de trabajo están en `CLAUDE.md`.
@@ -33,10 +33,11 @@ pero innecesario.
 Consecuencia práctica: producción ya emite los avisos de asignación con el enlace
 correcto, aunque el resto de la tanda no esté desplegado.
 
-Lo mismo vale para `042_fix_validate_invitation_search_path.sql`: se aplicó
-directamente sobre producción el 2026-08-20 para desatascar el alta de Loren, y
-quedó registrada en el historial de migraciones de Supabase. El archivo del repo
-es la copia para el control de versiones, no algo pendiente de ejecutar.
+Lo mismo vale para `042_fix_validate_invitation_search_path.sql` y
+`043_fix_use_invitation_role_cast.sql`: se aplicaron directamente sobre
+producción el 2026-08-20 para desatascar el alta de Loren, y quedaron
+registradas en el historial de migraciones de Supabase. Los archivos del repo
+son la copia para el control de versiones, no algo pendiente de ejecutar.
 
 ---
 
@@ -210,6 +211,50 @@ Esto es lo que convirtió un error concreto en «no hace nada», que es mucho m�
 caro de diagnosticar. Si algo vuelve a fallar en silencio, sospechar primero de
 un aviso que no se ve.
 
+### 10. El segundo fallo del alta, justo detrás del primero (migración `043`)
+
+Arreglada la `042`, Loren lo intentó de nuevo y **entró** — pero el alta quedó a
+medias sin que se notara. Los logs lo enseñaron en tres líneas:
+
+```
+15:23:13  rpc/validate_invitation  → 200   (la 042 ya funcionaba)
+15:23:14  cuenta creada
+15:23:16  rpc/use_invitation       → 400   ← falla aquí
+```
+
+**La causa:** `invitations.role` es `text` y `profiles.role` es `public.role_enum`.
+Postgres no convierte uno en otro por su cuenta, así que
+`UPDATE public.profiles SET role = v_invitation.role` reventaba con `42804`
+**siempre**, fuera cual fuera el valor. Nació el 2026-04-23 con el commit
+`f014860` («apply invitation role server-side»), tres días después del último
+alta que funcionó.
+
+**Lo que provocaba, y es lo importante:** la cuenta se crea igual, porque de eso
+se encarga el trigger `on_auth_user_created` en otra transacción. Pero la
+invitación **no se consume** y el rol **no se aplica**. El nuevo miembro entra
+siempre como `DESIGNER`, que es el valor por defecto del trigger. Con una
+invitación de `ADMIN` habría entrado con menos permisos de los debidos, y el
+enlace habría seguido vivo para cualquiera que lo tuviese.
+
+Se arregla con un cast explícito, `v_invitation.role::public.role_enum`. Es
+deliberado y no defensivo: si alguien mete otra cosa en esa columna, el enum lo
+rechaza en vez de asignar basura. **Que las dos columnas no compartan tipo es la
+deuda de fondo y sigue ahí** (ver pendientes).
+
+Se verificó con la función real, creando una invitación de `ADMIN` de mentira,
+llamando a `use_invitation` y abortando la transacción a propósito para
+deshacerlo todo: devolvió `true`, aplicó el rol `ADMIN` y registró el uso.
+
+**Arreglado a mano lo que quedó torcido:** se registró el uso perdido de Loren en
+`invitation_uses` (fechado con su alta real, no con el momento del apaño) y se
+caducó la otra invitación del día, que se había quedado viva y sin usar. Su rol
+no hubo que tocarlo: la invitación era de `DESIGNER` y ya lo era por defecto.
+
+**La lección de las dos migraciones juntas:** los dos fallos los introdujeron
+migraciones de seguridad aplicadas a mano, y los dos vivieron meses porque el
+camino no lo recorría nadie. Un cambio en un flujo que no se ejercita no está
+probado por mucho que los tests pasen — aquí pasaban los 144.
+
 ## Qué queda pendiente
 
 ### 1. Subir a producción
@@ -257,7 +302,18 @@ y pierde un `public.`, se cae en silencio igual que se cayó el alta. El arreglo
 es mecánico —`SET search_path = ''` y cualificar— pero toca funciones vivas y
 merece su propia tanda con verificación una por una, no ir de paso.
 
-### 5. Ideas anotadas, sin decidir
+### 5. `invitations.role` y `profiles.role` no comparten tipo
+
+La primera es `text`, la segunda es `public.role_enum`. Eso es lo que tumbó
+`use_invitation` (§10), y el cast de la `043` lo tapa sin resolverlo: las dos
+columnas representan lo mismo y deberían ser el mismo tipo.
+
+Convertir `invitations.role` a `role_enum` es lo correcto, pero toca el diálogo
+de crear invitación y el esquema zod de la API, así que no es un `ALTER` suelto.
+Mientras tanto, el cast protege: un valor que no sea `ADMIN` o `DESIGNER` hace
+fallar el alta en vez de colar un rol inventado.
+
+### 6. Ideas anotadas, sin decidir
 
 - **Llevar el aviso de semanas futuras a Diseños.** Hoy solo está en Inicio.
   Requiere pensar dónde: esa página no tiene subtítulo y la semana vive en dos
