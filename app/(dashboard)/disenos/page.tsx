@@ -107,7 +107,11 @@ function DesignsPageContent() {
   // Show toast when revalidation fails (even if we have cached data)
   useEffect(() => {
     if (error) {
-      toast.error('No se pudieron actualizar los datos. Revisa la conexión e inténtalo de nuevo.');
+      // id estable: SWR reintenta 2 veces y revalida al recuperar el foco, así
+      // que sin él un solo corte de red apila un aviso por intento.
+      toast.error('No se pudieron actualizar los datos. Revisa la conexión e inténtalo de nuevo.', {
+        id: 'disenos-revalidacion',
+      });
     }
   }, [error]);
 
