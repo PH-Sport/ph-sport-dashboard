@@ -1,7 +1,7 @@
 # Estado del proyecto y traspaso
 
-> **Actualizado:** 2026-08-20, al arreglar los dos fallos del alta por invitación
-> (migraciones 042 y 043) y montar el Toaster, ausente desde el principio.
+> **Actualizado:** 2026-08-22, al subir a producción los 95 commits que llevaban
+> meses en `preview`. `main` y `preview` van a la par.
 > **Para qué sirve:** que quien retome —persona o Claude Code, en cualquier
 > máquina— sepa dónde está cada cosa, por qué se decidió así y qué falta. Las
 > convenciones de trabajo están en `CLAUDE.md`.
@@ -12,12 +12,13 @@
 
 | Rama | Contenido |
 |---|---|
-| `main` | Lo que corre en producción. Último: `4e6f929`. |
-| `preview` | **88 commits por delante de `main`.** Todo lo de abajo vive aquí. Último: `2c02d99`. |
+| `main` | Lo que corre en producción. |
+| `preview` | Donde se implementa. |
 
-Ese desfase no es de esta tanda: arrastra el chat de creación de diseños, la fase
-1 del rediseño iOS 26 y el trabajo de superficies. **Subir a producción no es un
-merge de trámite**; hay que decidir si va entero o por partes.
+**Las dos van a la par desde el 2026-08-22**, en `95bb3ca`. Ese día se subieron
+a producción los 95 commits que llevaban meses acumulados: el rediseño iOS 26
+entero, la fase 1.5 de contenido y voz, el chat de creación de diseños y los
+arreglos del alta por invitación. Fue un fast-forward limpio, sin merge commit.
 
 **El flujo de ramas ya está por escrito** en `CLAUDE.md`, apartado «Ramas»: se
 implementa en `preview` y `main` solo recibe lo probado. Hasta ahora era un
@@ -25,19 +26,17 @@ acuerdo tácito y no constaba en ningún sitio.
 
 ### Cuidado: la base de datos va por delante del código
 
-La migración `041_fix_assignment_notification_link.sql` **ya está aplicada en la
-base de datos de producción**, aunque su código siga sin desplegarse. Al mergear
-a `main` no hay nada que ejecutar en Supabase. Volver a lanzarla sería inofensivo
-pero innecesario.
+**Ya no lo va: con el despliegue del 2026-08-22 se han igualado.** Se deja escrito
+porque explica por qué tres migraciones del repo no hay que ejecutarlas nunca.
 
-Consecuencia práctica: producción ya emite los avisos de asignación con el enlace
-correcto, aunque el resto de la tanda no esté desplegado.
+Las migraciones `041`, `042` y `043` se aplicaron **directamente sobre la base de
+producción** antes de que su código estuviera desplegado: la `041` para arreglar
+el enlace de los avisos de asignación, y la `042` y la `043` el 2026-08-20 para
+desatascar el alta de Loren, que no podía esperar a una release. Las tres están
+registradas en el historial de migraciones de Supabase.
 
-Lo mismo vale para `042_fix_validate_invitation_search_path.sql` y
-`043_fix_use_invitation_role_cast.sql`: se aplicaron directamente sobre
-producción el 2026-08-20 para desatascar el alta de Loren, y quedaron
-registradas en el historial de migraciones de Supabase. Los archivos del repo
-son la copia para el control de versiones, no algo pendiente de ejecutar.
+Los archivos del repo son la copia para el control de versiones, no algo
+pendiente de ejecutar. Volver a lanzarlas sería inofensivo pero innecesario.
 
 ---
 
@@ -255,12 +254,44 @@ migraciones de seguridad aplicadas a mano, y los dos vivieron meses porque el
 camino no lo recorría nadie. Un cambio en un flujo que no se ejercita no está
 probado por mucho que los tests pasen — aquí pasaban los 144.
 
+### 11. «La tarjeta 8» no era la misma para el usuario y para el agente
+
+El taller numera las tarjetas en pantalla sobre **todas**, incluidas las que
+están a medio rellenar. Al agente se le mandan solo las no vacías —son ruido, y
+además le invitarían a rellenarlas— pero se numeraban **después** de filtrar, así
+que volvía a contar desde uno sobre las que quedaban.
+
+Con una tarjeta vacía en la posición 3, la que el usuario ve como la 8 le llegaba
+al agente como `#7`. Decirle «en la tarjeta 8 cambia el diseñador a Izan» le
+cambiaba el diseñador a otra. Y no fallaba de forma ruidosa: hacía el cambio,
+confirmaba que lo había hecho, y todo parecía correcto.
+
+Ahora el número se fija antes de filtrar. El agente puede recibir «1, 2, 4»: el
+hueco es la tarjeta vacía y no le estorba, porque para modificar identifica por
+`id`, no por número. El número existe solo para que las dos partes hablen de la
+misma tarjeta.
+
+**El contrato que hay que respetar de aquí en adelante:** el número que ve el
+agente es la posición en el taller completo, no en la lista que se le manda. Si
+alguien vuelve a filtrar antes de numerar, esto reaparece.
+
+De paso quedó claro que el agente **ya sabía** modificar tarjetas del taller: la
+herramienta `update_designs` existe desde el principio y cubre el diseñador, el
+tipo, la fecha y el resto de campos. Lo que faltaba no era la capacidad, era que
+los números coincidieran.
+
 ## Qué queda pendiente
 
-### 1. Subir a producción
+### 1. Confirmar `ANTHROPIC_API_KEY` en Vercel (Production)
 
-Los 87 commits. Decidir si entero o por partes. Recordar que la migración 041 ya
-está viva en la base de datos.
+Sin ella el chat de creación de diseños **no falla, pero no funciona**: la ruta
+`/api/designs/chat` devuelve `200` con `{ fallback: true, reason: 'sin_api_key' }`
+y el agente no responde. Degrada limpio, que es lo que permitió publicar sin
+confirmarla, pero significa que puede estar apagada en producción sin que salte
+ninguna alarma. Es lo primero que hay que mirar del despliegue del 22 de agosto.
+
+No se puede comprobar desde aquí: el MCP de Vercel solo ve el proyecto del repo
+antiguo. Hay que entrar al panel.
 
 ### 2. Una cuenta de pruebas
 
@@ -274,16 +305,20 @@ Hasta ahora se han ejecutado con la cuenta real de Mario, que es de mánager, co
 `is_dev`, y apunta a **producción**. Los tests actuales solo leen. En cuanto haya
 alguno que cree o borre diseños, hace falta una cuenta aparte.
 
-### 3. Validación pendiente
+### 3. Los «retoquillos» del rediseño, sin concretar
 
-El arreglo de la cabecera se comprobó en iPhone el 2026-08-16 y a primera vista
-va bien. El resto de la tanda —el aviso de semanas futuras, la barra sin la
-píldora— no se ha usado en el día a día todavía.
+Mario validó el rediseño completo en iPhone el 2026-08-21 y le convence: eso es
+lo que desbloqueó el despliegue. Quedan **ajustes menores que él vio y que no
+están anotados todavía** — hay que pedírselos antes de tocar nada, porque
+adivinarlos es la vía rápida a cambiar lo que no molestaba.
 
-**Sin ver en dispositivo:** el fundido de la tab bar y los títulos sin icono
-(§6). Del fundido, lo que hay que mirar es la cantidad: si sabe a poco o a
-demasiado, es un número —`6.5rem` en los dos archivos del acoplamiento— y se
-ajusta en un minuto.
+Si alguno es el fundido de la tab bar, recordar que la cantidad es un número
+—`6.5rem`— y que vive **en dos archivos acoplados**: cambiar uno sin el otro
+deja la última fila del scroll atenuada.
+
+Lo que sigue sin rodaje en el día a día: el aviso de semanas futuras y el chat
+de creación de diseños. El chat, además, no se puede usar en producción hasta
+confirmar su clave (pendiente 1).
 
 ### 4. Las otras 14 funciones con el `search_path` entrecomillado
 
