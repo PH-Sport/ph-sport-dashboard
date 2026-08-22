@@ -51,6 +51,27 @@ describe('serializeCards', () => {
     expect(out).not.toContain('c-2');
   });
 
+  it('numera por la posición real del taller, aunque haya vacías por delante', () => {
+    const vacia = snapshot({
+      id: 'c-vacia',
+      type: null,
+      player: '',
+      match_home: '',
+      match_away: '',
+      deadline_at: null,
+      details: '',
+    });
+    const tercera = snapshot({ id: 'c-3', player: 'Marc Ubach' });
+
+    // Taller: 1 llena, 2 vacía, 3 llena. La interfaz numera sobre TODAS, así que
+    // para el usuario la última es la 3. Si el agente la llama #2, cambiaría la
+    // tarjeta equivocada cuando el usuario diga «en la 3».
+    const out = serializeCards([snapshot(), vacia, tercera]);
+
+    expect(out).toContain('#3 id=c-3');
+    expect(out).not.toContain('#2 id=c-3');
+  });
+
   it('lo dice explícitamente cuando no hay ninguna tarjeta', () => {
     expect(serializeCards([])).toContain('ninguna');
   });

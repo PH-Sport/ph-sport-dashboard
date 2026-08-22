@@ -158,13 +158,19 @@ function isSnapshotEmpty(card: CardSnapshot): boolean {
 
 /** El taller en texto, una línea por tarjeta, para el prompt de sistema. */
 export function serializeCards(cards: CardSnapshot[]): string {
-  const utiles = cards.filter((c) => !isSnapshotEmpty(c));
+  // El número se fija ANTES de descartar las vacías: es el que el usuario ve
+  // en el taller y con el que se refiere a las tarjetas al hablar con el
+  // agente. Numerando después, una tarjeta a medias corre la cuenta y «la 8»
+  // del usuario sería otra distinta para el modelo. Los huecos son correctos.
+  const utiles = cards
+    .map((card, i) => ({ card, numero: i + 1 }))
+    .filter(({ card }) => !isSnapshotEmpty(card));
   if (utiles.length === 0) return 'El taller no tiene ninguna tarjeta todavía.';
 
   return utiles
-    .map((c, i) =>
+    .map(({ card: c, numero }) =>
       [
-        `#${i + 1} id=${c.id}`,
+        `#${numero} id=${c.id}`,
         `tipo=${c.type ?? 'sin elegir'}`,
         c.player ? `jugador=${c.player}` : null,
         c.match_home || c.match_away ? `partido=${c.match_home} vs ${c.match_away}` : null,
