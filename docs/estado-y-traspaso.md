@@ -15,7 +15,7 @@
 | `main` | Lo que corre en producción. |
 | `preview` | Donde se implementa. |
 
-**Las dos van a la par desde el 2026-08-22**, en `95bb3ca`. Ese día se subieron
+**Las dos van a la par desde el 2026-08-22.** Ese día se subieron
 a producción los 95 commits que llevaban meses acumulados: el rediseño iOS 26
 entero, la fase 1.5 de contenido y voz, el chat de creación de diseños y los
 arreglos del alta por invitación. Fue un fast-forward limpio, sin merge commit.
